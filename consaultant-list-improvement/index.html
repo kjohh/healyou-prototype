@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HealYou — 專家列表（Prototype）</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:        #4a5e3a;
+      --primary-light:  #6b7f5a;
+      --primary-pale:   #eef2ea;
+      --primary-border: #c8d9b8;
+      --bg:             #f4f4f0;
+      --card:           #ffffff;
+      --text-1:         #1a1a1a;
+      --text-2:         #666666;
+      --text-3:         #999999;
+      --tag-bg:         #eeeee9;
+      --border:         #e4e4e0;
+      --shadow:         0 1px 4px rgba(0,0,0,0.08);
+      --r-sm:           6px;
+      --r-md:           12px;
+      --r-lg:           20px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans TC', 'PingFang TC', sans-serif;
+      background: var(--bg);
+      color: var(--text-1);
+      min-height: 100vh;
+    }
+
+    /* ── Category Tabs ── */
+    .category-tabs {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      padding: 0 16px;
+      gap: 4px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .cat-tab {
+      padding: 14px 20px;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-2);
+      border: none;
+      border-bottom: 2px solid transparent;
+      background: none;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: color .15s, border-color .15s;
+    }
+    .cat-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+    /* ── Sort Pills ── */
+    .sort-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .sort-label { font-size: 13px; color: var(--text-2); white-space: nowrap; }
+    .sort-pill {
+      padding: 5px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      font-size: 13px;
+      color: var(--text-2);
+      background: #fff;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all .15s;
+    }
+    .sort-pill.active {
+      background: var(--primary-pale);
+      color: var(--primary);
+      border-color: var(--primary);
+      font-weight: 500;
+    }
+
+    /* ── Filter Tags ── */
+    .ftag-group { display: flex; flex-wrap: wrap; gap: 7px; }
+    .ftag {
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      font-size: 13px;
+      color: var(--text-1);
+      background: #fff;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .ftag:hover { border-color: var(--primary); color: var(--primary); }
+    .ftag.on { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--card);
+      border-radius: var(--r-md);
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: box-shadow .15s, transform .15s;
+    }
+    .card:hover {
+      box-shadow: 0 4px 14px rgba(0,0,0,0.11);
+      transform: translateY(-1px);
+    }
+    .card-top {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+    .avatar {
+      width: 76px; height: 76px;
+      border-radius: 10px;
+      flex-shrink: 0;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+    }
+    .card-header { flex: 1; min-width: 0; }
+    .name-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 5px;
+    }
+    .name { font-size: 17px; font-weight: 700; }
+    .price { font-size: 14px; font-weight: 700; color: var(--primary); white-space: nowrap; }
+    .price small { font-size: 12px; font-weight: 400; color: var(--text-3); }
+    .meta-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 8px;
+    }
+    .meta-txt { font-size: 12px; color: var(--text-2); }
+    .sep { color: var(--border); font-size: 12px; }
+
+    .skill-pills { display: flex; flex-wrap: wrap; gap: 5px; }
+    .skill-pill {
+      padding: 3px 10px;
+      background: var(--tag-bg);
+      border-radius: var(--r-lg);
+      font-size: 12px;
+      color: var(--text-2);
+    }
+
+    /* Unified badge — single style for social proof + special badges */
+    .badge-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: var(--r-lg);
+      font-size: 12px;
+      font-weight: 500;
+      background: var(--primary-pale);
+      border: 1px solid var(--primary-border);
+      color: var(--primary);
+    }
+
+    /* Card Body */
+    .card-body { border-top: 1px solid var(--border); padding-top: 12px; }
+    .edu { font-size: 12px; color: var(--text-3); margin-bottom: 7px; }
+    .intro {
+      font-size: 14px;
+      color: var(--text-2);
+      line-height: 1.65;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .avail {
+      font-size: 12px;
+      color: var(--text-2);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .avail-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #56b356;
+      flex-shrink: 0;
+    }
+    .btn-detail {
+      padding: 8px 16px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--r-md);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    /* Load more */
+    .load-more { text-align: center; padding: 8px 0 32px; }
+    .btn-more {
+      padding: 12px 32px;
+      border: 1.5px solid var(--primary);
+      border-radius: var(--r-lg);
+      background: #fff;
+      color: var(--primary);
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    /* Price range */
+    .price-range { display: flex; align-items: center; gap: 8px; }
+    .price-input {
+      flex: 1;
+      min-width: 0;
+      width: 0;
+      padding: 8px 6px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      font-size: 13px;
+      text-align: center;
+      outline: none;
+    }
+    .price-input:focus { border-color: var(--primary); }
+
+    /* Search icon */
+    .search-ico-svg {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--text-3);
+    }
+
+    /* ════════════════════════
+       MOBILE
+    ════════════════════════ */
+    .mobile-wrap { display: block; }
+    .desktop-wrap { display: none; }
+
+    .search-bar {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .search-wrap { flex: 1; position: relative; }
+    .search-input {
+      width: 100%;
+      padding: 9px 12px 9px 34px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      font-size: 14px;
+      background: var(--bg);
+      outline: none;
+    }
+    .search-input:focus { border-color: var(--primary); }
+
+    .filter-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 9px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      background: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all .15s;
+    }
+    .filter-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+    .filter-panel {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height .3s ease;
+    }
+    .filter-panel.open { max-height: 900px; }
+    .filter-inner { padding: 16px; }
+    .fsection { margin-bottom: 20px; }
+    .fsection:last-child { margin-bottom: 0; }
+    .fsection-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 10px;
+    }
+    .filter-actions {
+      display: flex;
+      gap: 8px;
+      padding-top: 16px;
+      margin-top: 4px;
+      border-top: 1px solid var(--border);
+    }
+    .btn-clear {
+      flex: 1; padding: 10px;
+      border: 1px solid var(--border); border-radius: var(--r-md);
+      background: #fff; font-size: 14px; cursor: pointer;
+    }
+    .btn-apply {
+      flex: 2; padding: 10px;
+      border: none; border-radius: var(--r-md);
+      background: var(--primary); color: #fff;
+      font-size: 14px; font-weight: 500; cursor: pointer;
+    }
+
+    .mobile-sort-bar { padding: 10px 16px; background: var(--bg); }
+    .mobile-results { padding: 8px 16px 32px; }
+    .results-count { font-size: 13px; color: var(--text-2); margin-bottom: 12px; }
+
+    /* ════════════════════════
+       DESKTOP
+    ════════════════════════ */
+    @media (min-width: 960px) {
+      .mobile-wrap { display: none; }
+      .desktop-wrap {
+        display: flex;
+        max-width: 1240px;
+        margin: 28px auto;
+        padding: 0 40px;
+        gap: 28px;
+        align-items: flex-start;
+      }
+      .category-tabs { padding: 0 40px; }
+
+      .sidebar {
+        width: 256px;
+        flex-shrink: 0;
+        background: var(--card);
+        border-radius: var(--r-md);
+        box-shadow: var(--shadow);
+        padding: 20px;
+        position: sticky;
+        top: 72px;
+        /* prevent content from overflowing sidebar */
+        overflow: hidden;
+      }
+      .sidebar-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+      .sb-search-wrap { position: relative; margin-bottom: 20px; }
+      .sb-search {
+        width: 100%;
+        padding: 9px 12px 9px 34px;
+        border: 1px solid var(--border);
+        border-radius: var(--r-lg);
+        font-size: 14px;
+        background: var(--bg);
+        outline: none;
+      }
+      .sb-search:focus { border-color: var(--primary); }
+      .sb-section {
+        padding-bottom: 18px;
+        margin-bottom: 18px;
+        border-bottom: 1px solid var(--border);
+      }
+      .sb-section:last-of-type { border-bottom: none; padding-bottom: 0; margin-bottom: 16px; }
+      .sb-title {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--text-3);
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        margin-bottom: 10px;
+      }
+      .sb-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+      .sb-tag {
+        padding: 5px 12px;
+        border: 1px solid var(--border);
+        border-radius: var(--r-lg);
+        font-size: 12px;
+        color: var(--text-1);
+        background: #fff;
+        cursor: pointer;
+        transition: all .15s;
+      }
+      .sb-tag:hover { border-color: var(--primary); color: var(--primary); }
+      .sb-tag.on { background: var(--primary); color: #fff; border-color: var(--primary); }
+      .btn-sb-apply {
+        width: 100%; padding: 10px;
+        border: none; border-radius: var(--r-md);
+        background: var(--primary); color: #fff;
+        font-size: 14px; font-weight: 500; cursor: pointer;
+      }
+
+      .main-col { flex: 1; min-width: 0; }
+      .desktop-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+      .dt-count { font-size: 14px; color: var(--text-2); }
+      .dt-sort { display: flex; align-items: center; gap: 6px; }
+
+      .card { padding: 20px; margin-bottom: 14px; }
+      .avatar { width: 88px; height: 88px; border-radius: 12px; }
+      .name { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="category-tabs">
+  <button class="cat-tab active">心理諮詢</button>
+  <button class="cat-tab">藝術療癒</button>
+  <button class="cat-tab">職涯教練</button>
+</div>
+
+
+<!-- ══════════════ MOBILE ══════════════ -->
+<div class="mobile-wrap">
+
+  <div class="search-bar">
+    <div class="search-wrap">
+      <svg class="search-ico-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input class="search-input" type="text" placeholder="搜尋名稱、專長、介紹…">
+    </div>
+    <button class="filter-btn" id="mFilterBtn" onclick="toggleMobileFilter()">篩選</button>
+  </div>
+
+  <div class="filter-panel" id="mFilterPanel">
+    <div class="filter-inner">
+      <div class="fsection">
+        <div class="fsection-title">費用（每小時）</div>
+        <div class="price-range">
+          <input class="price-input" type="number" placeholder="最低" value="1000">
+          <span style="color:var(--text-3);font-size:13px;flex-shrink:0">—</span>
+          <input class="price-input" type="number" placeholder="最高" value="5000">
+        </div>
+      </div>
+      <div class="fsection">
+        <div class="fsection-title">性別</div>
+        <div class="ftag-group" data-single>
+          <button class="ftag on">不限</button>
+          <button class="ftag">女性</button>
+          <button class="ftag">男性</button>
+        </div>
+      </div>
+      <div class="fsection">
+        <div class="fsection-title">可諮詢時間</div>
+        <div class="ftag-group" style="margin-bottom:8px">
+          <button class="ftag">週一</button>
+          <button class="ftag">週二</button>
+          <button class="ftag">週三</button>
+          <button class="ftag">週四</button>
+          <button class="ftag">週五</button>
+          <button class="ftag">週六</button>
+          <button class="ftag">週日</button>
+        </div>
+        <div class="ftag-group">
+          <button class="ftag">上午</button>
+          <button class="ftag">下午</button>
+          <button class="ftag">晚上</button>
+        </div>
+      </div>
+      <div class="fsection">
+        <div class="fsection-title">擅長議題</div>
+        <div class="ftag-group">
+          <button class="ftag">感情困擾</button>
+          <button class="ftag">家庭關係</button>
+          <button class="ftag">職場壓力</button>
+          <button class="ftag">情緒困擾</button>
+          <button class="ftag on">自我探索</button>
+          <button class="ftag">焦慮與恐慌</button>
+          <button class="ftag">憂鬱</button>
+          <button class="ftag">創傷</button>
+          <button class="ftag">親子關係</button>
+          <button class="ftag">性別議題</button>
+        </div>
+      </div>
+      <div class="fsection">
+        <div class="fsection-title">諮商風格</div>
+        <div class="ftag-group">
+          <button class="ftag">溫暖</button>
+          <button class="ftag">理性</button>
+          <button class="ftag">輕鬆</button>
+          <button class="ftag">直接</button>
+          <button class="ftag">體驗式</button>
+          <button class="ftag">教練式</button>
+          <button class="ftag">慢節奏</button>
+          <button class="ftag">快節奏</button>
+        </div>
+      </div>
+      <div class="fsection">
+        <div class="fsection-title">共同身份 / 生命經歷</div>
+        <div class="ftag-group">
+          <button class="ftag">有海外經驗</button>
+          <button class="ftag">有孩子</button>
+          <button class="ftag">長照經驗</button>
+        </div>
+      </div>
+      <div class="fsection">
+        <div class="fsection-title">宗教信仰</div>
+        <div class="ftag-group">
+          <button class="ftag">基督教</button>
+          <button class="ftag">天主教</button>
+          <button class="ftag">其他</button>
+        </div>
+      </div>
+      <div class="filter-actions">
+        <button class="btn-clear">清除全部</button>
+        <button class="btn-apply">套用篩選</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="mobile-sort-bar">
+    <div class="sort-row">
+      <span class="sort-label">排序：</span>
+      <button class="sort-pill active">最快可預約</button>
+      <button class="sort-pill">相關度</button>
+      <button class="sort-pill">費用</button>
+      <button class="sort-pill">認證資格</button>
+    </div>
+  </div>
+
+  <div class="mobile-results">
+    <div class="results-count">共 24 位心理師</div>
+
+    <div class="card">
+      <div class="card-top">
+        <img class="avatar" src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop&crop=faces&auto=format" alt="張心怡">
+        <div class="card-header">
+          <div class="name-row">
+            <span class="name">張心怡</span>
+            <span class="price">$2,500 <small>/ 小時</small></span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-txt">諮心字第 001234 號</span>
+          </div>
+          <div class="skill-pills">
+            <span class="skill-pill">認知行為治療 CBT</span>
+            <span class="skill-pill">正念療法</span>
+            <span class="skill-pill">睡眠治療</span>
+          </div>
+        </div>
+      </div>
+      <div class="badge-row">
+        <span class="badge">本週 12 人瀏覽</span>
+        <span class="badge">本週預約 3 次</span>
+        <span class="badge">睡眠專家</span>
+        <span class="badge">海外經驗</span>
+      </div>
+      <div class="card-body">
+        <div class="edu">國立台灣大學 心理學碩士</div>
+        <div class="intro">8 年國中輔導教師，CTSSO 體重管理師，企業講師。服務對象涵蓋兒童、青少年、成人與樂齡族群，擅長協助個案處理情緒調節與睡眠困擾，提供具結構性的認知行為介入。</div>
+        <div class="card-footer">
+          <div class="avail"><span class="avail-dot"></span>最快 明天 10:00 可預約</div>
+          <a href="#" class="btn-detail">了解更多</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <img class="avatar" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&h=200&fit=crop&crop=faces&auto=format" alt="朱悅瑜">
+        <div class="card-header">
+          <div class="name-row">
+            <span class="name">朱悅瑜 Aileen</span>
+            <span class="price">$2,600 <small>/ 小時</small></span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-txt">臨心字第 005678 號</span>
+          </div>
+          <div class="skill-pills">
+            <span class="skill-pill">人本取向</span>
+            <span class="skill-pill">存在主義治療</span>
+            <span class="skill-pill">EMDR</span>
+          </div>
+        </div>
+      </div>
+      <div class="badge-row">
+        <span class="badge">本週 8 人瀏覽</span>
+        <span class="badge">海外經驗</span>
+        <span class="badge">有孩子</span>
+        <span class="badge">10 年資歷</span>
+      </div>
+      <div class="card-body">
+        <div class="edu">美國波士頓大學 諮商心理學碩士</div>
+        <div class="intro">在受西方教育訓練與協助世界各國個案的 15 年經驗中，總是很享受與每位來訪者一起從探索議題、面對困境到找到出口的過程。秉持「每個人都是獨一無二」的信念，我想幫你看見自身的美好。</div>
+        <div class="card-footer">
+          <div class="avail"><span class="avail-dot"></span>最快 後天 14:00 可預約</div>
+          <a href="#" class="btn-detail">了解更多</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <img class="avatar" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=faces&auto=format" alt="潘昭樺">
+        <div class="card-header">
+          <div class="name-row">
+            <span class="name">潘昭樺</span>
+            <span class="price">$2,500 <small>/ 小時</small></span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-txt">諮心字第 002345 號</span>
+          </div>
+          <div class="skill-pills">
+            <span class="skill-pill">敘事治療</span>
+            <span class="skill-pill">完形治療</span>
+            <span class="skill-pill">性別議題</span>
+          </div>
+        </div>
+      </div>
+      <div class="badge-row">
+        <span class="badge">本週預約 2 次</span>
+        <span class="badge">本週有空</span>
+      </div>
+      <div class="card-body">
+        <div class="edu">國立政治大學 心理學碩士</div>
+        <div class="intro">如果此時的您，正經歷情緒的低潮、生活的停滯，或是感到迷茫，請允許我對您說：您不是問題，您只是遇到了問題。我想讓您知道，您不必獨自面對。</div>
+        <div class="card-footer">
+          <div class="avail"><span class="avail-dot"></span>最快 本週五 16:00 可預約</div>
+          <a href="#" class="btn-detail">了解更多</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <img class="avatar" src="https://images.unsplash.com/photo-1554151228-14d9def656e4?w=200&h=200&fit=crop&crop=faces&auto=format" alt="林佳蓉">
+        <div class="card-header">
+          <div class="name-row">
+            <span class="name">林佳蓉</span>
+            <span class="price">$1,800 <small>/ 小時</small></span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-txt">諮心字第 003456 號</span>
+          </div>
+          <div class="skill-pills">
+            <span class="skill-pill">接受與承諾治療 ACT</span>
+            <span class="skill-pill">正念減壓</span>
+          </div>
+        </div>
+      </div>
+      <div class="badge-row">
+        <span class="badge">本週 5 人瀏覽</span>
+        <span class="badge">有孩子</span>
+      </div>
+      <div class="card-body">
+        <div class="edu">輔仁大學 臨床心理學碩士</div>
+        <div class="intro">擅長以接受與承諾治療（ACT）協助個案面對生命中的困境。相信每個人都有自己的智慧與力量，我的角色是陪你找到它，而不是替你解決它。</div>
+        <div class="card-footer">
+          <div class="avail"><span class="avail-dot"></span>最快 下週一 09:00 可預約</div>
+          <a href="#" class="btn-detail">了解更多</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="load-more">
+      <button class="btn-more">顯示更多專家</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════ DESKTOP ══════════════ -->
+<div class="desktop-wrap">
+
+  <div class="sidebar">
+    <div class="sidebar-title">篩選條件</div>
+
+    <div class="sb-search-wrap">
+      <svg class="search-ico-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input class="sb-search" type="text" placeholder="搜尋名稱、專長、介紹…">
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-title">費用（每小時）</div>
+      <div class="price-range">
+        <input class="price-input" type="number" placeholder="最低" value="1000">
+        <span style="color:var(--text-3);font-size:13px;flex-shrink:0">—</span>
+        <input class="price-input" type="number" placeholder="最高" value="5000">
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-title">性別</div>
+      <div class="sb-tags" data-single>
+        <button class="sb-tag on">不限</button>
+        <button class="sb-tag">女性</button>
+        <button class="sb-tag">男性</button>
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-title">可諮詢時間</div>
+      <div class="sb-tags" style="margin-bottom:8px">
+        <button class="sb-tag">週一</button>
+        <button class="sb-tag">週二</button>
+        <button class="sb-tag">週三</button>
+        <button class="sb-tag">週四</button>
+        <button class="sb-tag">週五</button>
+        <button class="sb-tag">週六</button>
+        <button class="sb-tag">週日</button>
+      </div>
+      <div class="sb-tags">
+        <button class="sb-tag">上午</button>
+        <button class="sb-tag">下午</button>
+        <button class="sb-tag">晚上</button>
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-title">擅長議題</div>
+      <div class="sb-tags">
+        <button class="sb-tag">感情困擾</button>
+        <button class="sb-tag">家庭關係</button>
+        <button class="sb-tag">職場壓力</button>
+        <button class="sb-tag">情緒困擾</button>
+        <button class="sb-tag on">自我探索</button>
+        <button class="sb-tag">焦慮與恐慌</button>
+        <button class="sb-tag">憂鬱</button>
+        <button class="sb-tag">創傷</button>
+        <button class="sb-tag">親子關係</button>
+        <button class="sb-tag">性別議題</button>
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-title">諮商風格</div>
+      <div class="sb-tags">
+        <button class="sb-tag">溫暖</button>
+        <button class="sb-tag">理性</button>
+        <button class="sb-tag">輕鬆</button>
+        <button class="sb-tag">直接</button>
+        <button class="sb-tag">體驗式</button>
+        <button class="sb-tag">教練式</button>
+        <button class="sb-tag">慢節奏</button>
+        <button class="sb-tag">快節奏</button>
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-title">共同身份 / 生命經歷</div>
+      <div class="sb-tags">
+        <button class="sb-tag">有海外經驗</button>
+        <button class="sb-tag">有孩子</button>
+        <button class="sb-tag">長照經驗</button>
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-title">宗教信仰</div>
+      <div class="sb-tags">
+        <button class="sb-tag">基督教</button>
+        <button class="sb-tag">天主教</button>
+        <button class="sb-tag">其他</button>
+      </div>
+    </div>
+
+    <button class="btn-sb-apply">套用篩選</button>
+  </div>
+
+  <div class="main-col">
+    <div class="desktop-topbar">
+      <span class="dt-count">共 24 位心理師</span>
+      <div class="dt-sort sort-row">
+        <span class="sort-label">排序：</span>
+        <button class="sort-pill active">最快可預約</button>
+        <button class="sort-pill">相關度</button>
+        <button class="sort-pill">費用</button>
+        <button class="sort-pill">認證資格</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <img class="avatar" src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop&crop=faces&auto=format" alt="張心怡">
+        <div class="card-header">
+          <div class="name-row">
+            <span class="name">張心怡</span>
+            <span class="price">$2,500 <small>/ 小時</small></span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-txt">諮心字第 001234 號</span>
+            <span class="sep">·</span>
+            <span class="meta-txt">國立台灣大學 心理學碩士</span>
+          </div>
+          <div class="skill-pills">
+            <span class="skill-pill">認知行為治療 CBT</span>
+            <span class="skill-pill">正念療法</span>
+            <span class="skill-pill">睡眠治療</span>
+          </div>
+        </div>
+      </div>
+      <div class="badge-row">
+        <span class="badge">本週 12 人瀏覽</span>
+        <span class="badge">本週預約 3 次</span>
+        <span class="badge">睡眠專家</span>
+        <span class="badge">海外經驗</span>
+      </div>
+      <div class="card-body">
+        <div class="intro">8 年國中輔導教師，CTSSO 體重管理師，企業講師。服務對象涵蓋兒童、青少年、成人與樂齡族群，擅長協助個案處理情緒調節與睡眠困擾，提供具結構性的認知行為介入。</div>
+        <div class="card-footer">
+          <div class="avail"><span class="avail-dot"></span>最快 明天 10:00 可預約</div>
+          <a href="#" class="btn-detail">了解更多</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <img class="avatar" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&h=200&fit=crop&crop=faces&auto=format" alt="朱悅瑜">
+        <div class="card-header">
+          <div class="name-row">
+            <span class="name">朱悅瑜 Aileen</span>
+            <span class="price">$2,600 <small>/ 小時</small></span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-txt">臨心字第 005678 號</span>
+            <span class="sep">·</span>
+            <span class="meta-txt">美國波士頓大學 諮商心理學碩士</span>
+          </div>
+          <div class="skill-pills">
+            <span class="skill-pill">人本取向</span>
+            <span class="skill-pill">存在主義治療</span>
+            <span class="skill-pill">EMDR</span>
+          </div>
+        </div>
+      </div>
+      <div class="badge-row">
+        <span class="badge">本週 8 人瀏覽</span>
+        <span class="badge">海外經驗</span>
+        <span class="badge">有孩子</span>
+        <span class="badge">10 年資歷</span>
+      </div>
+      <div class="card-body">
+        <div class="intro">在受西方教育訓練與協助世界各國個案的 15 年經驗中，總是很享受與每位來訪者一起從探索議題、面對困境到找到出口的過程。秉持「每個人都是獨一無二」的信念，我想幫你看見自身的美好。</div>
+        <div class="card-footer">
+          <div class="avail"><span class="avail-dot"></span>最快 後天 14:00 可預約</div>
+          <a href="#" class="btn-detail">了解更多</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <img class="avatar" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=faces&auto=format" alt="潘昭樺">
+        <div class="card-header">
+          <div class="name-row">
+            <span class="name">潘昭樺</span>
+            <span class="price">$2,500 <small>/ 小時</small></span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-txt">諮心字第 002345 號</span>
+            <span class="sep">·</span>
+            <span class="meta-txt">國立政治大學 心理學碩士</span>
+          </div>
+          <div class="skill-pills">
+            <span class="skill-pill">敘事治療</span>
+            <span class="skill-pill">完形治療</span>
+            <span class="skill-pill">性別議題</span>
+          </div>
+        </div>
+      </div>
+      <div class="badge-row">
+        <span class="badge">本週預約 2 次</span>
+        <span class="badge">本週有空</span>
+      </div>
+      <div class="card-body">
+        <div class="intro">如果此時的您，正經歷情緒的低潮、生活的停滯，或是感到迷茫，請允許我對您說：您不是問題，您只是遇到了問題。我想讓您知道，您不必獨自面對。</div>
+        <div class="card-footer">
+          <div class="avail"><span class="avail-dot"></span>最快 本週五 16:00 可預約</div>
+          <a href="#" class="btn-detail">了解更多</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <img class="avatar" src="https://images.unsplash.com/photo-1554151228-14d9def656e4?w=200&h=200&fit=crop&crop=faces&auto=format" alt="林佳蓉">
+        <div class="card-header">
+          <div class="name-row">
+            <span class="name">林佳蓉</span>
+            <span class="price">$1,800 <small>/ 小時</small></span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-txt">諮心字第 003456 號</span>
+            <span class="sep">·</span>
+            <span class="meta-txt">輔仁大學 臨床心理學碩士</span>
+          </div>
+          <div class="skill-pills">
+            <span class="skill-pill">接受與承諾治療 ACT</span>
+            <span class="skill-pill">正念減壓</span>
+          </div>
+        </div>
+      </div>
+      <div class="badge-row">
+        <span class="badge">本週 5 人瀏覽</span>
+        <span class="badge">有孩子</span>
+      </div>
+      <div class="card-body">
+        <div class="intro">擅長以接受與承諾治療（ACT）協助個案面對生命中的困境。相信每個人都有自己的智慧與力量，我的角色是陪你找到它，而不是替你解決它。</div>
+        <div class="card-footer">
+          <div class="avail"><span class="avail-dot"></span>最快 下週一 09:00 可預約</div>
+          <a href="#" class="btn-detail">了解更多</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="load-more">
+      <button class="btn-more">顯示更多專家</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  function toggleMobileFilter() {
+    const panel = document.getElementById('mFilterPanel');
+    const btn   = document.getElementById('mFilterBtn');
+    panel.classList.toggle('open');
+    btn.classList.toggle('active');
+  }
+
+  document.querySelectorAll('.ftag, .sb-tag').forEach(el => {
+    el.addEventListener('click', () => {
+      const group = el.closest('[data-single]');
+      if (group) {
+        group.querySelectorAll('.ftag, .sb-tag').forEach(t => t.classList.remove('on'));
+        el.classList.add('on');
+      } else {
+        el.classList.toggle('on');
+      }
+    });
+  });
+
+  document.querySelectorAll('.sort-row').forEach(row => {
+    row.querySelectorAll('.sort-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        row.querySelectorAll('.sort-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+      });
+    });
+  });
+
+  document.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      if (!e.target.closest('.btn-detail')) {
+        window.location = '#';
+      }
+    });
+  });
+
+  document.querySelectorAll('.cat-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
