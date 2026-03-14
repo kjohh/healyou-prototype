@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tomo</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;1,400&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--paper:#f7f2ec;--ink:#2e2318;--ink2:rgba(46,35,24,0.44);--glass:rgba(255,255,255,0.55);}
+body{background:var(--paper);font-family:'Noto Serif TC',serif;height:100vh;overflow:hidden;}
+
+/* single canvas behind everything */
+#canvas-bg{position:fixed;inset:0;z-index:0;}
+
+/* views */
+#view-record,#view-diary{position:fixed;inset:0;transition:opacity .45s;}
+#view-record{z-index:10;background:transparent;}
+#view-record.hidden{opacity:0;pointer-events:none;}
+#view-diary{z-index:20;opacity:0;pointer-events:none;overflow-y:auto;background:var(--paper);}
+#view-diary.active{opacity:1;pointer-events:all;}
+
+/* record UI */
+.rec-ui{display:flex;flex-direction:column;height:100vh;}
+.rec-header{padding:28px 32px 0;display:flex;justify-content:space-between;align-items:flex-start;}
+.brand{font-family:'Playfair Display',serif;font-style:italic;font-size:20px;color:var(--ink);}
+.rec-date{font-size:11px;color:var(--ink2);margin-top:3px;letter-spacing:.07em;}
+
+.diary-btn{display:flex;align-items:center;gap:6px;background:var(--glass);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.8);border-radius:20px;padding:8px 14px;font-size:12px;color:#5a4a3a;font-family:'Noto Serif TC',serif;cursor:pointer;transition:all .2s;}
+.diary-btn:hover{background:rgba(255,255,255,.75);}
+.diary-btn .cnt{background:rgba(46,35,24,.12);border-radius:10px;padding:1px 7px;font-size:11px;min-width:20px;text-align:center;}
+
+.emotion-pill{position:absolute;top:50%;left:50%;transform:translate(-50%,-170px);display:flex;align-items:center;gap:7px;background:var(--glass);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.85);border-radius:20px;padding:7px 16px;font-size:12px;color:#5a4a3a;pointer-events:none;transition:all .6s;}
+.pill-dot{width:7px;height:7px;border-radius:50%;background:#c9b99a;transition:background 1s;}
+
+.transcript-area{flex:1;display:flex;align-items:center;justify-content:center;padding:32px;pointer-events:none;}
+.transcript-box{max-width:480px;width:100%;text-align:center;}
+#transcript-text{font-size:18px;line-height:1.95;color:rgba(46,35,24,.82);font-weight:300;letter-spacing:.03em;min-height:54px;}
+.ph{font-size:14px;color:rgba(120,100,85,.42);font-style:italic;}
+
+.rec-controls{padding:20px 40px 36px;display:flex;flex-direction:column;align-items:center;gap:14px;}
+.vol-viz{display:flex;align-items:center;gap:2px;height:18px;opacity:0;transition:opacity .3s;}
+.vol-viz.on{opacity:1;}
+.vbar{width:3px;background:rgba(120,90,70,.38);border-radius:2px;height:4px;transition:height .07s;}
+
+.btn-row{display:flex;align-items:center;gap:22px;}
+.mic-btn{width:68px;height:68px;border-radius:50%;border:none;cursor:pointer;background:rgba(255,255,255,.68);backdrop-filter:blur(20px);box-shadow:0 8px 28px rgba(0,0,0,.09),inset 0 1px 0 rgba(255,255,255,.9);position:relative;transition:all .3s;display:flex;align-items:center;justify-content:center;}
+.mic-btn::before{content:'';position:absolute;inset:0;border-radius:50%;border:1.5px solid rgba(255,255,255,.88);}
+.mic-btn svg{fill:none;stroke:#7a5c4a;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.mic-btn.rec{background:rgba(200,80,60,.13);animation:pulse 2s infinite;}
+.mic-btn.rec svg{stroke:#c84c3c;}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(200,80,60,.22),0 8px 28px rgba(200,80,60,.18);}70%{box-shadow:0 0 0 16px rgba(200,80,60,0),0 8px 28px rgba(200,80,60,.18);}100%{box-shadow:0 0 0 0 rgba(200,80,60,0),0 8px 28px rgba(200,80,60,.18);}}
+
+.save-btn{display:flex;align-items:center;gap:6px;background:rgba(46,35,24,.08);border:1px solid rgba(46,35,24,.13);border-radius:20px;padding:9px 18px;font-size:12px;color:var(--ink);font-family:'Noto Serif TC',serif;cursor:pointer;transition:all .25s;opacity:0;pointer-events:none;}
+.save-btn.on{opacity:1;pointer-events:all;}
+.save-btn:hover{background:rgba(46,35,24,.14);}
+.status-lbl{font-size:11px;letter-spacing:.11em;text-transform:uppercase;color:rgba(90,70,55,.5);transition:all .4s;}
+.status-lbl.rec{color:rgba(200,80,60,.65);}
+
+/* diary */
+.diary-header{padding:28px 0 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--paper);z-index:10;border-bottom:1px solid rgba(46,35,24,.08);}
+.diary-header-inner{max-width:680px;margin:0 auto;width:100%;padding:0 24px;display:flex;justify-content:space-between;align-items:center;}
+.diary-title{font-family:'Playfair Display',serif;font-size:22px;color:var(--ink);}
+.back-btn{display:flex;align-items:center;gap:5px;background:none;border:none;cursor:pointer;font-size:13px;color:var(--ink2);font-family:'Noto Serif TC',serif;transition:color .2s;}
+.back-btn:hover{color:var(--ink);}
+.entries-list{padding:28px 24px 80px;display:flex;flex-direction:column;gap:20px;max-width:680px;margin:0 auto;width:100%;}
+.entry-empty{text-align:center;padding:80px 40px;color:var(--ink2);font-size:14px;font-style:italic;line-height:2.2;}
+.entry-card{border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.07);position:relative;cursor:pointer;transition:transform .2s,box-shadow .2s;}
+.entry-card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.11);}
+.entry-img{display:block;width:100%;height:200px;object-fit:cover;}
+.entry-overlay{position:absolute;inset:0;padding:18px 22px;display:flex;flex-direction:column;justify-content:flex-end;background:linear-gradient(to top,rgba(247,242,236,.96) 0%,rgba(247,242,236,.2) 50%,transparent 100%);}
+.entry-meta{display:flex;align-items:center;gap:7px;margin-bottom:6px;flex-wrap:wrap;}
+.em-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.em-name{font-size:11px;color:var(--ink2);letter-spacing:.08em;}
+.em-time{font-size:11px;color:var(--ink2);margin-left:auto;}
+.em-tags{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.em-tag{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--ink2);letter-spacing:.06em;}
+.entry-text{font-size:14px;line-height:1.75;color:var(--ink);font-weight:300;letter-spacing:.02em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+
+/* ── auth / onboarding overlay ───────────────────────────────────── */
+#view-landing{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;animation:lndIn .9s ease .25s both;}
+@keyframes lndIn{from{opacity:0}to{opacity:1}}
+.auth-page{display:flex;flex-direction:column;align-items:center;gap:18px;width:100%;max-width:340px;padding:0 28px;transition:opacity .3s ease,transform .3s ease;}
+.lnd-brand{font-family:'Playfair Display',serif;font-style:italic;font-size:38px;color:var(--ink);text-align:center;line-height:1.2;}
+.lnd-sub{font-size:13px;color:var(--ink2);letter-spacing:.07em;text-align:center;line-height:2.2;}
+.btn-start{padding:14px 40px;border-radius:50px;background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.9);font-family:'Noto Serif TC',serif;font-size:14px;color:var(--ink);cursor:pointer;letter-spacing:.06em;box-shadow:0 4px 24px rgba(0,0,0,.07);transition:all .22s;}
+.btn-start:hover{background:rgba(255,255,255,.75);box-shadow:0 6px 32px rgba(0,0,0,.11);}
+.auth-card{width:100%;background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.85);border-radius:24px;padding:22px 22px 18px;display:flex;flex-direction:column;gap:10px;}
+.auth-card-lbl{font-size:11px;color:var(--ink2);letter-spacing:.12em;text-align:center;padding-bottom:2px;}
+.btn-apple,.btn-google{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:14px 20px;border-radius:13px;font-family:'Noto Serif TC',serif;font-size:14px;cursor:pointer;letter-spacing:.04em;transition:background .15s,transform .12s;}
+.btn-apple{background:#1a1a1a;color:#fff;border:none;}
+.btn-apple:hover{background:#333;}
+.btn-google{background:rgba(255,255,255,.92);color:var(--ink);border:1px solid rgba(46,35,24,.14);}
+.btn-google:hover{background:#fff;}
+.btn-apple:active,.btn-google:active{transform:scale(.97);}
+.auth-note{font-size:11px;color:rgba(46,35,24,.3);letter-spacing:.06em;text-align:center;}
+.auth-back-btn{display:flex;align-items:center;gap:4px;background:none;border:none;font-family:'Noto Serif TC',serif;font-size:12px;color:var(--ink2);cursor:pointer;letter-spacing:.06em;padding:0;align-self:flex-start;transition:color .2s;}
+.auth-back-btn:hover{color:var(--ink);}
+.auth-spin-wrap{display:flex;flex-direction:column;align-items:center;gap:16px;padding:10px 0 4px;}
+.spinner{width:30px;height:30px;border:2px solid rgba(46,35,24,.1);border-top-color:rgba(46,35,24,.42);border-radius:50%;animation:spin .75s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.auth-spin-lbl{font-size:12px;color:var(--ink2);letter-spacing:.12em;transition:opacity .25s;}
+
+/* modal */
+.modal-bg{position:fixed;inset:0;z-index:50;background:rgba(46,35,24,.35);backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .3s;display:flex;align-items:center;justify-content:center;padding:24px;}
+.modal-bg.open{opacity:1;pointer-events:all;}
+.modal-card{background:var(--paper);border-radius:20px;width:100%;max-width:600px;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.18);transform:translateY(12px);transition:transform .3s;}
+.modal-bg.open .modal-card{transform:translateY(0);}
+.modal-img{width:100%;height:200px;object-fit:cover;flex-shrink:0;}
+.modal-body{padding:24px 28px 32px;overflow-y:auto;flex:1;}
+.modal-meta{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.modal-time{font-size:11px;color:var(--ink2);margin-left:auto;}
+.modal-text{font-size:16px;line-height:2;color:var(--ink);font-weight:300;letter-spacing:.03em;white-space:pre-wrap;}
+.modal-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.75);backdrop-filter:blur(8px);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink2);transition:all .2s;}
+.modal-close:hover{background:rgba(255,255,255,.95);color:var(--ink);}
+</style>
+</head>
+<body>
+
+<canvas id="canvas-bg"></canvas>
+
+<!-- LANDING / AUTH OVERLAY -->
+<div id="view-landing">
+
+  <!-- page 1: landing -->
+  <div id="auth-p1" class="auth-page">
+    <div class="lnd-brand">Tomo</div>
+    <div class="lnd-sub">說出今天的心情<br>讓水彩替你記下來</div>
+    <button class="btn-start" onclick="goToLogin()">登入並開始記錄</button>
+  </div>
+
+  <!-- page 2: login -->
+  <div id="auth-p2" class="auth-page" style="display:none;opacity:0">
+    <div class="auth-card">
+      <button class="auth-back-btn" onclick="goToLanding()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        返回
+      </button>
+      <div class="auth-card-lbl">選擇登入方式繼續</div>
+      <button class="btn-apple" onclick="startAuth('apple')">
+        <svg width="14" height="17" viewBox="0 0 814 1000" fill="white"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-37.5-155.5-127.4C46 442.6 37.8 324.8 87.4 206.9c24.4-58.2 91.5-118.8 167.9-118.8 77.7 0 134.8 51 176.1 51 39.3 0 101.1-54 185.6-54 29.5 0 108.2 2.6 162.5 96.2zm-234-181.5c31.1-36.9 53.1-88.1 53.1-139.3 0-7.1-.6-14.3-1.9-20.1-50.6 1.9-110.8 33.7-147.1 75.8-28.5 32.4-55.1 83.6-55.1 135.5 0 7.8 1.3 15.6 1.9 18.1 3.2.6 8.4 1.3 13.6 1.3 45.4 0 102.5-30.4 135.5-71.3z"/></svg>
+        以 Apple 登入
+      </button>
+      <button class="btn-google" onclick="startAuth('google')">
+        <svg width="17" height="17" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        以 Google 登入
+      </button>
+      <div class="auth-note">首次登入即自動建立帳號</div>
+    </div>
+  </div>
+
+  <!-- page 3: loading -->
+  <div id="auth-loading-page" class="auth-page" style="display:none;opacity:0">
+    <div class="auth-card">
+      <div class="auth-spin-wrap">
+        <div class="spinner"></div>
+        <div class="auth-spin-lbl" id="loading-text">登入中…</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- RECORD VIEW -->
+<div id="view-record" class="hidden">
+  <div class="rec-ui">
+    <div class="rec-header">
+      <div>
+        <div class="brand">Tomo</div>
+        <div class="rec-date" id="rec-date"></div>
+      </div>
+      <button class="diary-btn" onclick="openDiary()">
+        日記簿 <span class="cnt" id="entry-count">0</span>
+      </button>
+    </div>
+    <div class="emotion-pill">
+      <div class="pill-dot" id="pill-dot"></div>
+      <span id="pill-label">靜待…</span>
+    </div>
+    <div class="transcript-area">
+      <div class="transcript-box">
+        <div id="transcript-text"><span class="ph">按下麥克風，開始說話</span></div>
+      </div>
+    </div>
+    <div class="rec-controls">
+      <div class="vol-viz" id="vol-viz"></div>
+      <div class="btn-row">
+        <div style="width:90px"></div>
+        <button class="mic-btn" id="mic-btn" onclick="toggleRec()">
+          <svg width="24" height="24" viewBox="0 0 24 24">
+            <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
+            <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
+            <line x1="12" y1="19" x2="12" y2="22"/>
+            <line x1="8" y1="22" x2="16" y2="22"/>
+          </svg>
+        </button>
+        <button class="save-btn" id="save-btn" onclick="saveEntry()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
+          </svg>
+          儲存日記
+        </button>
+      </div>
+      <div class="status-lbl" id="status-lbl">點擊錄音</div>
+    </div>
+  </div>
+</div>
+
+<!-- DIARY VIEW -->
+<div id="view-diary">
+  <div class="diary-header">
+    <div class="diary-header-inner">
+      <div class="diary-title">日記簿</div>
+      <button class="back-btn" onclick="closeDiary()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+        </svg>
+        返回錄音
+      </button>
+    </div>
+  </div>
+  <div class="entries-list" id="entries-list">
+    <div class="entry-empty">還沒有日記<br>開始錄音，儲存你的第一篇吧</div>
+  </div>
+</div>
+
+<!-- ENTRY MODAL -->
+<div class="modal-bg" id="modal-bg" onclick="closeModal(event)">
+  <div class="modal-card" id="modal-card">
+    <img class="modal-img" id="modal-img" src="" alt="">
+    <button class="modal-close" onclick="closeModal()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="modal-body">
+      <div class="modal-meta" id="modal-meta"></div>
+      <div class="modal-text" id="modal-text"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── date ─────────────────────────────────────────────────────────
+document.getElementById('rec-date').textContent =
+  new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
+
+// ── canvas ────────────────────────────────────────────────────────
+const canvas = document.getElementById('canvas-bg');
+const ctx = canvas.getContext('2d');
+let W, H;
+function resize(){ W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; }
+resize(); window.addEventListener('resize', resize);
+
+// ── emotion palette ───────────────────────────────────────────────
+const EM = {
+  '平靜': {rgb:[170,205,218], dot:'#8BB8C8'},
+  '快樂': {rgb:[255,210,80],  dot:'#F5C030'},
+  '興奮': {rgb:[255,125,65],  dot:'#F07030'},
+  '悲傷': {rgb:[95,120,198],  dot:'#6478C0'},
+  '焦慮': {rgb:[190,150,220], dot:'#C09ADC'},
+  '憤怒': {rgb:[218,70,60],   dot:'#DC4840'},
+  '感激': {rgb:[125,198,142], dot:'#80C888'},
+  '疲倦': {rgb:[155,145,135], dot:'#9E9488'},
+  '溫柔': {rgb:[250,190,180], dot:'#FCC0B5'},
+  '孤獨': {rgb:[112,92,155],  dot:'#7460A0'},
+};
+
+// soft ambient palette — muted watercolour tones, no strong hue
+const AMBIENT_COLORS = [
+  [210,185,165], // warm peach
+  [175,210,205], // soft teal
+  [220,195,175], // dusty rose
+  [185,200,225], // soft periwinkle
+  [200,220,190], // mint
+  [225,200,180], // salmon
+  [180,195,220], // lavender blue
+  [215,205,175], // warm sand
+  [195,215,200], // sage
+  [220,185,190], // blush
+  [175,205,215], // sky
+  [210,200,175], // cream gold
+];
+
+let curEmotion = '平靜';
+let allBlobs = [];   // ambient WaterBlobs
+let emotionBlobs = []; // emotion Blooms (separate array)
+
+// ────────────────────────────────────────────────────────────────
+// 1. AMBIENT WATER BLOB  (original organic shape from uploaded version)
+// ────────────────────────────────────────────────────────────────
+class WaterBlob {
+  constructor(x, y, rgb, size) {
+    this.x = x; this.y = y;
+    this.color = rgb ? [...rgb] : AMBIENT_COLORS[Math.floor(Math.random()*AMBIENT_COLORS.length)];
+    this.r = size || (Math.random()*70+40);
+    this.maxR = this.r * (Math.random()*2.2+1.5); // grows but not too large
+    this.alpha = Math.random()*0.22+0.10;          // slightly richer alpha
+    this.vx = (Math.random()-.5)*.4;
+    this.vy = (Math.random()-.5)*.3;
+    this.growth = Math.random()*0.6+0.3;         // original growth speed
+    this.wobblePhase = Math.random()*Math.PI*2;
+    this.wobbleSpeed = Math.random()*.018+.008;
+    this.wobbleAmp = Math.random()*14+5;
+    this.life = 0;
+    this.maxLife = Math.random()*400+200;        // original life span
+    const n=8; this.points=[];
+    for(let i=0;i<n;i++) this.points.push({angle:(i/n)*Math.PI*2, offset:Math.random()*20-10});
+    this.dead = false;
+  }
+  update(){
+    this.life++;
+    this.x+=this.vx; this.y+=this.vy;
+    this.wobblePhase+=this.wobbleSpeed;
+    if(this.r<this.maxR) this.r+=this.growth;
+    if(this.life>this.maxLife){ this.alpha-=0.002; if(this.alpha<=0)this.dead=true; }
+  }
+  draw(){
+    ctx.save(); ctx.globalAlpha=Math.max(0,this.alpha);
+    ctx.beginPath();
+    const n=this.points.length;
+    for(let i=0;i<=n;i++){
+      const pt=this.points[i%n];
+      const wobble=Math.sin(this.wobblePhase+pt.angle*3)*this.wobbleAmp;
+      const r=this.r+pt.offset+wobble;
+      const px=this.x+Math.cos(pt.angle)*r;
+      const py=this.y+Math.sin(pt.angle)*r;
+      i===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
+    }
+    ctx.closePath();
+    const [r,g,b]=this.color;
+    const grad=ctx.createRadialGradient(this.x-this.r*.2,this.y-this.r*.2,0,this.x,this.y,this.r*1.4);
+    grad.addColorStop(0,`rgba(${r},${g},${b},0.9)`);
+    grad.addColorStop(0.5,`rgba(${r},${g},${b},0.5)`);
+    grad.addColorStop(1,`rgba(${r},${g},${b},0)`);
+    ctx.fillStyle=grad; ctx.fill(); ctx.restore();
+  }
+}
+
+// ────────────────────────────────────────────────────────────────
+// 2. EMOTION BLOOM  (flower shape, emotion-coloured)
+// ────────────────────────────────────────────────────────────────
+class EmotionBloom {
+  constructor(x, y, emotionKey, size) {
+    const e = EM[emotionKey] || EM['平靜'];
+    this.x=x; this.y=y;
+    this.rgb = [...e.rgb]; // ALWAYS use the emotion's exact colour
+    const n=Math.floor(Math.random()*4)+5;
+    const base=size||(Math.random()*65+40);
+    this.petals=[];
+    for(let i=0;i<n;i++){
+      this.petals.push({
+        a:(i/n)*Math.PI*2+Math.random()*.5,
+        d:base*(0.25+Math.random()*.45),
+        r:base*(0.38+Math.random()*.5),
+        alpha:Math.random()*.16+0.07,
+        ph:Math.random()*Math.PI*2,
+        sp:Math.random()*.014+.006,
+        off:Array.from({length:8},()=>Math.random()*16-8)
+      });
+    }
+    // center
+    this.petals.push({a:0,d:0,r:base*.55,alpha:.09+Math.random()*.08,ph:0,sp:.007,off:Array.from({length:8},()=>Math.random()*10-5)});
+    this.life=0; this.maxLife=Math.random()*480+300;
+    this.scale=0.01; this.growing=true; this.dead=false;
+    this.persistent=false; // set true after fully grown for 2 blooms per burst
+  }
+  update(){
+    this.life++;
+    if(this.growing){ this.scale=Math.min(1,this.scale+0.04); if(this.scale>=1)this.growing=false; }
+    if(!this.persistent && this.life>this.maxLife){
+      this.petals.forEach(p=>p.alpha-=.0015);
+      if(this.petals.every(p=>p.alpha<=0)) this.dead=true;
+    }
+    this.petals.forEach(p=>p.ph+=p.sp);
+  }
+  draw(){
+    ctx.save(); ctx.translate(this.x,this.y); ctx.scale(this.scale,this.scale);
+    this.petals.forEach(p=>{
+      const px=Math.cos(p.a)*p.d, py=Math.sin(p.a)*p.d;
+      ctx.save(); ctx.globalAlpha=Math.max(0,p.alpha);
+      ctx.beginPath();
+      const n=p.off.length;
+      for(let i=0;i<=n;i++){
+        const a=(i/n)*Math.PI*2;
+        const r=p.r+p.off[i%n]+Math.sin(p.ph+a*2.5)*9;
+        const bx=px+Math.cos(a)*r, by=py+Math.sin(a)*r;
+        i===0?ctx.moveTo(bx,by):ctx.lineTo(bx,by);
+      }
+      ctx.closePath();
+      const [r,g,b]=this.rgb;
+      const grd=ctx.createRadialGradient(px,py,0,px,py,p.r*1.35);
+      grd.addColorStop(0,`rgba(${r},${g},${b},0.9)`);
+      grd.addColorStop(.55,`rgba(${r},${g},${b},0.42)`);
+      grd.addColorStop(1,`rgba(${r},${g},${b},0)`);
+      ctx.fillStyle=grd; ctx.fill(); ctx.restore();
+    });
+    ctx.restore();
+  }
+}
+
+// ── spawn helpers ─────────────────────────────────────────────────
+let spawnTimer=0, isRec=false;
+const M=90;
+
+function spawnAmbient(){
+  allBlobs.push(new WaterBlob(
+    M+Math.random()*(W-M*2),
+    M+Math.random()*(H-M*2)
+  ));
+}
+
+function spawnEmotionBloom(emotionKey, intensity, persist){
+  const b = new EmotionBloom(
+    M+Math.random()*(W-M*2),
+    M+Math.random()*(H-M*2),
+    emotionKey,
+    intensity*90+35
+  );
+  if(persist) b.persistent=true;
+  emotionBlobs.push(b);
+}
+
+// called when emotion detected
+function bloomEmotion(emotionKey, intensity){
+  const liveCount = Math.round(intensity*3)+2;
+  for(let i=0;i<liveCount;i++){
+    setTimeout(()=>spawnEmotionBloom(emotionKey, intensity, false), i*160);
+  }
+  // 2 persistent blooms per detection
+  setTimeout(()=>spawnEmotionBloom(emotionKey, intensity*.8, true), 500);
+  setTimeout(()=>spawnEmotionBloom(emotionKey, intensity*.7, true), 900);
+}
+
+// ── animation loop ────────────────────────────────────────────────
+function animate(){
+  requestAnimationFrame(animate);
+
+  // Original-style: slow paper overlay gives the watercolour bleed effect
+  // Strict blob cap prevents grey accumulation
+  ctx.globalAlpha = 0.015;
+  ctx.fillStyle = '#f7f2ec';
+  ctx.fillRect(0,0,W,H);
+  ctx.globalAlpha = 1;
+
+  // spawn ambient blobs — original rate
+  spawnTimer++;
+  const rate = isRec ? 8 : 60;
+  if(spawnTimer%rate===0) spawnAmbient();
+
+  // draw ambient blobs — original cap of 80, splice oldest 5 when exceeded
+  allBlobs = allBlobs.filter(b=>!b.dead);
+  allBlobs.forEach(b=>{ b.update(); b.draw(); });
+  if(allBlobs.length > 80) allBlobs.splice(0, 5);
+
+  // emotion blooms on top
+  emotionBlobs = emotionBlobs.filter(b=>!b.dead);
+  emotionBlobs.forEach(b=>{ b.update(); b.draw(); });
+  if(emotionBlobs.length > 30) emotionBlobs.splice(0, 3);
+}
+
+// seed initial ambient blobs — burst at start for strong first impression
+ctx.fillStyle='#f7f2ec'; ctx.fillRect(0,0,W,H);
+for(let i=0;i<16;i++) setTimeout(()=>spawnAmbient(), i*120);
+animate();
+
+// ── snapshot (captures current canvas state) ──────────────────────
+function captureSnapshot(){
+  const CW=640,CH=220;
+  const snap=document.createElement('canvas'); snap.width=CW; snap.height=CH;
+  const sx=snap.getContext('2d');
+  sx.fillStyle='#f7f2ec'; sx.fillRect(0,0,CW,CH);
+  // Center-crop from canvas to match target aspect ratio, avoiding distortion
+  const targetAR=CW/CH;
+  let srcX,srcY,srcW,srcH;
+  if(W/H>targetAR){ srcH=H; srcW=H*targetAR; srcX=(W-srcW)/2; srcY=0; }
+  else            { srcW=W; srcH=W/targetAR; srcX=0; srcY=(H-srcH)/2; }
+  sx.globalAlpha=.95; sx.drawImage(canvas,srcX,srcY,srcW,srcH,0,0,CW,CH); sx.globalAlpha=1;
+  return snap.toDataURL('image/png');
+}
+
+// ── volume visualizer ─────────────────────────────────────────────
+const volViz=document.getElementById('vol-viz');
+for(let i=0;i<12;i++){const b=document.createElement('div');b.className='vbar';volViz.appendChild(b);}
+let aCx,anlsr,dArr,mStream,volRaf;
+function startVol(s){
+  aCx=new AudioContext(); anlsr=aCx.createAnalyser(); anlsr.fftSize=64;
+  aCx.createMediaStreamSource(s).connect(anlsr);
+  dArr=new Uint8Array(anlsr.frequencyBinCount);
+  volViz.classList.add('on');
+  const bars=volViz.querySelectorAll('.vbar');
+  function tick(){ anlsr.getByteFrequencyData(dArr); bars.forEach((b,i)=>b.style.height=Math.max(4,(dArr[i]/255)*24)+'px'); volRaf=requestAnimationFrame(tick); }
+  tick();
+}
+function stopVol(){
+  cancelAnimationFrame(volRaf); volViz.classList.remove('on');
+  volViz.querySelectorAll('.vbar').forEach(b=>b.style.height='4px');
+  if(aCx)aCx.close();
+}
+
+// ── keyword emotion ───────────────────────────────────────────────
+const KW={
+  '快樂':['開心','高興','快樂','喜歡','愛死','超棒','好棒','太好了','哈哈','笑','好玩','幸福','爽','讚','很棒','棒透了','完美','滿足','順利','成功','做到了','終於','好好','美好','享受','感覺好','很好','超好','最棒','太爽了','沒問題','很順','輕鬆搞定','甜蜜','可愛','好可愛','喜悅','雀躍'],
+  '興奮':['興奮','太棒了','不敢相信','驚喜','哇','真的假的','好刺激','衝','期待','迫不及待','好期待','超期待','躍躍欲試','蠢蠢欲動','熱血','澎湃','激動','好想','等不及'],
+  '悲傷':['難過','傷心','哭','失落','悲傷','痛','心碎','捨不得','想念','思念','遺憾','後悔','可惜','委屈','心疼','難受','沮喪','心情不好','低落','灰心','絕望','無奈','心裡很悶','好難受','很痛','好痛','好不舒服','很難','撐不下去','好想哭','想哭','哭了','眼眶','鼻酸'],
+  '焦慮':['擔心','焦慮','緊張','害怕','不安','壓力','怎麼辦','煩惱','糟了','完蛋','迷茫','慌','慌張','亂了','不知道怎麼辦','很慌','很亂','手忙腳亂','焦躁','坐立難安','睡不著','失眠','一直想','停不下來','胡思亂想','很多事','事情太多','來不及','趕不上','怕','很怕','恐慌','不確定','沒把握'],
+  '憤怒':['生氣','憤怒','煩死','討厭','氣死','搞什麼','受不了','憑什麼','不爽','火大','幹','靠','很煩','好煩','煩透了','超煩','幹嘛','為什麼要','憑什麼','太過分','過分','無理','無理取鬧','欺負','針對','故意','很過分','氣炸','氣到','讓我很火','很不爽','超不爽','暴怒','崩潰','瘋了'],
+  '感激':['感謝','謝謝','感激','幸運','感恩','幸好','有你真好','多虧','托您的福','幸好有','還好','好在','感謝有','謝天謝地','太感謝','非常感謝','感謝你','感謝他','幸虧','有幸','很幸運','真的很感謝','深深感謝'],
+  '疲倦':['累','疲倦','疲憊','睏','沒力','好累','撐不住','好想睡','倦','很累','超累','累壞了','累到','精疲力竭','筋疲力盡','沒精神','無力','提不起勁','懶','懶得','不想動','好想躺','身體很重','很沉','撐不住了','快撐不住','已經很累','累了一天','累了好久'],
+  '溫柔':['溫柔','輕柔','親愛','寶貝','乖','慢慢','輕輕','暖心','暖','溫暖','溫馨','甜','甜蜜','柔和','體貼','貼心','疼','心疼','珍惜','在乎','好好照顧','輕聲','輕柔','安慰','安撫','包容','陪伴','守護','心軟','很柔','好溫柔'],
+  '孤獨':['孤獨','寂寞','一個人','沒人','孤單','空虛','沒伴','冷清','沒有人','都沒有人','自己一個','很孤','很孤單','很寂寞','沒人陪','沒人懂','沒人理解','被忽略','被忘記','被冷落','被排擠','格格不入','無人問津','冷漠','疏離','隔閡','距離','好遠','感覺很遠','落單'],
+  '平靜':['平靜','放鬆','還好','輕鬆','舒服','安靜','安心','平和','還可以','普通','一般','平常','沒什麼','就這樣','還算','穩定','平穩','恢復','好多了','好一點','慢慢來','不急','沒關係','好好的','沒事','一切都好','淡淡的','平淡'],
+};
+const KW_INT={'快樂':.85,'興奮':.95,'悲傷':.8,'焦慮':.8,'憤怒':.9,'感激':.75,'疲倦':.7,'溫柔':.65,'孤獨':.75,'平靜':.5};
+
+let analyzeTO;
+let lastAnalyzedLen = 0; // only analyze NEW text each time
+
+// negation prefixes — if keyword is preceded by these, flip or skip it
+const NEGATIONS = ['不','沒','別','未','非','莫','無'];
+
+function hasNegation(text, word){
+  const idx = text.indexOf(word);
+  if(idx <= 0) return false;
+  return NEGATIONS.includes(text[idx-1]);
+}
+
+function analyzeEmotion(fullText){
+  if(!fullText.trim()||fullText.length<2)return;
+  // analyze only text added since last call
+  const newText = fullText.slice(lastAnalyzedLen);
+  lastAnalyzedLen = fullText.length;
+  if(!newText.trim()||newText.length<2)return;
+
+  let scores = {};
+  for(const em of Object.keys(KW)) scores[em] = 0;
+
+  for(const[em,words]of Object.entries(KW)){
+    for(const w of words){
+      if(newText.includes(w)){
+        if(hasNegation(newText, w)){
+          // negated positive → add to 悲傷/焦慮 instead; negated negative → skip
+          const positives = ['快樂','興奮','感激','溫柔'];
+          const negatives = ['悲傷','焦慮','憤怒','孤獨','疲倦'];
+          if(positives.includes(em)){
+            scores['悲傷'] += w.length;
+            scores['焦慮'] += w.length * 0.5;
+          }
+          // negated negative — don't add anything
+        } else {
+          scores[em] += w.length;
+        }
+      }
+    }
+  }
+
+  let best=null, bs=0;
+  for(const[em,sc]of Object.entries(scores)){
+    if(sc>bs){bs=sc;best=em;}
+  }
+  if(best && bs > 0) setEmotion(best);
+}
+function scheduleAnalyze(text){ clearTimeout(analyzeTO); analyzeTO=setTimeout(()=>analyzeEmotion(text),600); }
+
+let sessionEmotions = []; // collect all emotions detected this session
+
+function setEmotion(name){
+  const e=EM[name]; if(!e)return;
+  curEmotion=name;
+  // add to session list (deduplicate consecutive, keep order)
+  if(sessionEmotions[sessionEmotions.length-1]!==name) sessionEmotions.push(name);
+  // update pill: show up to 3 recent emotions
+  const recent=sessionEmotions.slice(-3);
+  const pillDot=document.getElementById('pill-dot');
+  const pillLabel=document.getElementById('pill-label');
+  pillDot.style.background=e.dot;
+  pillLabel.textContent=recent.join('・');
+  bloomEmotion(name, KW_INT[name]||.7);
+}
+
+// ── speech recognition ────────────────────────────────────────────
+let recognition, sessionText='';
+function initRec(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){alert('請用 Chrome 或 Safari 開啟');return null;}
+  const r=new SR(); r.continuous=true; r.interimResults=true; r.lang='zh-TW';
+  r.onresult=e=>{
+    let interim='',final='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      const t=e.results[i][0].transcript;
+      e.results[i].isFinal?(final+=t):(interim+=t);
+    }
+    if(final){sessionText+=final;scheduleAnalyze(sessionText);}
+    setTx(sessionText+interim);
+  };
+  r.onerror=e=>console.warn(e.error);
+  r.onend=()=>{if(isRec)r.start();};
+  return r;
+}
+function setTx(t){
+  document.getElementById('transcript-text').innerHTML=t.trim()?t:'<span class="ph">按下麥克風，開始說話</span>';
+}
+
+// ── toggle recording ──────────────────────────────────────────────
+async function toggleRec(){
+  if(!isRec){
+    try{
+      mStream=await navigator.mediaDevices.getUserMedia({audio:true});
+      recognition=initRec(); if(!recognition)return;
+      recognition.start(); isRec=true; startVol(mStream);
+      document.getElementById('mic-btn').classList.add('rec');
+      document.getElementById('status-lbl').textContent='錄音中…';
+      document.getElementById('status-lbl').classList.add('rec');
+      sessionText=''; lastAnalyzedLen=0; sessionEmotions=[]; setTx('');
+      document.getElementById('save-btn').classList.remove('on');
+    }catch(e){alert('無法存取麥克風');}
+  } else {
+    isRec=false; recognition.stop(); mStream.getTracks().forEach(t=>t.stop()); stopVol();
+    document.getElementById('mic-btn').classList.remove('rec');
+    document.getElementById('status-lbl').textContent='點擊錄音';
+    document.getElementById('status-lbl').classList.remove('rec');
+    if(sessionText.trim()) document.getElementById('save-btn').classList.add('on');
+  }
+}
+
+// ── save entry ────────────────────────────────────────────────────
+let entries=[];
+function saveEntry(){
+  if(!sessionText.trim())return;
+  const snap=captureSnapshot();
+  entries.unshift({
+    id:Date.now(),
+    text:sessionText,
+    emotions: sessionEmotions.length ? [...sessionEmotions] : [curEmotion],
+    time:new Date().toLocaleString('zh-TW',{month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'}),
+    imageData:snap
+  });
+  updateCount(); renderDiary();
+  sessionText=''; lastAnalyzedLen=0; setTx('');
+  sessionEmotions=[];
+  document.getElementById('save-btn').classList.remove('on');
+  document.getElementById('pill-label').textContent='靜待…';
+  document.getElementById('pill-dot').style.background='#c9b99a';
+  curEmotion='平靜';
+  // auto-open diary with a brief confirmation flash
+  const sl=document.getElementById('status-lbl');
+  sl.textContent='已儲存 ✓';
+  setTimeout(()=>{ sl.textContent='點擊錄音'; openDiary(); }, 800);
+}
+function updateCount(){ document.getElementById('entry-count').textContent=entries.length; }
+
+// ── diary view ────────────────────────────────────────────────────
+function renderDiary(){
+  const list=document.getElementById('entries-list');
+  if(!entries.length){ list.innerHTML='<div class="entry-empty">還沒有日記<br>開始錄音，儲存你的第一篇吧</div>'; return; }
+  list.innerHTML='';
+  entries.forEach((e,idx)=>{
+    const card=document.createElement('div'); card.className='entry-card';
+    card.onclick=()=>openModal(idx);
+    const img=document.createElement('img'); img.className='entry-img'; img.src=e.imageData;
+    const ems = e.emotions || [e.emotionKey || '平靜'];
+    const dotsHtml = ems.map(name=>{
+      const em=EM[name]||EM['平靜'];
+      return `<span class="em-tag"><span class="em-dot" style="background:${em.dot}"></span>${name}</span>`;
+    }).join('');
+    const ov=document.createElement('div'); ov.className='entry-overlay';
+    ov.innerHTML=`
+      <div class="entry-meta">
+        <div class="em-tags">${dotsHtml}</div>
+        <span class="em-time">${e.time}</span>
+      </div>
+      <div class="entry-text">${e.text}</div>`;
+    card.appendChild(img); card.appendChild(ov); list.appendChild(card);
+  });
+}
+
+function openModal(idx){
+  const e=entries[idx];
+  const ems=e.emotions||[e.emotionKey||'平靜'];
+  document.getElementById('modal-img').src=e.imageData;
+  document.getElementById('modal-text').textContent=e.text;
+  const dotsHtml=ems.map(name=>{
+    const em=EM[name]||EM['平靜'];
+    return `<span class="em-tag"><span class="em-dot" style="background:${em.dot}"></span>${name}</span>`;
+  }).join('');
+  document.getElementById('modal-meta').innerHTML=`<div class="em-tags">${dotsHtml}</div><span class="modal-time">${e.time}</span>`;
+  document.getElementById('modal-bg').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(ev){
+  if(ev && ev.target!==document.getElementById('modal-bg') && !ev.target.closest('.modal-close')) return;
+  document.getElementById('modal-bg').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+function openDiary(){ renderDiary(); document.getElementById('view-diary').classList.add('active'); document.getElementById('view-record').classList.add('hidden'); }
+function closeDiary(){ document.getElementById('view-diary').classList.remove('active'); document.getElementById('view-record').classList.remove('hidden'); }
+
+// ── auth / onboarding ─────────────────────────────────────────────
+function authTransition(fromId, toId) {
+  const from = document.getElementById(fromId);
+  const to   = document.getElementById(toId);
+  from.style.opacity = '0';
+  from.style.transform = 'translateY(-8px)';
+  setTimeout(() => {
+    from.style.display = 'none';
+    to.style.opacity = '0';
+    to.style.transform = 'translateY(8px)';
+    to.style.display = 'flex';
+    to.offsetHeight; // trigger reflow so transition fires
+    to.style.opacity = '1';
+    to.style.transform = 'translateY(0)';
+  }, 300);
+}
+function goToLogin()   { authTransition('auth-p1', 'auth-p2'); }
+function goToLanding() { authTransition('auth-p2', 'auth-p1'); }
+function startAuth(provider) {
+  authTransition('auth-p2', 'auth-loading-page');
+  const lbl = document.getElementById('loading-text');
+  lbl.textContent = '登入中…';
+  setTimeout(() => { lbl.style.opacity='0'; setTimeout(()=>{ lbl.textContent='驗證身份中…'; lbl.style.opacity='1'; }, 220); }, 700);
+  setTimeout(() => { lbl.style.opacity='0'; setTimeout(()=>{ lbl.textContent='正在準備你的日記…'; lbl.style.opacity='1'; }, 220); }, 1500);
+  setTimeout(() => {
+    // Reset canvas to blank while overlay is still covering it
+    allBlobs = [];
+    emotionBlobs = [];
+    spawnTimer = 0;
+    ctx.fillStyle = '#f7f2ec';
+    ctx.fillRect(0, 0, W, H);
+    // Start seeding fresh blobs — they'll build up as the overlay fades
+    for(let i = 0; i < 16; i++) setTimeout(() => spawnAmbient(), i * 120);
+
+    // Fade out landing overlay
+    const ov = document.getElementById('view-landing');
+    ov.style.transition = 'opacity .9s ease';
+    ov.style.opacity = '0';
+    setTimeout(() => {
+      ov.remove();
+      document.getElementById('view-record').classList.remove('hidden');
+    }, 950);
+  }, 2500);
+}
+</script>
+</body>
+</html>
