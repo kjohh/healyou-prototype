@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HealYou — Confirm Payment</title>
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    .checkout-wrap {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 0 20px 120px;
+    }
+
+    /* ── Therapist mini card ── */
+    .therapist-mini {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+    }
+    .therapist-mini-info { flex: 1; }
+    .therapist-mini-name {
+      font-family: 'Noto Serif', serif;
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .therapist-mini-badges { display: flex; flex-wrap: wrap; gap: 5px; }
+
+    /* ── Detail rows ── */
+    .detail-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 0; overflow: hidden; margin-bottom: 20px; }
+    .detail-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+    }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-label { font-size: 14px; color: var(--text-2); display: flex; align-items: center; gap: 8px; }
+    .detail-label svg { color: var(--text-3); }
+    .detail-value { font-size: 15px; font-weight: 600; color: var(--text-1); text-align: right; }
+    .detail-value.price { color: var(--primary); font-size: 18px; font-family: 'Noto Serif', serif; }
+
+    /* ── Voucher ── */
+    .voucher-row { display: flex; gap: 8px; margin-bottom: 20px; }
+    .voucher-input {
+      flex: 1;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-md);
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .voucher-input:focus { border-color: var(--primary); }
+    .voucher-input::placeholder { color: var(--text-3); }
+
+    /* ── Payment methods ── */
+    .payment-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 20px; }
+    .payment-title { font-size: 13px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.5px; padding: 14px 18px 10px; }
+    .payment-option {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .payment-option:last-child { border-bottom: none; }
+    .payment-option:hover { background: var(--primary-pale); }
+    .payment-option.selected { background: var(--primary-pale); }
+    .radio-circle {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color .15s;
+    }
+    .payment-option.selected .radio-circle {
+      border-color: var(--cta);
+      background: var(--cta);
+    }
+    .radio-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #fff;
+      display: none;
+    }
+    .payment-option.selected .radio-dot { display: block; }
+    .payment-method-label { flex: 1; }
+    .payment-method-name { font-size: 15px; font-weight: 500; color: var(--text-1); }
+    .payment-method-sub  { font-size: 12px; color: var(--text-3); margin-top: 1px; }
+    .payment-icon {
+      width: 36px; height: 24px;
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      background: var(--bg);
+      flex-shrink: 0;
+    }
+
+    /* ── Section header ── */
+    .section-header-sm {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-2);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body class="page-offset">
+
+<header class="header">
+  <div class="header-left">
+    <a href="index.html" class="logo">HealYou</a>
+    <div class="logo-sep"></div>
+    <span class="header-sub">Confirm Booking</span>
+  </div>
+</header>
+
+<div class="checkout-wrap">
+
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb">
+    <a href="index.html">All Therapists</a>
+    <span class="breadcrumb-sep">/</span>
+    <a href="#" id="bc-therapist">Therapist</a>
+    <span class="breadcrumb-sep">/</span>
+    <span class="breadcrumb-current">Confirm Payment</span>
+  </nav>
+
+  <!-- Therapist mini card -->
+  <div class="therapist-mini">
+    <img id="mini-photo" src="" alt="" class="avatar avatar-sm">
+    <div class="therapist-mini-info">
+      <p class="therapist-mini-name" id="mini-name">—</p>
+      <div class="therapist-mini-badges" id="mini-badges"></div>
+    </div>
+  </div>
+
+  <!-- Booking summary -->
+  <p class="section-header-sm">Booking Details</p>
+  <div class="detail-card">
+    <div class="detail-row">
+      <span class="detail-label">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1" y="2" width="14" height="12" rx="1.5"/><path d="M5 1v2M11 1v2M1 6h14"/></svg>
+        Date &amp; Time
+      </span>
+      <span class="detail-value" id="detail-datetime">—</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5v4l2.5 1.5"/></svg>
+        Duration
+      </span>
+      <span class="detail-value">60 minutes</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4.5" width="9.5" height="7" rx="1.2"/><path d="M10.5 7.2l4-2.2v6l-4-2.2V7.2z"/></svg>
+        Format
+      </span>
+      <span class="detail-value">Online (Google Meet)</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 12V5.5a2 2 0 012-2h8a2 2 0 012 2V12"/><path d="M1 12h14"/><path d="M6 12V9.5a2 2 0 014 0V12"/></svg>
+        Session Fee
+      </span>
+      <span class="detail-value price" id="detail-price">—</span>
+    </div>
+  </div>
+
+  <!-- Voucher -->
+  <p class="section-header-sm">Promo Code</p>
+  <div class="voucher-row">
+    <input class="voucher-input" type="text" placeholder="Enter promo code (optional)" id="voucher-input">
+    <button class="btn btn-outline btn-sm" onclick="applyVoucher()">Apply</button>
+  </div>
+
+  <!-- Payment methods -->
+  <p class="section-header-sm">Payment Method</p>
+  <div class="payment-card">
+    <div class="payment-option selected" onclick="selectPayment(this)">
+      <div class="radio-circle"><div class="radio-dot"></div></div>
+      <div class="payment-icon">💳</div>
+      <div class="payment-method-label">
+        <p class="payment-method-name">Credit / Debit Card</p>
+        <p class="payment-method-sub">Visa, Mastercard, JCB</p>
+      </div>
+    </div>
+    <div class="payment-option" onclick="selectPayment(this)">
+      <div class="radio-circle"><div class="radio-dot"></div></div>
+      <div class="payment-icon">🏦</div>
+      <div class="payment-method-label">
+        <p class="payment-method-name">Bank Transfer (ATM)</p>
+        <p class="payment-method-sub">Complete within 3 days</p>
+      </div>
+    </div>
+    <div class="payment-option" onclick="selectPayment(this)">
+      <div class="radio-circle"><div class="radio-dot"></div></div>
+      <div class="payment-icon">
+        <svg width="24" height="16" viewBox="0 0 24 16"><rect width="24" height="16" rx="3" fill="#003087"/><text x="2" y="12" font-family="sans-serif" font-size="8" fill="white" font-weight="bold">PayPal</text></svg>
+      </div>
+      <div class="payment-method-label">
+        <p class="payment-method-name">PayPal</p>
+        <p class="payment-method-sub">Pay with your PayPal account</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Policy note -->
+  <div class="notice-box" style="margin-bottom:20px;">
+    <strong>Free cancellation</strong> up to 24 hours before your session. You will receive a Google Meet link and booking confirmation by email within 15 minutes.
+  </div>
+
+</div>
+
+<!-- Sticky bar -->
+<div class="sticky-bar">
+  <div class="sticky-bar-info">
+    <span class="sticky-price" id="footer-price">NT$—</span>
+    <span class="sticky-detail">Total · 60 min session</span>
+  </div>
+  <button class="btn btn-primary btn-pill" onclick="confirmPayment()">
+    Confirm Booking
+  </button>
+</div>
+
+<script>
+const THERAPISTS = {
+  'sarah-chen': { name:'Sarah Chen', title:'Licensed Counselor', license:'001847', photo:'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=160&h=160&fit=crop&crop=face' },
+  'michael-wu': { name:'Michael Wu', title:'Psychologist', license:'003291', photo:'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&h=160&fit=crop&crop=face' },
+  'amy-liu':    { name:'Amy Liu', title:'Licensed Counselor', license:'002015', photo:'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=160&h=160&fit=crop&crop=face' },
+  'david-chang':{ name:'David Chang', title:'Counseling Psychologist', license:'004102', photo:'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&h=160&fit=crop&crop=face' },
+  'jessica-hsu':{ name:'Jessica Hsu', title:'Psychologist', license:'005487', photo:'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=160&h=160&fit=crop&crop=face' }
+};
+
+const params = new URLSearchParams(window.location.search);
+const therapistId = params.get('therapist') || 'sarah-chen';
+const date  = params.get('date')  || '';
+const time  = params.get('time')  || '';
+const price = params.get('price') || '2800';
+
+const t = THERAPISTS[therapistId] || THERAPISTS['sarah-chen'];
+
+// Populate
+document.getElementById('bc-therapist').textContent = t.name;
+document.getElementById('bc-therapist').href = `therapist.html?id=${therapistId}`;
+document.getElementById('mini-photo').src = t.photo;
+document.getElementById('mini-photo').alt = t.name;
+document.getElementById('mini-name').textContent = t.name;
+document.getElementById('mini-badges').innerHTML = `
+  <span class="badge badge-license" style="font-size:11px;">
+    <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2L3 4.5v3.5c0 3.2 2.2 5.5 5 6.5 2.8-1 5-3.3 5-6.5V4.5L8 2z"/><path d="M6 8l1.5 1.5L10.5 6"/></svg>
+    ${t.title} · License #${t.license}
+  </span>`;
+
+// Format date
+if (date) {
+  const d = new Date(date + 'T00:00:00');
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('detail-datetime').textContent =
+    `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()} at ${time}`;
+}
+
+const priceNum = parseInt(price);
+document.getElementById('detail-price').textContent = `NT$${priceNum.toLocaleString()}`;
+document.getElementById('footer-price').textContent = `NT$${priceNum.toLocaleString()}`;
+
+function selectPayment(el) {
+  document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function applyVoucher() {
+  const val = document.getElementById('voucher-input').value.trim();
+  if (!val) return;
+  alert(`Promo code "${val}" — demo mode, no discount applied.`);
+}
+
+function confirmPayment() {
+  // Save booking to sessionStorage
+  const booking = {
+    id: 'BK' + Date.now(),
+    therapistId,
+    therapistName: t.name,
+    therapistTitle: t.title,
+    therapistLicense: t.license,
+    therapistPhoto: t.photo,
+    date, time, price: priceNum,
+    status: 'upcoming',
+    bookedAt: new Date().toISOString()
+  };
+  const bookings = JSON.parse(sessionStorage.getItem('healyou_bookings') || '[]');
+  bookings.unshift(booking);
+  sessionStorage.setItem('healyou_bookings', JSON.stringify(bookings));
+  sessionStorage.setItem('healyou_latest', JSON.stringify(booking));
+
+  window.location.href = 'confirmation.html';
+}
+</script>
+</body>
+</html>

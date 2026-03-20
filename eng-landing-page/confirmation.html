@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HealYou — Booking Confirmed</title>
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    body { display: flex; flex-direction: column; min-height: 100vh; background: var(--bg); }
+
+    .confirm-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 24px 40px;
+      text-align: center;
+    }
+
+    /* ── Loading state ── */
+    .loading-ring {
+      width: 72px; height: 72px;
+      border: 4px solid var(--primary-border);
+      border-top-color: var(--cta);
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+      margin-bottom: 20px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 16px; color: var(--text-2); }
+
+    /* ── Success state ── */
+    .success-icon {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--tag-green-bg), var(--primary-pale));
+      border: 2px solid var(--primary-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes popIn {
+      from { transform: scale(0.4); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+    .success-title {
+      font-family: 'Noto Serif', Georgia, serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+    .success-subtitle {
+      font-size: 15px;
+      color: var(--text-2);
+      line-height: 1.6;
+      max-width: 340px;
+      margin: 0 auto 28px;
+    }
+
+    /* ── Booking card ── */
+    .booking-card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 28px;
+      animation: slideUp 0.4s ease 0.1s both;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+    .booking-card-header {
+      background: linear-gradient(135deg, var(--primary-pale), #e8f0e0);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--primary-border);
+    }
+    .booking-id { font-size: 12px; color: var(--primary-light); font-weight: 600; letter-spacing: 0.5px; }
+    .booking-card-body { padding: 0; }
+    .booking-detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 13px 20px;
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+    }
+    .booking-detail-row:last-child { border-bottom: none; }
+    .booking-detail-label { font-size: 13px; color: var(--text-3); }
+    .booking-detail-value { font-size: 14px; font-weight: 600; color: var(--text-1); text-align: right; }
+    .booking-detail-value.green { color: var(--primary); }
+
+    /* ── Actions ── */
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      max-width: 420px;
+      animation: slideUp 0.4s ease 0.2s both;
+    }
+  </style>
+</head>
+<body class="page-offset">
+
+<header class="header">
+  <div class="header-left">
+    <a href="index.html" class="logo">HealYou</a>
+    <div class="logo-sep"></div>
+    <span class="header-sub">Booking Confirmed</span>
+  </div>
+</header>
+
+<!-- Loading state -->
+<div class="confirm-wrap" id="loading-state">
+  <div class="loading-ring"></div>
+  <p class="loading-text">Processing your booking…</p>
+</div>
+
+<!-- Success state -->
+<div class="confirm-wrap" id="success-state" style="display:none;">
+
+  <div class="success-icon">
+    <svg width="36" height="36" viewBox="0 0 40 40" fill="none" stroke="#3d5230" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10 20l7 7 13-14"/>
+    </svg>
+  </div>
+
+  <h1 class="success-title">You're all booked!</h1>
+  <p class="success-subtitle">A confirmation email with your Google Meet link will arrive within 15 minutes.</p>
+
+  <div class="booking-card" id="booking-summary"></div>
+
+  <div class="actions">
+    <a href="bookings.html" class="btn btn-primary btn-full btn-pill">View My Bookings</a>
+    <a href="index.html"    class="btn btn-outline btn-full btn-pill">Back to Therapists</a>
+  </div>
+
+</div>
+
+<script>
+// Show loading for 1.8s then success
+setTimeout(() => {
+  document.getElementById('loading-state').style.display = 'none';
+  document.getElementById('success-state').style.display  = 'flex';
+
+  const booking = JSON.parse(sessionStorage.getItem('healyou_latest') || 'null');
+  if (!booking) return;
+
+  const d = new Date(booking.date + 'T00:00:00');
+  const days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const dateStr = `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`;
+
+  document.getElementById('booking-summary').innerHTML = `
+    <div class="booking-card-header">
+      <img src="${booking.therapistPhoto}" alt="${booking.therapistName}"
+           style="width:44px;height:44px;border-radius:10px;object-fit:cover;object-position:center top;flex-shrink:0;">
+      <div>
+        <p style="font-family:'Noto Serif',serif;font-size:16px;font-weight:700;color:var(--text-1);">${booking.therapistName}</p>
+        <p class="booking-id">Booking #${booking.id}</p>
+      </div>
+      <span class="badge badge-status-upcoming" style="margin-left:auto;">Upcoming</span>
+    </div>
+    <div class="booking-card-body">
+      <div class="booking-detail-row">
+        <span class="booking-detail-label">Date</span>
+        <span class="booking-detail-value">${dateStr}</span>
+      </div>
+      <div class="booking-detail-row">
+        <span class="booking-detail-label">Time</span>
+        <span class="booking-detail-value">${booking.time}</span>
+      </div>
+      <div class="booking-detail-row">
+        <span class="booking-detail-label">Duration</span>
+        <span class="booking-detail-value">60 minutes</span>
+      </div>
+      <div class="booking-detail-row">
+        <span class="booking-detail-label">Format</span>
+        <span class="booking-detail-value">Online (Google Meet)</span>
+      </div>
+      <div class="booking-detail-row">
+        <span class="booking-detail-label">Total Paid</span>
+        <span class="booking-detail-value green">NT$${booking.price.toLocaleString()}</span>
+      </div>
+    </div>
+  `;
+}, 1800);
+</script>
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HealYou — My Bookings</title>
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    /* ── Booking item ── */
+    .booking-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px 18px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      transition: box-shadow .15s, border-color .15s, transform .1s;
+    }
+    .booking-item:hover { box-shadow: var(--shadow-md); border-color: var(--primary-border); transform: translateY(-1px); }
+
+    .booking-item-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .booking-item-info { flex: 1; min-width: 0; }
+    .booking-item-name {
+      font-family: 'Noto Serif', serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-1);
+      margin-bottom: 3px;
+    }
+    .booking-item-title { font-size: 13px; color: var(--text-3); margin-bottom: 8px; }
+
+    .booking-item-detail-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 20px;
+      margin-bottom: 10px;
+    }
+    .booking-detail-chip {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 13px;
+      color: var(--text-2);
+    }
+    .booking-detail-chip svg { color: var(--text-3); flex-shrink: 0; }
+
+    .booking-item-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .booking-price { font-size: 15px; font-weight: 700; color: var(--primary); font-family: 'Noto Serif', serif; }
+
+    /* ── Re-book button ── */
+    .btn-rebook {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--primary-light);
+      background: var(--primary-pale);
+      border: 1px solid var(--primary-border);
+      padding: 6px 12px;
+      border-radius: var(--r-lg);
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: background .15s;
+    }
+    .btn-rebook:hover { background: var(--primary-border); }
+
+    /* ── Page header ── */
+    .page-title {
+      font-family: 'Noto Serif', serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--primary);
+      padding: 20px 0 4px;
+    }
+    .page-subtitle { font-size: 14px; color: var(--text-3); margin-bottom: 20px; }
+  </style>
+</head>
+<body class="page-offset">
+
+<header class="header">
+  <div class="header-left">
+    <a href="index.html" class="logo">HealYou</a>
+    <div class="logo-sep"></div>
+    <span class="header-sub">My Bookings</span>
+  </div>
+  <nav class="header-nav">
+    <a href="index.html" class="header-link">Browse Therapists</a>
+  </nav>
+</header>
+
+<div class="page-wrap">
+
+  <h1 class="page-title">My Bookings</h1>
+  <p class="page-subtitle">Manage and review your sessions</p>
+
+  <!-- Tabs -->
+  <div class="tabs" role="tablist">
+    <button class="tab active" onclick="switchTab('upcoming', this)">Upcoming</button>
+    <button class="tab"        onclick="switchTab('completed', this)">Completed</button>
+    <button class="tab"        onclick="switchTab('cancelled', this)">Cancelled</button>
+  </div>
+
+  <!-- Lists -->
+  <div id="tab-upcoming"></div>
+  <div id="tab-completed" style="display:none;"></div>
+  <div id="tab-cancelled" style="display:none;"></div>
+
+</div>
+
+<script>
+/* ── Pre-seeded bookings ── */
+const SEED_BOOKINGS = [
+  {
+    id: 'BK1000001',
+    therapistId: 'jessica-hsu',
+    therapistName: 'Jessica Hsu',
+    therapistTitle: 'Psychologist',
+    therapistPhoto: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=160&h=160&fit=crop&crop=face',
+    date: offsetDate(5), time: '14:00', price: 2800, status: 'upcoming', bookedAt: new Date(Date.now() - 86400000 * 3).toISOString()
+  },
+  {
+    id: 'BK1000002',
+    therapistId: 'michael-wu',
+    therapistName: 'Michael Wu',
+    therapistTitle: 'Psychologist',
+    therapistPhoto: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&h=160&fit=crop&crop=face',
+    date: offsetDate(-10), time: '11:00', price: 2500, status: 'completed', bookedAt: new Date(Date.now() - 86400000 * 20).toISOString()
+  },
+  {
+    id: 'BK1000003',
+    therapistId: 'sarah-chen',
+    therapistName: 'Sarah Chen',
+    therapistTitle: 'Licensed Counselor',
+    therapistPhoto: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=160&h=160&fit=crop&crop=face',
+    date: offsetDate(-25), time: '10:00', price: 2800, status: 'completed', bookedAt: new Date(Date.now() - 86400000 * 35).toISOString()
+  },
+  {
+    id: 'BK1000004',
+    therapistId: 'amy-liu',
+    therapistName: 'Amy Liu',
+    therapistTitle: 'Licensed Counselor',
+    therapistPhoto: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=160&h=160&fit=crop&crop=face',
+    date: offsetDate(-5), time: '16:00', price: 3200, status: 'cancelled', bookedAt: new Date(Date.now() - 86400000 * 10).toISOString()
+  }
+];
+
+function offsetDate(days) {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toISOString().split('T')[0];
+}
+
+/* ── Merge with sessionStorage bookings ── */
+function getAllBookings() {
+  const stored = JSON.parse(sessionStorage.getItem('healyou_bookings') || '[]');
+  // Merge: stored bookings come first, then seeds (avoid duplicates by id)
+  const ids = new Set(stored.map(b => b.id));
+  return [...stored, ...SEED_BOOKINGS.filter(b => !ids.has(b.id))];
+}
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  const days   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`;
+}
+
+function renderBookings() {
+  const all = getAllBookings();
+  const tabs = { upcoming: [], completed: [], cancelled: [] };
+  all.forEach(b => {
+    if (tabs[b.status]) tabs[b.status].push(b);
+  });
+
+  ['upcoming','completed','cancelled'].forEach(status => {
+    const el = document.getElementById(`tab-${status}`);
+    const list = tabs[status];
+    if (!list.length) {
+      el.innerHTML = `<div class="empty-state">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round"><rect x="6" y="4" width="28" height="32" rx="3"/><path d="M13 14h14M13 20h14M13 26h8"/></svg>
+        <p>No ${status} sessions</p>
+      </div>`;
+      return;
+    }
+    el.innerHTML = list.map(b => bookingItemHTML(b)).join('');
+  });
+}
+
+function bookingItemHTML(b) {
+  const statusMap = {
+    upcoming:  { cls: 'badge-status-upcoming',  label: 'Upcoming' },
+    completed: { cls: 'badge-status-completed', label: 'Completed' },
+    cancelled: { cls: 'badge-status-cancelled', label: 'Cancelled' }
+  };
+  const s = statusMap[b.status] || statusMap.completed;
+  const rebookBtn = (b.status === 'completed' || b.status === 'cancelled')
+    ? `<button class="btn-rebook" onclick="event.stopPropagation();rebook('${b.therapistId}')">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8a6 6 0 106-6H4.5"/><path d="M2 4v4h4"/></svg>
+        Book again
+       </button>`
+    : '';
+
+  return `<div class="booking-item" onclick="goToDetail('${b.id}')">
+    <div class="booking-item-top">
+      <img src="${b.therapistPhoto}" alt="${b.therapistName}"
+           style="width:52px;height:52px;border-radius:10px;object-fit:cover;object-position:center top;flex-shrink:0;">
+      <div class="booking-item-info">
+        <p class="booking-item-name">${b.therapistName}</p>
+        <p class="booking-item-title">${b.therapistTitle}</p>
+        <div class="booking-item-detail-row">
+          <span class="booking-detail-chip">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1" y="2" width="14" height="12" rx="1.5"/><path d="M5 1v2M11 1v2M1 6h14"/></svg>
+            ${formatDate(b.date)}
+          </span>
+          <span class="booking-detail-chip">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5v4l2.5 1.5"/></svg>
+            ${b.time} · 60 min
+          </span>
+        </div>
+      </div>
+      <span class="badge ${s.cls}" style="flex-shrink:0;">${s.label}</span>
+    </div>
+    <div class="booking-item-footer">
+      <span class="booking-price">NT$${b.price.toLocaleString()}</span>
+      <div style="display:flex;align-items:center;gap:8px;">
+        ${rebookBtn}
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-3)" stroke-width="1.8" stroke-linecap="round"><path d="M6 4l4 4-4 4"/></svg>
+      </div>
+    </div>
+  </div>`;
+}
+
+function switchTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  ['upcoming','completed','cancelled'].forEach(t => {
+    document.getElementById(`tab-${t}`).style.display = t === tab ? 'block' : 'none';
+  });
+}
+
+function goToDetail(id) {
+  // In a real app, would go to order detail page. For prototype, show a toast.
+  alert(`Booking #${id}\n\nIn the full product, this would open the booking detail page where you can join the session, cancel, or contact support.`);
+}
+
+function rebook(therapistId) {
+  window.location.href = `therapist.html?id=${therapistId}`;
+}
+
+renderBookings();
+</script>
+</body>
+</html>
