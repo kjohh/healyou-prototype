@@ -293,5 +293,30 @@ body {
 /* ── Responsive ── */
 @media (min-width: 768px) {
   .page-wrap { padding: 0 40px 120px; }
-  .sticky-bar { padding: 16px 40px 20px; }
+
+  /* Align sticky bar content with page max-width so button isn't at screen edge */
+  .sticky-bar {
+    padding: 16px max(40px, calc((100vw - 820px) / 2)) 20px;
+  }
+}
+
+/* ── Desktop inline booking footer (replaces sticky bar on desktop) ── */
+.desktop-booking-footer {
+  display: none;
+}
+@media (min-width: 768px) {
+  .desktop-booking-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 0 8px;
+    border-top: 1px solid var(--border);
+    margin-top: 8px;
+  }
+  .desktop-booking-footer .sticky-bar-info { display: flex; flex-direction: column; gap: 2px; }
+  .desktop-booking-footer .sticky-price { font-size: 20px; font-weight: 700; color: var(--primary); font-family: 'Noto Serif', serif; }
+  .desktop-booking-footer .sticky-detail { font-size: 13px; color: var(--text-3); }
+  /* Hide mobile sticky bar on desktop for therapist page */
+  .sticky-bar.hide-sticky-on-desktop { display: none; }
 }

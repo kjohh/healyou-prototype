@@ -6,29 +6,51 @@
   <title>HealYou — Therapist Profile</title>
   <link rel="stylesheet" href="shared.css">
   <style>
+    /* ── Two-column page layout ── */
+    .therapist-layout {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 20px 120px;
+    }
+    @media (min-width: 768px) {
+      .therapist-layout {
+        display: flex;
+        align-items: flex-start;
+        gap: 36px;
+        padding: 0 40px 80px;
+      }
+      .therapist-main { flex: 1; min-width: 0; }
+      .booking-sidebar {
+        width: 340px;
+        flex-shrink: 0;
+        position: sticky;
+        top: 80px;
+      }
+    }
+
     /* ── Profile hero ── */
     .profile-hero {
       display: flex;
-      gap: 24px;
+      gap: 20px;
       align-items: flex-start;
       padding: 24px 0 20px;
     }
-    .profile-photo {
-      flex-shrink: 0;
-      position: relative;
-    }
-    .profile-photo img, .profile-photo .avatar-placeholder {
-      width: 110px; height: 110px;
-      border-radius: 20px;
+    .profile-photo img {
+      width: 100px; height: 100px;
+      border-radius: 16px;
       object-fit: cover;
       object-position: center top;
       display: block;
+      flex-shrink: 0;
     }
-    .profile-photo .avatar-placeholder { font-size: 40px; }
+    @media (min-width: 768px) {
+      .profile-photo img { width: 120px; height: 120px; }
+      .profile-name { font-size: 26px !important; }
+    }
     .profile-info { flex: 1; min-width: 0; }
     .profile-name {
       font-family: 'Noto Serif', Georgia, serif;
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 700;
       color: var(--text-1);
       margin-bottom: 8px;
@@ -36,7 +58,7 @@
     }
     .profile-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
     .profile-price {
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 700;
       color: var(--primary);
       margin-bottom: 12px;
@@ -68,85 +90,153 @@
       margin-top: 7px;
       flex-shrink: 0;
     }
-
-    /* ── Calendar / Time Picker ── */
-    .booking-section { padding-bottom: 12px; }
-    .day-strip-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
-    .day-strip-wrap::-webkit-scrollbar { display: none; }
-    .day-strip { display: flex; gap: 8px; padding: 4px 2px 6px; min-width: max-content; }
-    .day-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      width: 58px;
-      padding: 10px 4px;
-      border-radius: 14px;
-      border: 1.5px solid var(--border);
-      background: var(--card);
-      cursor: pointer;
-      transition: all .15s;
-      position: relative;
+    .about-grid { display: grid; gap: 20px; }
+    @media (min-width: 768px) {
+      .about-grid { grid-template-columns: 1fr 1fr; gap: 0 32px; }
     }
-    .day-btn.has-slots { border-color: var(--primary-border); }
-    .day-btn.has-slots:hover { background: var(--primary-pale); border-color: var(--cta); }
-    .day-btn.selected { background: var(--primary); border-color: var(--primary); }
-    .day-btn.disabled { opacity: 0.38; cursor: not-allowed; }
-    .day-name { font-size: 11px; font-weight: 600; letter-spacing: 0.5px; color: var(--text-3); text-transform: uppercase; }
-    .day-num  { font-size: 18px; font-weight: 700; color: var(--text-1); font-family: 'Noto Serif', serif; }
-    .day-btn.selected .day-name,
-    .day-btn.selected .day-num { color: #fff; }
-    .day-avail-dot {
-      width: 5px; height: 5px;
-      border-radius: 50%;
-      background: var(--cta);
-    }
-    .day-btn.selected .day-avail-dot { background: rgba(255,255,255,0.7); }
-
-    .time-grid-wrap { margin-top: 16px; }
-    .time-grid-title { font-size: 13px; font-weight: 600; color: var(--text-3); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-    .time-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 12px 8px;
-      border-radius: 10px;
-      border: 1.5px solid var(--border);
-      background: var(--card);
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text-1);
-      cursor: pointer;
-      transition: all .15s;
-      font-family: 'Inter', sans-serif;
-    }
-    .time-btn:hover { border-color: var(--cta); color: var(--cta); background: var(--primary-pale); }
-    .time-btn.selected { background: var(--tag-green-bg); border-color: var(--cta); color: var(--cta-dark); }
-    .no-slots-msg { font-size: 14px; color: var(--text-3); text-align: center; padding: 24px 0; }
 
     /* ── Notice box ── */
     .notice-box {
-      background: var(--primary-pale);
-      border: 1px solid var(--primary-border);
-      border-radius: var(--r-md);
-      padding: 14px 16px;
-      font-size: 13px;
-      color: var(--text-2);
-      line-height: 1.6;
+      background: var(--primary-pale); border: 1px solid var(--primary-border);
+      border-radius: var(--r-md); padding: 14px 16px;
+      font-size: 13px; color: var(--text-2); line-height: 1.6;
     }
     .notice-box strong { color: var(--primary); }
 
-    /* Desktop layout */
+    /* ── Booking sidebar card ── */
+    .booking-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+    }
+    .booking-card-header {
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .booking-card-price {
+      font-family: 'Noto Serif', serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .booking-card-price small {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--text-3);
+    }
+    .booking-card-body { padding: 16px 20px 0; }
+    .booking-card-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 10px;
+    }
+
+    /* ── Calendar ── */
+    .cal-container { margin-bottom: 16px; }
+    .cal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .cal-month-title { font-size: 15px; font-weight: 700; color: var(--text-1); }
+    .cal-nav-btn {
+      width: 28px; height: 28px; border-radius: 7px;
+      border: 1px solid var(--border); background: var(--card);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      color: var(--text-2); transition: background .15s;
+    }
+    .cal-nav-btn:hover { background: var(--primary-pale); }
+    .cal-weekdays {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      text-align: center; font-size: 11px; font-weight: 600;
+      color: var(--text-3); margin-bottom: 4px;
+    }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; }
+    .cal-day {
+      aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+      border-radius: 7px; font-size: 13px; color: var(--text-3);
+      cursor: default; transition: background .12s;
+    }
+    .cal-avail { color: var(--text-1); font-weight: 600; cursor: pointer; }
+    .cal-avail:hover { background: var(--primary-pale); }
+    .cal-today { background: #efefef !important; color: var(--text-2) !important; font-weight: 400 !important; }
+    .cal-selected { background: var(--text-1) !important; color: #fff !important; border-radius: 8px; }
+    .cal-past { opacity: 0.28; }
+
+    /* ── Time slots in sidebar ── */
+    .time-panel { margin-bottom: 16px; }
+    .time-panel-label {
+      font-size: 13px; font-weight: 600; color: var(--text-2);
+      margin-bottom: 10px; min-height: 20px;
+    }
+    .time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+    .time-btn {
+      display: flex; align-items: center; justify-content: center;
+      padding: 10px 6px; border-radius: 8px;
+      border: 1.5px solid var(--border); background: var(--card);
+      font-size: 13px; font-weight: 600; color: var(--text-1);
+      cursor: pointer; transition: all .15s; font-family: 'Inter', sans-serif;
+    }
+    .time-btn:hover { border-color: var(--cta); background: var(--primary-pale); }
+    .time-btn.selected { background: var(--tag-green-bg); border-color: var(--cta); color: var(--cta-dark); }
+
+    /* ── Sidebar CTA footer ── */
+    .booking-card-footer {
+      padding: 14px 20px 20px;
+      border-top: 1px solid var(--border);
+      margin-top: 4px;
+    }
+    .booking-card-footer .btn { width: 100%; }
+    .booking-detail-text {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-3);
+      margin-top: 8px;
+    }
+
+    /* ── Mobile: booking section inline ── */
+    .mobile-booking-section {
+      padding-bottom: 12px;
+    }
+    .mobile-booking-section .booking-picker {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    /* Mobile calendar full-width */
+    .mobile-cal-container {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 14px;
+      background: var(--card);
+    }
+    .mobile-cal-container .cal-day { font-size: 14px; }
+    .mobile-cal-container .cal-weekdays { font-size: 13px; }
+    .mobile-time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .mobile-time-btn {
+      display: flex; align-items: center; justify-content: center;
+      padding: 14px 8px; border-radius: 10px;
+      border: 1.5px solid var(--border); background: var(--card);
+      font-size: 15px; font-weight: 600; color: var(--text-1);
+      cursor: pointer; transition: all .15s; font-family: 'Inter', sans-serif;
+    }
+    .mobile-time-btn:hover { border-color: var(--cta); background: var(--primary-pale); }
+    .mobile-time-btn.selected { background: var(--tag-green-bg); border-color: var(--cta); color: var(--cta-dark); }
+
+    /* Hide/show based on viewport */
     @media (min-width: 768px) {
-      .profile-photo img, .profile-photo .avatar-placeholder { width: 130px; height: 130px; }
-      .profile-name { font-size: 28px; }
-      .about-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0 40px;
-      }
-      .time-grid { grid-template-columns: repeat(4, 1fr); }
+      .mobile-booking-section { display: none; }
+      .sticky-bar { display: none !important; }
+      /* Hide price in profile hero on desktop (shown in sidebar) */
+      .profile-price { display: none; }
+    }
+    @media (max-width: 767px) {
+      .booking-sidebar { display: none; }
     }
   </style>
 </head>
@@ -163,75 +253,137 @@
   </nav>
 </header>
 
-<div class="page-wrap">
+<div class="therapist-layout">
 
-  <!-- Breadcrumb -->
-  <nav class="breadcrumb">
-    <a href="index.html">
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10 12L6 8l4-4"/></svg>
-      All Therapists
-    </a>
-    <span class="breadcrumb-sep">/</span>
-    <span class="breadcrumb-current" id="bc-name">…</span>
-  </nav>
+  <!-- ── Left: profile content ── -->
+  <div class="therapist-main">
 
-  <!-- Profile Hero -->
-  <section class="profile-hero">
-    <div class="profile-photo">
-      <img id="profile-img" src="" alt="" class="avatar avatar-lg">
-    </div>
-    <div class="profile-info">
-      <h1 class="profile-name" id="profile-name">—</h1>
-      <div class="profile-badges" id="profile-badges"></div>
-      <p class="profile-price" id="profile-price"></p>
-      <div class="pill-row" id="profile-specialties"></div>
-    </div>
-  </section>
+    <nav class="breadcrumb">
+      <a href="index.html">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10 12L6 8l4-4"/></svg>
+        All Therapists
+      </a>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-current" id="bc-name">…</span>
+    </nav>
 
-  <hr class="section-divider">
-
-  <!-- About -->
-  <section>
-    <h2 class="section-title">About</h2>
-    <p class="about-text" id="about-bio"></p>
-
-    <div class="about-grid">
-      <div id="edu-section">
-        <h3 class="section-title" style="font-size:15px;margin-bottom:10px;">Education</h3>
-        <ul class="info-list" id="edu-list"></ul>
+    <!-- Profile Hero -->
+    <section class="profile-hero">
+      <div class="profile-photo">
+        <img id="profile-img" src="" alt="">
       </div>
-      <div id="exp-section" style="margin-top:20px;">
-        <h3 class="section-title" style="font-size:15px;margin-bottom:10px;">Experience</h3>
-        <ul class="info-list" id="exp-list"></ul>
+      <div class="profile-info">
+        <h1 class="profile-name" id="profile-name">—</h1>
+        <div class="profile-badges" id="profile-badges"></div>
+        <p class="profile-price" id="profile-price"></p>
+        <div class="pill-row" id="profile-specialties"></div>
       </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- About -->
+    <section>
+      <h2 class="section-title">About</h2>
+      <p class="about-text" id="about-bio"></p>
+
+      <div class="about-grid">
+        <div>
+          <h3 class="section-title" style="font-size:15px;margin-bottom:10px;">Education</h3>
+          <ul class="info-list" id="edu-list"></ul>
+        </div>
+        <div>
+          <h3 class="section-title" style="font-size:15px;margin-bottom:10px;">Experience</h3>
+          <ul class="info-list" id="exp-list"></ul>
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- Mobile booking section (hidden on desktop) -->
+    <section class="mobile-booking-section">
+      <h2 class="section-title">Select a Session Time</h2>
+      <div class="booking-picker">
+
+        <div class="mobile-cal-container">
+          <div class="cal-header">
+            <button class="cal-nav-btn" onclick="prevMonth()" aria-label="Previous month">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 12L6 8l4-4"/></svg>
+            </button>
+            <span class="cal-month-title" id="mobile-cal-title"></span>
+            <button class="cal-nav-btn" onclick="nextMonth()" aria-label="Next month">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 4l4 4-4 4"/></svg>
+            </button>
+          </div>
+          <div class="cal-weekdays">
+            <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+          </div>
+          <div class="cal-grid" id="mobile-cal-grid"></div>
+        </div>
+
+        <div>
+          <p class="time-panel-label" id="mobile-time-label">Select a date to see available times</p>
+          <div class="mobile-time-grid" id="mobile-time-grid"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <div class="notice-box" style="margin-bottom:20px;">
+      <strong>Cancellation Policy:</strong> Free cancellation up to 24 hours before your session.
+      Sessions are conducted via Google Meet. A link will be sent to your email after booking.
     </div>
-  </section>
 
-  <hr class="section-divider">
-
-  <!-- Booking -->
-  <section class="booking-section" id="booking">
-    <h2 class="section-title">Select a Session Time</h2>
-    <div class="day-strip-wrap">
-      <div class="day-strip" id="day-strip"></div>
-    </div>
-    <div class="time-grid-wrap" id="time-grid-wrap" style="display:none;">
-      <p class="time-grid-title" id="time-grid-label"></p>
-      <div class="time-grid" id="time-grid"></div>
-    </div>
-  </section>
-
-  <hr class="section-divider">
-
-  <!-- Notice -->
-  <div class="notice-box">
-    <strong>Cancellation Policy:</strong> Free cancellation up to 24 hours before your session.
-    Sessions are conducted via Google Meet. A link will be sent to your email after booking.
   </div>
+
+  <!-- ── Right: sticky booking sidebar (desktop only) ── -->
+  <aside class="booking-sidebar">
+    <div class="booking-card">
+
+      <div class="booking-card-header">
+        <div class="booking-card-price" id="sidebar-price">NT$—</div>
+        <div style="font-size:13px;color:var(--text-3);margin-top:2px;">per session · 60 min · Online</div>
+      </div>
+
+      <div class="booking-card-body">
+        <p class="booking-card-label">Select a Date</p>
+
+        <div class="cal-container">
+          <div class="cal-header">
+            <button class="cal-nav-btn" onclick="prevMonth()" aria-label="Previous month">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 12L6 8l4-4"/></svg>
+            </button>
+            <span class="cal-month-title" id="cal-title"></span>
+            <button class="cal-nav-btn" onclick="nextMonth()" aria-label="Next month">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 4l4 4-4 4"/></svg>
+            </button>
+          </div>
+          <div class="cal-weekdays">
+            <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+        </div>
+
+        <div class="time-panel" id="time-panel">
+          <p class="time-panel-label" id="time-panel-label">Select a date to see available times</p>
+          <div class="time-grid" id="time-grid"></div>
+        </div>
+      </div>
+
+      <div class="booking-card-footer">
+        <button class="btn btn-primary btn-pill" id="sidebar-book-btn" disabled onclick="goToCheckout()">
+          Select a time
+        </button>
+        <p class="booking-detail-text" id="sidebar-detail">Choose a date and time to continue</p>
+      </div>
+
+    </div>
+  </aside>
 
 </div>
 
-<!-- Sticky footer -->
+<!-- Mobile sticky bar -->
 <div class="sticky-bar" id="sticky-bar">
   <div class="sticky-bar-info">
     <span class="sticky-price" id="footer-price">NT$—</span>
@@ -264,8 +416,7 @@ const THERAPISTS = {
     specialties: ['Anxiety & Stress', 'Expat Life', 'Career Transitions', 'Work-Life Balance', 'Cultural Identity'],
     price: 2800,
     bio: `I work with international professionals, expats, and anyone navigating life in a new culture or language. Over 8 years of practice, I've supported clients through career transitions, burnout, relationship strain, and the quiet loneliness that can come with living far from home.\n\nMy approach is collaborative and grounded in evidence-based methods — primarily CBT and ACT — adapted to each person's specific context. Sessions are fully in English, and I understand the particular pressures of working in a predominantly Mandarin-speaking environment while trying to maintain a sense of self.\n\nWhether you're newly arrived in Taiwan or have been here for years, I offer a space where you don't have to translate your feelings.`,
-    photo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop&crop=face',
-    availPattern: 'A'
+    photo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop&crop=face'
   },
   'michael-wu': {
     id: 'michael-wu',
@@ -283,33 +434,31 @@ const THERAPISTS = {
       'Trauma-informed practitioner',
       'Trained in Schema Therapy and EMDR'
     ],
-    specialties: ['Depression', 'Relationships', "Men's Mental Health", 'Self-Worth', 'Grief'],
+    specialties: ['Depression', 'Relationships', 'Men\'s Mental Health', 'Self-Worth', 'Grief'],
     price: 2500,
     bio: `After training and working in the UK's NHS, I returned to Taiwan with a strong belief that mental health care should be accessible and stigma-free — especially for men, who often find it harder to seek help.\n\nI work primarily with depression, relational difficulties, and grief. My style is warm and direct: I won't just reflect your words back at you, but will actively help you understand patterns and work toward change. Sessions are in English, and I'm equally comfortable with British, American, or Taiwanese-English communication styles.\n\nIf you've been telling yourself you should be fine by now — let's talk.`,
-    photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face',
-    availPattern: 'B'
+    photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face'
   },
   'amy-liu': {
     id: 'amy-liu',
     name: 'Amy Liu',
     title: 'Licensed Counselor',
     license: '002015',
-    languages: 'English · Mandarin · Japanese',
+    languages: 'English · Mandarin · Cantonese',
     education: [
-      'New York University, M.A. Art Therapy',
-      'Fu Jen Catholic University, B.A. Applied Psychology'
+      'University of Hong Kong, M.Soc.Sc. Counseling',
+      'National Sun Yat-sen University, B.A. Education'
     ],
     experience: [
-      'Trilingual therapist with international clientele across Asia',
-      'Specialist in trauma, PTSD, and somatic approaches',
-      'Art therapy facilitator for corporate and clinical groups',
-      '10+ years of cross-cultural therapy experience'
+      '10 years of practice across Hong Kong, Singapore, and Taiwan',
+      'Specialist in anxiety, perfectionism, and academic burnout',
+      'Experience with multicultural and third-culture clients',
+      'Trained in Dialectical Behavior Therapy (DBT)'
     ],
-    specialties: ['Trauma & PTSD', 'Art Therapy', "Women's Issues", 'Identity', 'Cross-Cultural Relationships'],
+    specialties: ['Anxiety', 'Perfectionism', 'Burnout', 'Academic Stress', 'Identity'],
     price: 3200,
-    bio: `I use creative arts and talk therapy to help clients access parts of themselves that words alone can't always reach. This isn't about making art — it's about using creative processes as a doorway into deeper self-understanding.\n\nI work primarily with trauma, grief, and identity questions — particularly for people navigating between cultures or in cross-cultural relationships. Having lived and worked in New York, Tokyo, and Taipei, I bring genuine personal experience to these conversations.\n\nSessions are available in English, Mandarin, or Japanese, or any combination. I work with individuals and occasionally couples.`,
-    photo: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop&crop=face',
-    availPattern: 'C'
+    bio: `I specialize in working with high-achieving individuals who are exhausted by the pressure to always perform. Whether you're a student, professional, or parent — perfectionism and anxiety often look productive from the outside, but feel suffocating from within.\n\nHaving lived and worked across Hong Kong, Singapore, and Taiwan, I understand the specific cultural pressures that shape how people in this region experience mental health. My approach blends DBT skills with compassion-focused techniques.\n\nSessions are available in English, Mandarin, or Cantonese — whichever feels most natural to you.`,
+    photo: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop&crop=face'
   },
   'david-chang': {
     id: 'david-chang',
@@ -318,20 +467,19 @@ const THERAPISTS = {
     license: '004102',
     languages: 'English · Mandarin',
     education: [
-      'NTNU, M.A. Counseling Psychology',
-      'NTHU, B.S. Industrial Engineering (career pivot)'
+      'Boston University, Ed.D. Counseling Psychology',
+      'Fu Jen Catholic University, B.A. Psychology'
     ],
     experience: [
-      'Former software engineer — understands tech industry pressures firsthand',
-      'Specialist in ADHD, executive dysfunction, and workplace burnout',
-      'Certified in CBT for ADHD (Barkley model)',
-      '5 years in university counseling centers'
+      '14 years of experience across university and private settings',
+      'Specialist in relationship counseling and life transitions',
+      'Published researcher in cross-cultural adaptation',
+      'Experienced with LGBTQ+ affirming therapy'
     ],
-    specialties: ['ADHD', 'Workplace Stress', 'Young Adults', 'Burnout', 'Perfectionism'],
-    price: 2400,
-    bio: `I came to counseling after a career in engineering, which means I genuinely understand what it feels like to be in high-performance environments, to struggle with focus and follow-through, and to wonder if something is wrong with you when the systems around you seem to work fine for everyone else.\n\nI work mainly with ADHD, burnout, and perfectionism in professionals and young adults. I take a practical, non-judgmental approach — we'll identify what's actually happening, build systems that work for your brain, and address the underlying emotional patterns that keep you stuck.\n\nAll sessions in English. I work well with engineers, designers, and people who want a therapist who won't be confused by how you actually think.`,
-    photo: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop&crop=face',
-    availPattern: 'B'
+    specialties: ['Relationships', 'Life Transitions', 'LGBTQ+ Affirming', 'Cultural Adjustment', 'Family'],
+    price: 3500,
+    bio: `I've spent fourteen years working with people at crossroads — career changes, relationship shifts, identity questions, and the kind of quiet disorientation that comes from living between cultures.\n\nMy training is psychodynamic, but I work in a practical, collaborative way. I'm interested in what's happening beneath the surface, but I also care about what you can do differently next week. I work in English and Mandarin, and I'm experienced in LGBTQ+ affirming therapy.\n\nI believe the therapeutic relationship itself is part of the healing — which means I show up as a real person, not a blank screen.`,
+    photo: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop&crop=face'
   },
   'jessica-hsu': {
     id: 'jessica-hsu',
@@ -340,54 +488,44 @@ const THERAPISTS = {
     license: '005487',
     languages: 'English · Mandarin',
     education: [
-      'UC Berkeley, M.A. Psychology',
-      'National Sun Yat-sen University, B.A. Psychology'
+      'UCLA, M.A. Clinical Psychology',
+      'National Taiwan University, B.A. Psychology'
     ],
     experience: [
-      'Over 10 years bridging Eastern and Western therapeutic models',
-      'Specialist in couples therapy and family dynamics',
-      'Trained in Gottman Method Couples Therapy (Level 2)',
+      'Couples therapist in both private practice and community settings',
+      'Trained in Gottman Method and Emotionally Focused Therapy (EFT)',
+      'Adjunct faculty at NTU, teaching relationship psychology',
       'Workshop facilitator for communication and intimacy'
     ],
     specialties: ['Couples Therapy', 'Family Conflicts', 'Life Purpose', 'Communication', 'Intimacy'],
     price: 2800,
     bio: `I work with individuals and couples who want to improve how they relate — to each other, to their families, and to themselves. Much of my work sits at the intersection of Eastern family expectations and Western frameworks for individual wellbeing, which can create real tension for people raised between cultures.\n\nMy approach draws on the Gottman Method, attachment theory, and narrative therapy. I'm direct, warm, and will gently call out patterns I notice — always in service of the relationship or the person you want to become.\n\nSessions with couples are available in English, Mandarin, or bilingual mix. Individual sessions in English.`,
-    photo: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=300&fit=crop&crop=face',
-    availPattern: 'A'
+    photo: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=300&fit=crop&crop=face'
   }
 };
 
-/* ─── Availability Patterns ─── */
-function getAvailability(pattern) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const result = {};
-  const patterns = {
-    A: { offsets: [1,2,4,5,7,9,11,12,14], even: ['09:00','10:00','11:00','14:00','15:00'], odd: ['10:00','11:00','13:00','16:00','17:00'] },
-    B: { offsets: [1,3,4,6,8,10,11,13],   even: ['10:00','13:00','15:00','17:00'],        odd: ['09:00','11:00','14:00','16:00'] },
-    C: { offsets: [2,3,5,6,9,10,12,13],   even: ['10:00','11:00','15:00','16:00'],        odd: ['09:00','13:00','14:00','17:00'] }
-  };
-  const p = patterns[pattern] || patterns.A;
-  p.offsets.forEach(offset => {
-    const d = new Date(today);
-    d.setDate(today.getDate() + offset);
-    const key = d.toISOString().split('T')[0];
-    result[key] = offset % 2 === 0 ? p.even : p.odd;
-  });
-  return result;
+/* ─── Fixed time slots ─── */
+const DEFAULT_SLOTS = ['09:00','10:00','11:00','13:00','14:00','15:00','16:00','17:00'];
+
+function localKey(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
 /* ─── State ─── */
 let therapist = null;
-let availability = {};
 let selectedDate = null;
 let selectedTime = null;
+let calMonth = new Date();
+calMonth.setDate(1);
+calMonth.setHours(0,0,0,0);
+
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MONTH_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 /* ─── Init ─── */
 const params = new URLSearchParams(window.location.search);
 const id = params.get('id') || 'sarah-chen';
 therapist = THERAPISTS[id] || THERAPISTS['sarah-chen'];
-availability = getAvailability(therapist.availPattern);
 
 renderProfile();
 renderCalendar();
@@ -405,6 +543,8 @@ function renderProfile() {
   document.getElementById('profile-name').textContent = therapist.name;
   document.getElementById('profile-price').innerHTML =
     `NT$${therapist.price.toLocaleString()} <small>/ session · 60 min</small>`;
+  document.getElementById('sidebar-price').textContent =
+    `NT$${therapist.price.toLocaleString()}`;
 
   const badges = document.getElementById('profile-badges');
   badges.innerHTML = `
@@ -418,110 +558,157 @@ function renderProfile() {
     </span>
   `;
 
-  const specEl = document.getElementById('profile-specialties');
-  specEl.innerHTML = therapist.specialties.map(s => `<span class="pill">${s}</span>`).join('');
+  document.getElementById('profile-specialties').innerHTML =
+    therapist.specialties.map(s => `<span class="pill">${s}</span>`).join('');
 
   document.getElementById('about-bio').innerHTML =
     therapist.bio.split('\n\n').map(p => `<p style="margin-bottom:14px">${p}</p>`).join('');
 
-  const eduList = document.getElementById('edu-list');
-  eduList.innerHTML = therapist.education.map(e => `<li>${e}</li>`).join('');
-
-  const expList = document.getElementById('exp-list');
-  expList.innerHTML = therapist.experience.map(e => `<li>${e}</li>`).join('');
+  document.getElementById('edu-list').innerHTML =
+    therapist.education.map(e => `<li>${e}</li>`).join('');
+  document.getElementById('exp-list').innerHTML =
+    therapist.experience.map(e => `<li>${e}</li>`).join('');
 }
 
-/* ─── Render Calendar ─── */
+/* ─── Render Calendar (updates both desktop sidebar + mobile) ─── */
 function renderCalendar() {
-  const strip = document.getElementById('day-strip');
-  const today = new Date();
-  today.setHours(0,0,0,0);
-  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  strip.innerHTML = '';
+  const today = new Date(); today.setHours(0,0,0,0);
+  const year  = calMonth.getFullYear();
+  const month = calMonth.getMonth();
 
-  for (let i = 1; i <= 21; i++) {
-    const d = new Date(today);
-    d.setDate(today.getDate() + i);
-    const key = d.toISOString().split('T')[0];
-    const hasSlots = !!availability[key];
-    const isSelected = key === selectedDate;
+  const titleText = `${MONTH_NAMES[month]} ${year}`;
+  ['cal-title','mobile-cal-title'].forEach(elId => {
+    const el = document.getElementById(elId);
+    if (el) el.textContent = titleText;
+  });
 
-    const btn = document.createElement('button');
-    btn.className = 'day-btn' + (hasSlots ? ' has-slots' : ' disabled') + (isSelected ? ' selected' : '');
-    btn.disabled = !hasSlots;
-    btn.innerHTML = `
-      <span class="day-name">${days[d.getDay()]}</span>
-      <span class="day-num">${d.getDate()}</span>
-      ${hasSlots ? '<span class="day-avail-dot"></span>' : '<span style="width:5px;height:5px;display:block;"></span>'}
-      <span style="font-size:10px;color:var(--text-3);${isSelected ? 'color:rgba(255,255,255,0.7)' : ''}">${months[d.getMonth()]}</span>
-    `;
-    if (hasSlots) {
-      btn.addEventListener('click', () => selectDate(key, d));
-    }
-    strip.appendChild(btn);
+  const firstDay    = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  let html = '';
+  for (let i = 0; i < firstDay; i++) html += '<div class="cal-day"></div>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date    = new Date(year, month, d);
+    const key     = localKey(date);
+    const isPast  = date < today;
+    const isToday = date.getTime() === today.getTime();
+    const hasSl   = !isPast;
+    const isSel   = key === selectedDate;
+
+    let cls = 'cal-day';
+    if (isPast)  cls += ' cal-past';
+    if (isToday) cls += ' cal-today';
+    if (hasSl)   cls += ' cal-avail';
+    if (isSel)   cls += ' cal-selected';
+
+    const onclick = hasSl ? `onclick="selectDate('${key}')"` : '';
+    html += `<div class="${cls}" ${onclick}>${d}</div>`;
   }
+
+  ['cal-grid','mobile-cal-grid'].forEach(elId => {
+    const el = document.getElementById(elId);
+    if (el) el.innerHTML = html;
+  });
+}
+
+function prevMonth() {
+  calMonth.setMonth(calMonth.getMonth() - 1);
+  renderCalendar();
+}
+function nextMonth() {
+  calMonth.setMonth(calMonth.getMonth() + 1);
+  renderCalendar();
 }
 
 /* ─── Select Date ─── */
-function selectDate(dateKey, dateObj) {
+function selectDate(dateKey) {
   selectedDate = dateKey;
   selectedTime = null;
   renderCalendar();
-  renderTimeSlots(dateKey, dateObj);
+  renderTimeSlots(dateKey);
   updateFooter();
 }
 
 /* ─── Render Time Slots ─── */
-function renderTimeSlots(dateKey, dateObj) {
-  const wrap = document.getElementById('time-grid-wrap');
-  const label = document.getElementById('time-grid-label');
+function renderTimeSlots(dateKey) {
+  const d = new Date(dateKey + 'T00:00:00');
+  const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const labelText = `${dayNames[d.getDay()]}, ${MONTH_SHORT[d.getMonth()]} ${d.getDate()} — ${DEFAULT_SLOTS.length} times available`;
+
+  // Desktop sidebar
+  const label = document.getElementById('time-panel-label');
+  if (label) label.textContent = labelText;
   const grid = document.getElementById('time-grid');
-  const slots = availability[dateKey] || [];
-
-  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  label.textContent = `${days[dateObj.getDay()]}, ${months[dateObj.getMonth()]} ${dateObj.getDate()} — ${slots.length} times available`;
-
-  grid.innerHTML = '';
-  slots.forEach(time => {
-    const btn = document.createElement('button');
-    btn.className = 'time-btn' + (time === selectedTime ? ' selected' : '');
-    btn.textContent = time;
-    btn.addEventListener('click', () => {
-      selectedTime = time;
-      document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      updateFooter();
+  if (grid) {
+    grid.innerHTML = '';
+    DEFAULT_SLOTS.forEach(time => {
+      const btn = document.createElement('button');
+      btn.className = 'time-btn' + (time === selectedTime ? ' selected' : '');
+      btn.textContent = time;
+      btn.addEventListener('click', () => {
+        selectedTime = time;
+        document.querySelectorAll('.time-btn, .mobile-time-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        updateFooter();
+      });
+      grid.appendChild(btn);
     });
-    grid.appendChild(btn);
-  });
+  }
 
-  wrap.style.display = 'block';
-  wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  // Mobile
+  const mLabel = document.getElementById('mobile-time-label');
+  if (mLabel) mLabel.textContent = labelText;
+  const mGrid = document.getElementById('mobile-time-grid');
+  if (mGrid) {
+    mGrid.innerHTML = '';
+    DEFAULT_SLOTS.forEach(time => {
+      const btn = document.createElement('button');
+      btn.className = 'mobile-time-btn' + (time === selectedTime ? ' selected' : '');
+      btn.textContent = time;
+      btn.addEventListener('click', () => {
+        selectedTime = time;
+        document.querySelectorAll('.time-btn, .mobile-time-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        updateFooter();
+      });
+      mGrid.appendChild(btn);
+    });
+  }
 }
 
 /* ─── Update Footer ─── */
 function updateFooter() {
-  const btn = document.getElementById('book-btn');
-  const detail = document.getElementById('footer-detail');
-  document.getElementById('footer-price').textContent = `NT$${therapist.price.toLocaleString()}`;
+  const priceStr = `NT$${therapist.price.toLocaleString()}`;
 
+  let detailStr, btnLabel, enabled;
   if (selectedDate && selectedTime) {
-    const d = new Date(selectedDate);
-    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    detail.textContent = `${months[d.getMonth()]} ${d.getDate()} at ${selectedTime} · 60 min`;
-    btn.disabled = false;
-    btn.textContent = 'Proceed to Payment →';
+    const d = new Date(selectedDate + 'T00:00:00');
+    detailStr = `${MONTH_SHORT[d.getMonth()]} ${d.getDate()} at ${selectedTime} · 60 min`;
+    btnLabel  = 'Proceed to Payment →';
+    enabled   = true;
   } else if (selectedDate) {
-    detail.textContent = '60 min · Select a time slot above';
-    btn.disabled = true;
-    btn.textContent = 'Select a time slot';
+    detailStr = 'Select a time to continue';
+    btnLabel  = 'Select a time';
+    enabled   = false;
   } else {
-    detail.textContent = '60 min · Select a date above';
-    btn.disabled = true;
-    btn.textContent = 'Select a time';
+    detailStr = 'Choose a date and time to continue';
+    btnLabel  = 'Select a time';
+    enabled   = false;
   }
+
+  // Sidebar
+  const sidebarBtn = document.getElementById('sidebar-book-btn');
+  if (sidebarBtn) { sidebarBtn.disabled = !enabled; sidebarBtn.textContent = btnLabel; }
+  const sidebarDetail = document.getElementById('sidebar-detail');
+  if (sidebarDetail) sidebarDetail.textContent = detailStr;
+
+  // Mobile sticky bar
+  const footerPrice = document.getElementById('footer-price');
+  if (footerPrice) footerPrice.textContent = priceStr;
+  const footerDetail = document.getElementById('footer-detail');
+  if (footerDetail) footerDetail.textContent = detailStr;
+  const mobileBtn = document.getElementById('book-btn');
+  if (mobileBtn) { mobileBtn.disabled = !enabled; mobileBtn.textContent = btnLabel; }
 }
 
 /* ─── Go to Checkout ─── */
