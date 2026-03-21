@@ -1,0 +1,1927 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>企業方案 — 聊心茶室</title>
+<style>
+  /* ===== RESET & BASE ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, 'PingFang TC', 'Noto Sans TC', sans-serif;
+    color: #2D2416;
+    background: #FEFAF5;
+    line-height: 1.6;
+  }
+
+  /* ===== TOKENS ===== */
+  :root {
+    --warm-primary: #7b9363;
+    --warm-primary-dark: #4B6741;
+    --warm-primary-light: #a8c49a;
+    --warm-primary-pale: #eef5eb;
+    --warm-green: #5a9177;
+    --warm-green-light: #e0f0e9;
+    --warm-sage: #8FAF8F;
+    --warm-gold: #C9973E;
+    --warm-gold-light: #FBF0DC;
+    --neutral-50: #FEFAF5;
+    --neutral-100: #F0EDE8;
+    --neutral-200: #E0D8CC;
+    --neutral-600: #7A6555;
+    --neutral-800: #3D2E20;
+    --text-main: #2D2416;
+    --text-sub: #7A6555;
+    --radius-sm: 8px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --shadow-sm: 0 2px 8px rgba(45,36,22,0.08);
+    --shadow-md: 0 4px 20px rgba(45,36,22,0.12);
+    --shadow-lg: 0 8px 40px rgba(45,36,22,0.15);
+  }
+
+  /* ===== NAV ===== */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: #fffff7;
+    border-bottom: 1px solid #ededed;
+    padding: 0 32px;
+    height: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-logo {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 17px; font-weight: 700; color: #1a1a1a;
+    text-decoration: none; letter-spacing: -0.01em;
+  }
+  .nav-links {
+    display: flex; align-items: center; gap: 4px;
+    list-style: none;
+  }
+  .nav-links a {
+    color: #1a1a1a; text-decoration: none; font-size: 15px; font-weight: 500;
+    padding: 6px 12px; border-radius: 8px;
+    transition: background 0.15s;
+  }
+  .nav-links a:hover { background: rgba(0,0,0,0.05); }
+  .nav-enterprise { font-weight: 700; color: #4B6741 !important; }
+  .nav-gift {
+    display: flex; align-items: center; gap: 5px;
+    color: #4B6741 !important; font-weight: 500;
+  }
+  .nav-login {
+    background: #7b9363 !important; color: white !important;
+    border-radius: 8px; font-weight: 600 !important;
+    padding: 6px 14px !important;
+    transition: background 0.2s !important;
+  }
+  .nav-login:hover { background: #5a7548 !important; }
+  /* ===== FLOAT ANIMATIONS ===== */
+  @keyframes floatA {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-14px); }
+  }
+  @keyframes floatB {
+    0%, 100% { transform: translateY(-6px); }
+    50% { transform: translateY(8px); }
+  }
+  @keyframes floatC {
+    0%, 100% { transform: translateY(0px) translateX(0px); }
+    40% { transform: translateY(-10px) translateX(5px); }
+    80% { transform: translateY(5px) translateX(-4px); }
+  }
+  @keyframes heroBarGrow {
+    from { transform: scaleY(0); opacity: 0; }
+    to { transform: scaleY(1); opacity: 0.75; }
+  }
+  @keyframes satPulse {
+    0%, 100% { box-shadow: 0 8px 32px rgba(45,36,22,0.12); }
+    50% { box-shadow: 0 12px 40px rgba(75,103,65,0.2); }
+  }
+
+  /* ===== SECTION COMMON ===== */
+  section { padding: 96px 0; }
+  .container { max-width: 1140px; margin: 0 auto; padding: 0 32px; }
+  .section-tag {
+    display: inline-block; background: var(--warm-primary-pale);
+    color: var(--warm-primary-dark); font-size: 13px; font-weight: 600;
+    padding: 4px 14px; border-radius: 100px; margin-bottom: 16px;
+    letter-spacing: .04em;
+  }
+  .section-tag.green { background: var(--warm-green-light); color: var(--warm-green); }
+  .section-tag.gold { background: var(--warm-gold-light); color: var(--warm-gold); }
+  h2.section-title {
+    font-size: 36px; font-weight: 800; line-height: 1.3;
+    color: var(--neutral-800); margin-bottom: 12px;
+  }
+  .section-sub {
+    font-size: 17px; color: var(--text-sub); max-width: 600px;
+    margin-bottom: 56px; line-height: 1.7;
+  }
+
+  /* ===== HERO ===== */
+  #hero {
+    min-height: 88vh; display: flex; align-items: center;
+    background: #fffff7;
+    background-image:
+      radial-gradient(circle at 70% 20%, rgba(123,147,99,0.10) 0%, transparent 50%),
+      radial-gradient(circle at 20% 80%, rgba(106,158,127,0.12) 0%, transparent 45%),
+      radial-gradient(#d5cfc4 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 28px 28px;
+    position: relative; overflow: hidden; padding: 80px 0 60px;
+  }
+  .hero-inner {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 56px; align-items: center; position: relative; z-index: 1;
+  }
+  /* Left */
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(75,103,65,0.08); border: 1px solid rgba(75,103,65,0.2);
+    border-radius: 100px; padding: 5px 14px 5px 10px;
+    font-size: 13px; font-weight: 600; color: #4B6741;
+    margin-bottom: 24px;
+  }
+  .eyebrow-dot {
+    width: 8px; height: 8px; background: #7b9363;
+    border-radius: 50%; animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .6; transform: scale(1.3); }
+  }
+  h1.hero-title {
+    font-size: 50px; font-weight: 900; line-height: 1.18;
+    color: var(--neutral-800); margin-bottom: 8px; letter-spacing: -0.02em;
+  }
+  .hero-title-line2 {
+    display: block; color: var(--warm-primary);
+    position: relative; width: fit-content;
+  }
+  .hero-title-line2::after {
+    content: ''; position: absolute; bottom: -4px; left: 0; right: 0;
+    height: 3px; background: var(--warm-primary); border-radius: 2px; opacity: 0.5;
+  }
+  .hero-divider {
+    width: 40px; height: 3px; background: var(--warm-primary);
+    border-radius: 2px; margin: 20px 0;
+  }
+  .hero-sub {
+    font-size: 17px; color: var(--text-sub); line-height: 1.75;
+    margin-bottom: 32px; max-width: 480px;
+  }
+  .hero-ctas { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-bottom: 36px; }
+  .btn-primary {
+    background: var(--warm-primary); color: #fff;
+    padding: 14px 28px; border-radius: 100px;
+    font-weight: 700; font-size: 15px; border: none; cursor: pointer;
+    box-shadow: 0 4px 20px rgba(123,147,99,0.35);
+    transition: all .2s; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-primary:hover {
+    background: var(--warm-primary-dark);
+    box-shadow: 0 6px 28px rgba(123,147,99,0.4);
+    transform: translateY(-1px);
+  }
+  .btn-secondary {
+    background: white; color: var(--text-main);
+    padding: 14px 24px; border-radius: 100px;
+    font-weight: 600; font-size: 14px;
+    border: 1.5px solid var(--neutral-200); cursor: pointer;
+    transition: all .2s; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-secondary:hover {
+    border-color: var(--warm-primary); color: var(--warm-primary);
+    box-shadow: var(--shadow-sm);
+  }
+  .hero-trust {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 12px; color: var(--neutral-600);
+  }
+  .trust-avatars { display: flex; }
+  .trust-avatars span {
+    width: 30px; height: 30px; border-radius: 50%;
+    border: 2px solid white; display: flex; align-items: center; justify-content: center;
+    margin-left: -8px; background: var(--neutral-100);
+  }
+  .trust-avatars span:first-child { margin-left: 0; }
+
+  /* Right — Hero Visual Scene */
+  .hero-visual { position: relative; }
+  .hero-scene {
+    position: relative;
+    padding: 48px 32px 48px 32px;
+  }
+  .hero-dash-3d {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 20px 28px 64px rgba(45,36,22,0.18), 0 2px 8px rgba(45,36,22,0.06);
+    border: 1px solid var(--neutral-200);
+    transform: perspective(1100px) rotateX(6deg) rotateY(-11deg) rotateZ(1.5deg);
+    transform-style: preserve-3d;
+    transition: transform 0.7s cubic-bezier(0.23,1,0.32,1), box-shadow 0.7s ease;
+    overflow: hidden;
+  }
+  .hero-scene:hover .hero-dash-3d {
+    transform: perspective(1100px) rotateX(2deg) rotateY(-4deg) rotateZ(0.5deg);
+    box-shadow: 10px 14px 40px rgba(45,36,22,0.12);
+  }
+  .hd-chrome {
+    background: var(--neutral-100); padding: 10px 14px;
+    display: flex; align-items: center; gap: 6px;
+    border-bottom: 1px solid var(--neutral-200);
+  }
+  .hd-dot { width: 11px; height: 11px; border-radius: 50%; }
+  .hd-url {
+    background: white; border-radius: 5px;
+    padding: 3px 14px; font-size: 11px; color: var(--neutral-600);
+    margin-left: 10px; flex: 1; max-width: 280px;
+  }
+  .hd-body { padding: 20px; }
+  .hd-kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+  .hd-kpi {
+    background: var(--neutral-50); border-radius: 10px;
+    padding: 12px; border: 1px solid var(--neutral-100); text-align: center;
+  }
+  .hd-kpi-num { font-size: 22px; font-weight: 800; color: var(--warm-primary); }
+  .hd-kpi-label { font-size: 10px; color: var(--neutral-600); margin-top: 2px; }
+  .hd-kpi-trend { font-size: 10px; color: var(--warm-green); font-weight: 600; margin-top: 3px; }
+  .hd-chart {
+    background: var(--neutral-50); border-radius: 10px;
+    padding: 12px; border: 1px solid var(--neutral-100);
+    margin-bottom: 14px;
+  }
+  .hd-chart-label { font-size: 11px; font-weight: 700; color: var(--neutral-800); margin-bottom: 10px; }
+  .hd-bars {
+    display: flex; align-items: flex-end; gap: 3px; height: 52px;
+  }
+  .hd-bar {
+    flex: 1; background: var(--warm-primary); border-radius: 3px 3px 0 0;
+    height: var(--h);
+    transform-origin: bottom;
+    transform: scaleY(0); opacity: 0;
+  }
+  .hd-bar.accent-bar { background: var(--warm-green); }
+  .hd-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .hd-tag {
+    background: var(--warm-primary-pale); color: var(--warm-primary-dark);
+    font-size: 10px; font-weight: 600; padding: 3px 9px; border-radius: 100px;
+  }
+  .hd-tag.g { background: var(--warm-green-light); color: var(--warm-green); }
+
+  /* Satellite cards */
+  .hero-sat {
+    position: absolute;
+    background: white; border-radius: 14px;
+    padding: 11px 15px;
+    box-shadow: 0 8px 28px rgba(45,36,22,0.14);
+    border: 1px solid var(--neutral-100);
+    display: flex; align-items: center; gap: 9px;
+    font-size: 12px; font-weight: 600; white-space: nowrap; z-index: 10;
+  }
+  .sat-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .sat-icon.orange { background: var(--warm-primary-pale); }
+  .sat-icon.green { background: var(--warm-green-light); }
+  .sat-icon.gold { background: var(--warm-gold-light); }
+  .sat-val { font-size: 16px; font-weight: 800; }
+  .sat-val.orange { color: var(--warm-primary); }
+  .sat-val.green { color: var(--warm-green); }
+  .sat-val.gold { color: var(--warm-gold); }
+  .sat-sub { font-size: 11px; color: var(--text-sub); font-weight: 400; }
+  .hero-sat-1 {
+    top: 6px; right: 10px;
+    animation: floatA 4.5s ease-in-out infinite;
+  }
+  .hero-sat-2 {
+    bottom: 16px; right: 0px;
+    animation: floatB 5.5s ease-in-out infinite 0.8s;
+  }
+  .hero-sat-3 {
+    top: 42%; left: 4px;
+    animation: floatC 3.8s ease-in-out infinite 0.4s;
+  }
+
+  /* ===== PAIN POINTS ===== */
+  #pain { background: white; }
+  .pain-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;
+  }
+  .pain-card {
+    background: var(--neutral-50); border-radius: var(--radius-md);
+    padding: 28px; border: 1.5px solid var(--neutral-100);
+    transition: all .25s; cursor: default;
+  }
+  .pain-card:hover {
+    border-color: var(--warm-primary-light);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-3px);
+  }
+  .pain-icon {
+    font-size: 32px; margin-bottom: 14px;
+    width: 60px; height: 60px; background: var(--warm-primary-pale);
+    border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center;
+  }
+  .pain-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: var(--neutral-800); }
+  .pain-desc { font-size: 15px; color: var(--text-sub); line-height: 1.6; }
+
+  /* ===== SOLUTION ===== */
+  #solution {
+    background: linear-gradient(180deg, var(--neutral-50) 0%, white 100%);
+  }
+  .solution-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+  .sol-card {
+    background: white; border-radius: var(--radius-lg);
+    padding: 32px; border: 1.5px solid var(--neutral-100);
+    box-shadow: var(--shadow-sm); transition: all .25s;
+  }
+  .sol-card:hover { box-shadow: var(--shadow-md); transform: translateY(-4px); }
+  .sol-card.featured {
+    border-color: var(--warm-primary);
+    background: linear-gradient(135deg, #F2F7EF, #F8FCF5);
+    box-shadow: 0 4px 24px rgba(123,147,99,0.18);
+  }
+  .sol-icon {
+    width: 56px; height: 56px; border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; margin-bottom: 20px;
+  }
+  .sol-icon.orange { background: var(--warm-primary-pale); }
+  .sol-icon.green { background: var(--warm-green-light); }
+  .sol-icon.gold { background: var(--warm-gold-light); }
+  .sol-num {
+    font-size: 12px; font-weight: 700; color: var(--warm-primary);
+    letter-spacing: .08em; text-transform: uppercase; margin-bottom: 8px;
+  }
+  .sol-title { font-size: 20px; font-weight: 800; margin-bottom: 12px; color: var(--neutral-800); }
+  .sol-list { list-style: none; }
+  .sol-list li {
+    display: flex; align-items: flex-start; gap: 8px;
+    font-size: 14px; color: var(--text-sub); margin-bottom: 10px; line-height: 1.5;
+  }
+  .sol-list li::before {
+    content: "✓"; color: var(--warm-green); font-weight: 800;
+    margin-top: 1px; flex-shrink: 0;
+  }
+
+  /* ===== PRODUCT PREVIEW ===== */
+  #preview { background: var(--neutral-100); }
+  .preview-tabs {
+    display: flex; gap: 8px; margin-bottom: 32px; flex-wrap: wrap;
+  }
+  .preview-tab {
+    padding: 10px 22px; border-radius: 100px;
+    border: 1.5px solid var(--neutral-200); background: white;
+    font-size: 14px; font-weight: 600; color: var(--neutral-600);
+    cursor: pointer; transition: all .2s;
+  }
+  .preview-tab:hover { border-color: var(--warm-primary); color: var(--warm-primary); }
+  .preview-tab.active {
+    background: var(--warm-primary); border-color: var(--warm-primary);
+    color: white; box-shadow: 0 2px 12px rgba(123,147,99,0.3);
+  }
+  .preview-panel { display: none; }
+  .preview-panel.active { display: block; }
+  .preview-frame {
+    background: white; border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg); overflow: hidden;
+    border: 1px solid var(--neutral-200);
+  }
+  .preview-frame-header {
+    background: var(--neutral-800); padding: 12px 20px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .chrome-dot { width: 12px; height: 12px; border-radius: 50%; }
+  .chrome-url {
+    background: rgba(255,255,255,0.12); border-radius: 6px;
+    padding: 4px 16px; font-size: 12px; color: rgba(255,255,255,0.6);
+    margin-left: 12px; flex: 1; max-width: 360px;
+  }
+  .preview-content { padding: 28px; min-height: 360px; }
+
+  /* Dashboard mockup */
+  .dash-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .dash-title { font-size: 20px; font-weight: 700; }
+  .dash-date { font-size: 13px; color: var(--neutral-600); }
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .kpi-card {
+    background: var(--neutral-50); border-radius: var(--radius-md);
+    padding: 16px; border: 1px solid var(--neutral-100);
+  }
+  .kpi-val { font-size: 28px; font-weight: 800; color: var(--warm-primary); }
+  .kpi-label { font-size: 12px; color: var(--neutral-600); margin-top: 4px; }
+  .kpi-change { font-size: 12px; color: var(--warm-green); font-weight: 600; margin-top: 6px; }
+  .chart-row { display: grid; grid-template-columns: 3fr 2fr; gap: 16px; }
+  .chart-box {
+    background: var(--neutral-50); border-radius: var(--radius-md);
+    padding: 16px; border: 1px solid var(--neutral-100);
+  }
+  .chart-label { font-size: 13px; font-weight: 700; margin-bottom: 12px; }
+  .line-chart { height: 100px; display: flex; align-items: flex-end; gap: 3px; padding: 0 4px; }
+  .line-bar {
+    flex: 1; background: linear-gradient(180deg, var(--warm-primary) 0%, var(--warm-primary-light) 100%);
+    border-radius: 3px 3px 0 0; opacity: .85;
+  }
+  .donut-wrap { display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; }
+  .donut {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: conic-gradient(var(--warm-primary) 0% 78%, var(--neutral-200) 78% 100%);
+    display: flex; align-items: center; justify-content: center; position: relative;
+  }
+  .donut::after {
+    content: '78%'; position: absolute; width: 56px; height: 56px;
+    background: var(--neutral-50); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 800; color: var(--warm-primary);
+  }
+  .donut-legend { font-size: 12px; color: var(--neutral-600); text-align: center; }
+
+  /* Case tracking mockup */
+  .case-table { width: 100%; border-collapse: collapse; }
+  .case-table th {
+    background: var(--neutral-100); padding: 10px 14px;
+    font-size: 12px; text-align: left; color: var(--neutral-600); font-weight: 600;
+  }
+  .case-table td { padding: 12px 14px; font-size: 13px; border-bottom: 1px solid var(--neutral-100); }
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 600;
+  }
+  .status-badge.ongoing { background: var(--warm-green-light); color: var(--warm-green); }
+  .status-badge.watch { background: var(--warm-gold-light); color: var(--warm-gold); }
+  .status-badge.done { background: var(--neutral-100); color: var(--neutral-600); }
+  .trend-bar {
+    display: flex; gap: 3px; align-items: flex-end; height: 24px;
+  }
+  .t-bar { width: 8px; background: var(--warm-primary); border-radius: 2px 2px 0 0; opacity: .7; }
+
+  /* ESG report mockup */
+  .esg-row { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+  .esg-check {
+    display: flex; align-items: center; gap: 8px; padding: 10px 16px;
+    background: var(--neutral-50); border-radius: var(--radius-sm);
+    border: 1.5px solid var(--neutral-100); font-size: 13px;
+    cursor: pointer; transition: all .2s;
+  }
+  .esg-check input { accent-color: var(--warm-primary); }
+  .esg-export {
+    display: flex; gap: 10px; margin-top: 16px;
+  }
+  .export-btn {
+    padding: 8px 20px; border-radius: 100px; font-size: 13px; font-weight: 600;
+    border: none; cursor: pointer; display: flex; align-items: center; gap: 6px;
+  }
+  .export-btn.primary { background: var(--warm-primary); color: white; }
+  .export-btn.outline { background: white; color: var(--neutral-800); border: 1.5px solid var(--neutral-200); }
+
+  /* ===== USE CASES ===== */
+  #usecases { background: white; }
+  .uc-tabs { display: flex; gap: 8px; margin-bottom: 40px; flex-wrap: wrap; }
+  .uc-tab {
+    padding: 10px 20px; border-radius: 100px;
+    border: 1.5px solid var(--neutral-200); background: var(--neutral-50);
+    font-size: 14px; font-weight: 600; color: var(--neutral-600);
+    cursor: pointer; transition: all .2s;
+  }
+  .uc-tab:hover { border-color: var(--warm-green); color: var(--warm-green); }
+  .uc-tab.active {
+    background: var(--warm-green); border-color: var(--warm-green);
+    color: white; box-shadow: 0 2px 12px rgba(106,158,127,0.3);
+  }
+  .uc-panel { display: none; }
+  .uc-panel.active { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+  .uc-label {
+    display: inline-block; font-size: 12px; font-weight: 700;
+    color: var(--warm-green); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 8px;
+  }
+  .uc-title { font-size: 28px; font-weight: 800; margin-bottom: 16px; color: var(--neutral-800); }
+  .uc-pain {
+    background: var(--warm-primary-pale); border-radius: var(--radius-md);
+    padding: 16px 20px; margin-bottom: 20px; border-left: 3px solid var(--warm-primary);
+  }
+  .uc-pain-label { font-size: 11px; font-weight: 700; color: var(--warm-primary-dark); margin-bottom: 4px; text-transform: uppercase; }
+  .uc-pain p { font-size: 14px; color: var(--warm-primary-dark); }
+  .uc-helps { list-style: none; margin-bottom: 24px; }
+  .uc-helps li {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 15px; color: var(--text-sub); margin-bottom: 12px; line-height: 1.5;
+  }
+  .uc-helps li .icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .uc-outcome {
+    display: flex; gap: 12px; flex-wrap: wrap;
+  }
+  .outcome-chip {
+    background: var(--warm-green-light); color: var(--warm-green);
+    padding: 6px 16px; border-radius: 100px; font-size: 13px; font-weight: 600;
+  }
+  .uc-visual {
+    background: var(--neutral-50); border-radius: var(--radius-lg);
+    padding: 32px; border: 1.5px solid var(--neutral-100); text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 16px;
+  }
+  .uc-emoji { width: 88px; height: 88px; background: var(--warm-primary-pale); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; }
+  .uc-visual-stat {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%;
+  }
+  .vs-box {
+    background: white; border-radius: var(--radius-md); padding: 16px;
+    border: 1px solid var(--neutral-100); text-align: center;
+  }
+  .vs-num { font-size: 24px; font-weight: 800; color: var(--warm-primary); }
+  .vs-label { font-size: 11px; color: var(--neutral-600); margin-top: 4px; }
+
+  /* ===== PROCESS ===== */
+  #process { background: var(--neutral-50); }
+  .process-steps {
+    display: flex; gap: 0; position: relative;
+  }
+  .process-steps::before {
+    content: ''; position: absolute; top: 36px; left: 60px; right: 60px; height: 2px;
+    background: linear-gradient(90deg, var(--warm-primary-light), var(--warm-green-light));
+    z-index: 0;
+  }
+  .process-step {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    text-align: center; padding: 0 12px; position: relative; z-index: 1;
+  }
+  .step-num {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: white; border: 3px solid var(--warm-primary);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 900; color: var(--warm-primary);
+    margin-bottom: 16px; box-shadow: var(--shadow-sm);
+    flex-shrink: 0;
+  }
+  .step-icon {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: var(--warm-primary-pale);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; margin-bottom: 16px; box-shadow: var(--shadow-sm);
+    border: 3px solid white;
+  }
+  .step-title { font-size: 15px; font-weight: 700; color: var(--neutral-800); margin-bottom: 6px; }
+  .step-desc { font-size: 13px; color: var(--text-sub); line-height: 1.5; }
+
+  /* ===== FAQ ===== */
+  #faq { background: white; }
+  .faq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+  .faq-item {
+    background: var(--neutral-50); border-radius: var(--radius-md);
+    border: 1.5px solid var(--neutral-100); overflow: hidden;
+    transition: border-color .2s;
+  }
+  .faq-item.open { border-color: var(--warm-primary-light); }
+  .faq-q {
+    padding: 18px 22px; font-size: 15px; font-weight: 700;
+    color: var(--neutral-800); cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    user-select: none;
+  }
+  .faq-q:hover { color: var(--warm-primary); }
+  .faq-chevron {
+    font-size: 18px; transition: transform .25s; flex-shrink: 0;
+    color: var(--neutral-600);
+  }
+  .faq-item.open .faq-chevron { transform: rotate(180deg); }
+  .faq-a {
+    max-height: 0; overflow: hidden; transition: max-height .3s ease, padding .3s;
+    font-size: 14px; color: var(--text-sub); line-height: 1.65;
+    padding: 0 22px;
+  }
+  .faq-item.open .faq-a { max-height: 200px; padding: 0 22px 18px; }
+
+  /* ===== CTA SECTION ===== */
+  #cta {
+    background: linear-gradient(135deg, var(--neutral-800) 0%, #4A3520 100%);
+    color: white; position: relative; overflow: hidden;
+  }
+  #cta::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at top right, rgba(123,147,99,0.25), transparent 60%),
+                radial-gradient(ellipse at bottom left, rgba(106,158,127,0.2), transparent 60%);
+  }
+  .cta-inner { position: relative; z-index: 1; }
+  .cta-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 64px; align-items: start; }
+  .cta-heading { font-size: 36px; font-weight: 900; line-height: 1.3; margin-bottom: 12px; }
+  .cta-sub { font-size: 16px; opacity: .75; line-height: 1.7; margin-bottom: 28px; }
+  .cta-bullets { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+  .cta-bullets li {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 15px; opacity: .88;
+  }
+  .cta-bullets li::before { content: '✓'; color: var(--warm-primary-light); font-weight: 800; font-size: 16px; }
+
+  /* Form */
+  .contact-form {
+    background: white; border-radius: var(--radius-lg); padding: 36px;
+    box-shadow: var(--shadow-lg);
+  }
+  .form-title { font-size: 20px; font-weight: 800; color: var(--neutral-800); margin-bottom: 4px; }
+  .form-sub { font-size: 13px; color: var(--neutral-600); margin-bottom: 24px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+  label { font-size: 13px; font-weight: 600; color: var(--neutral-800); }
+  input, select, textarea {
+    border: 1.5px solid var(--neutral-200); border-radius: var(--radius-sm);
+    padding: 10px 14px; font-size: 14px; color: var(--neutral-800);
+    background: var(--neutral-50); outline: none; width: 100%;
+    font-family: inherit; transition: border-color .2s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--warm-primary); background: white; }
+  textarea { resize: none; height: 80px; }
+  .needs-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .need-chip {
+    padding: 6px 14px; border-radius: 100px;
+    border: 1.5px solid var(--neutral-200); font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all .2s; background: white;
+    color: var(--neutral-600); user-select: none;
+  }
+  .need-chip.selected {
+    background: var(--warm-primary-pale); border-color: var(--warm-primary);
+    color: var(--warm-primary-dark);
+  }
+  .submit-btn {
+    width: 100%; padding: 14px; border-radius: 100px;
+    background: var(--warm-primary); color: white; border: none;
+    font-size: 16px; font-weight: 700; cursor: pointer;
+    box-shadow: 0 4px 20px rgba(123,147,99,0.35);
+    transition: all .2s; margin-top: 6px;
+  }
+  .submit-btn:hover {
+    background: var(--warm-primary-dark);
+    box-shadow: 0 6px 28px rgba(123,147,99,0.4);
+    transform: translateY(-1px);
+  }
+
+  /* ===== VOICE AGENT WIDGET ===== */
+  .voice-widget {
+    position: fixed; bottom: 28px; right: 28px; z-index: 999;
+    display: flex; flex-direction: column; align-items: flex-end; gap: 12px;
+  }
+  .voice-tooltip {
+    background: white; border-radius: var(--radius-md);
+    padding: 14px 18px; box-shadow: var(--shadow-lg);
+    border: 1px solid var(--neutral-100); max-width: 240px;
+    font-size: 13px; color: var(--neutral-800); line-height: 1.5;
+    display: none; animation: fadeUp .25s ease;
+  }
+  .voice-tooltip.show { display: block; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .voice-tooltip strong { display: block; margin-bottom: 4px; font-size: 14px; }
+
+  /* Prominent pill button */
+  .voice-btn-pill {
+    display: flex; align-items: center; gap: 0;
+    background: var(--warm-primary); border: none; cursor: pointer;
+    border-radius: 100px;
+    box-shadow: 0 4px 24px rgba(123,147,99,0.45), 0 1px 4px rgba(45,36,22,0.12);
+    transition: all .25s; position: relative; overflow: hidden;
+    text-decoration: none;
+  }
+  .voice-btn-pill:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(123,147,99,0.55), 0 2px 8px rgba(45,36,22,0.15);
+  }
+  .voice-btn-pill::before {
+    content: ''; position: absolute; inset: -4px; border-radius: 100px;
+    border: 2px solid rgba(123,147,99,0.4); animation: ripple 2.5s infinite;
+    pointer-events: none;
+  }
+  @keyframes ripple {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(1.18); opacity: 0; }
+  }
+  .vpill-icon {
+    width: 52px; height: 52px; border-radius: 100px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    background: rgba(0,0,0,0.12);
+  }
+  .vpill-text {
+    padding: 0 20px 0 14px; text-align: left;
+  }
+  .vpill-text strong {
+    display: block; font-size: 14px; font-weight: 700; color: white;
+    letter-spacing: -0.01em;
+  }
+  .vpill-text span {
+    display: block; font-size: 11px; color: rgba(255,255,255,0.75);
+    margin-top: 1px;
+  }
+
+  /* Compact icon-only btn (hidden when expanded) */
+  .voice-btn {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--warm-primary); border: none; cursor: pointer;
+    box-shadow: 0 4px 20px rgba(123,147,99,0.45);
+    display: flex; align-items: center; justify-content: center;
+    transition: all .2s; position: relative; display: none;
+  }
+
+  /* Voice expanded */
+  .voice-expanded {
+    background: white; border-radius: var(--radius-lg);
+    width: 320px; box-shadow: var(--shadow-lg);
+    border: 1px solid var(--neutral-100); overflow: hidden;
+    display: none; animation: fadeUp .25s ease;
+  }
+  .voice-expanded.show { display: block; }
+  .ve-header {
+    background: var(--warm-primary); padding: 16px 20px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .ve-avatar { font-size: 24px; }
+  .ve-name { font-size: 15px; font-weight: 700; color: white; }
+  .ve-status { font-size: 12px; color: rgba(255,255,255,0.8); }
+  .ve-close { margin-left: auto; color: white; cursor: pointer; font-size: 20px; background: none; border: none; }
+  .ve-messages { padding: 16px; min-height: 180px; display: flex; flex-direction: column; gap: 10px; }
+  .ve-msg {
+    max-width: 88%; padding: 10px 14px; border-radius: 16px;
+    font-size: 13px; line-height: 1.5;
+  }
+  .ve-msg.agent { background: var(--neutral-100); color: var(--neutral-800); align-self: flex-start; border-bottom-left-radius: 4px; }
+  .ve-msg.user { background: var(--warm-primary); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+  .ve-input-row {
+    padding: 12px 16px; border-top: 1px solid var(--neutral-100);
+    display: flex; gap: 8px; align-items: center;
+  }
+  .ve-input {
+    flex: 1; border: 1.5px solid var(--neutral-200); border-radius: 100px;
+    padding: 8px 14px; font-size: 13px; outline: none;
+    font-family: inherit;
+  }
+  .ve-input:focus { border-color: var(--warm-primary); }
+  .ve-send {
+    width: 36px; height: 36px; border-radius: 50%; background: var(--warm-primary);
+    border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 16px; color: white; flex-shrink: 0;
+    transition: background .2s;
+  }
+  .ve-send:hover { background: var(--warm-primary-dark); }
+  .ve-mic {
+    width: 36px; height: 36px; border-radius: 50%; background: var(--neutral-100);
+    border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0; transition: background .2s;
+  }
+  .ve-mic:hover { background: var(--warm-primary-pale); }
+
+  /* ===== 3D PREVIEW ===== */
+  .preview-3d-scene {
+    perspective: 1600px;
+    perspective-origin: 55% 40%;
+  }
+  .preview-frame {
+    transform: rotateX(10deg) rotateY(-14deg) rotateZ(1deg);
+    transform-style: preserve-3d;
+    box-shadow: 32px 40px 90px rgba(45,36,22,0.22), -6px -6px 24px rgba(255,255,255,0.6);
+    transition: transform 0.7s cubic-bezier(0.23,1,0.32,1), box-shadow 0.7s ease;
+  }
+  .preview-3d-scene:hover .preview-frame {
+    transform: rotateX(4deg) rotateY(-5deg) rotateZ(0deg);
+    box-shadow: 16px 20px 60px rgba(45,36,22,0.16), -3px -3px 16px rgba(255,255,255,0.5);
+  }
+  .preview-3d-hint {
+    text-align: center; margin-top: 20px; font-size: 12px;
+    color: var(--neutral-600); opacity: 0.6;
+  }
+
+  /* ===== SCROLL ANIMATIONS ===== */
+  [data-anim] {
+    opacity: 0;
+    transform: translateY(44px);
+    transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.23,1,0.32,1);
+    transition-delay: var(--d, 0ms);
+  }
+  [data-anim="slide-left"] { transform: translateX(-40px); }
+  [data-anim="slide-right"] { transform: translateX(40px); }
+  [data-anim="scale"] { transform: scale(0.92) translateY(20px); }
+  [data-anim].in-view {
+    opacity: 1;
+    transform: translateY(0) translateX(0) scale(1);
+  }
+
+  /* ===== USE CASE VISUAL CARD ===== */
+  .uc-visual-card {
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    border: 1.5px solid var(--neutral-100);
+    box-shadow: var(--shadow-md);
+    display: flex; flex-direction: column; gap: 20px;
+    position: relative; overflow: hidden;
+  }
+  .uc-visual-card::before {
+    content: ''; position: absolute; top: -40px; right: -40px;
+    width: 180px; height: 180px; border-radius: 50%;
+    opacity: 0.12; pointer-events: none;
+  }
+  .uvc-orange::before { background: var(--warm-primary); }
+  .uvc-green::before  { background: var(--warm-green); }
+  .uvc-gold::before   { background: var(--warm-gold); }
+  .uvc-orange { background: linear-gradient(145deg, #F2F7EF 0%, #F8FCF5 60%, #EDF5F0 100%); }
+  .uvc-green  { background: linear-gradient(145deg, #F0F7F3 0%, #FDFEFF 60%, #FFF8F3 100%); }
+  .uvc-gold   { background: linear-gradient(145deg, #FFFBF0 0%, #FDFEFF 60%, #F0F6F3 100%); }
+  .uvc-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    padding: 4px 12px; border-radius: 100px;
+  }
+  .uvc-orange .uvc-tag { background: var(--warm-primary-pale); color: var(--warm-primary-dark); }
+  .uvc-green  .uvc-tag { background: var(--warm-green-light); color: var(--warm-green); }
+  .uvc-gold   .uvc-tag { background: var(--warm-gold-light); color: var(--warm-gold); }
+  .uvc-hero {
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .uvc-big-num {
+    font-size: 52px; font-weight: 900; line-height: 1;
+  }
+  .uvc-orange .uvc-big-num { color: var(--warm-primary); }
+  .uvc-green  .uvc-big-num { color: var(--warm-green); }
+  .uvc-gold   .uvc-big-num { color: var(--warm-gold); }
+  .uvc-big-label { font-size: 15px; font-weight: 700; color: var(--neutral-800); margin-top: 6px; }
+  .uvc-trend-label { font-size: 12px; color: var(--text-sub); }
+  .uvc-bar-chart {
+    display: flex; align-items: flex-end; gap: 4px; height: 56px; padding: 0 2px;
+  }
+  .uvc-bar {
+    flex: 1; border-radius: 3px 3px 0 0; opacity: 0.7;
+    position: relative;
+  }
+  .uvc-orange .uvc-bar { background: var(--warm-primary); }
+  .uvc-green  .uvc-bar { background: var(--warm-green); }
+  .uvc-gold   .uvc-bar { background: var(--warm-gold); }
+  .uvc-bar.dim { opacity: 0.25; }
+  .uvc-bar-labels {
+    display: flex; justify-content: space-between;
+    font-size: 10px; color: var(--text-sub); margin-top: 4px; padding: 0 2px;
+  }
+  .uvc-stats {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  }
+  .uvc-stat {
+    background: white; border-radius: var(--radius-sm);
+    padding: 12px 14px; border: 1px solid var(--neutral-100);
+  }
+  .uvc-stat-num { font-size: 20px; font-weight: 800; color: var(--neutral-800); }
+  .uvc-stat-label { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
+  .uvc-stat.accent .uvc-stat-num { color: var(--warm-green); }
+
+  /* ===== FOOTER ===== */
+  footer {
+    background: var(--neutral-800); color: rgba(255,255,255,0.5);
+    padding: 32px 0; text-align: center; font-size: 13px;
+  }
+  footer a { color: var(--warm-primary-light); text-decoration: none; }
+  .footer-inner { display: flex; align-items: center; justify-content: space-between; }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 860px) {
+    .hero-inner, .cta-grid, .uc-panel.active { grid-template-columns: 1fr; }
+    .hero-visual { display: none; }
+    h1.hero-title { font-size: 36px; }
+    .pain-grid, .faq-grid { grid-template-columns: 1fr; }
+    .solution-grid { grid-template-columns: 1fr; }
+    .process-steps { flex-direction: column; gap: 20px; }
+    .process-steps::before { display: none; }
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .chart-row { grid-template-columns: 1fr; }
+    h2.section-title { font-size: 28px; }
+    nav .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV — matching healyou.io -->
+<nav>
+  <a href="https://www.healyou.io" class="nav-logo">
+    <svg width="20" height="24" viewBox="0 0 20 24" fill="none">
+      <path d="M10 0L16 9H13L19 18H11V24H9V18H1L7 9H4Z" fill="#4B6741"/>
+    </svg>
+    聊心茶室
+  </a>
+  <ul class="nav-links">
+    <li><a href="#">尋找專家</a></li>
+    <li><a href="#">聊心資源</a></li>
+    <li><a href="#" class="nav-enterprise">企業合作</a></li>
+    <li><a href="#">申請加入</a></li>
+    <li><a href="#" class="nav-gift">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7b9363" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+      獲取折扣
+    </a></li>
+    <li><a href="#" class="nav-login">註冊/登入</a></li>
+  </ul>
+</nav>
+<!-- HERO -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-inner">
+      <!-- Left: Copy -->
+      <div>
+        <div class="hero-eyebrow">
+          <span class="eyebrow-dot"></span>
+          為 HR、CEO 與 ESG 負責人設計
+        </div>
+        <h1 class="hero-title">
+          員工心理健康，<br>
+          <span class="hero-title-line2">讓數字來說話。</span>
+        </h1>
+        <div class="hero-divider"></div>
+        <p class="hero-sub">
+          聊心茶室企業方案提供心理諮商服務、企業數據後台與一鍵 ESG 報表，讓你看見方案成效，也能說服董事會。
+        </p>
+        <div class="hero-ctas">
+          <a href="#cta" class="btn-primary">預約免費顧問諮詢 →</a>
+          <a href="#preview" class="btn-secondary">查看後台功能</a>
+        </div>
+        <div class="hero-trust">
+          <div class="trust-avatars">
+            <span title="醫療"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--neutral-600)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></span>
+            <span title="金融"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--neutral-600)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="22" x2="21" y2="22"/><rect x="5" y="12" width="3" height="10"/><rect x="10.5" y="7" width="3" height="15"/><rect x="16" y="3" width="3" height="19"/></svg></span>
+            <span title="科技"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--neutral-600)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>
+            <span title="零售"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--neutral-600)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg></span>
+          </div>
+          醫療、金融、科技、零售等產業已導入
+        </div>
+      </div>
+      <!-- Right: Visual Scene -->
+      <div class="hero-visual">
+        <div class="hero-scene">
+          <!-- Main 3D dashboard card -->
+          <div class="hero-dash-3d">
+            <div class="hd-chrome">
+              <div class="hd-dot" style="background:#FF5F57"></div>
+              <div class="hd-dot" style="background:#FEBC2E;margin-left:5px"></div>
+              <div class="hd-dot" style="background:#28C840;margin-left:5px"></div>
+              <div class="hd-url">enterprise.healyou.io/dashboard</div>
+            </div>
+            <div class="hd-body">
+              <div style="font-size:13px;font-weight:700;color:var(--neutral-800);margin-bottom:14px">使用率總覽 — 2026 Q1</div>
+              <div class="hd-kpi-row">
+                <div class="hd-kpi">
+                  <div class="hd-kpi-num" data-count="78" data-suffix="%">0%</div>
+                  <div class="hd-kpi-label">方案使用率</div>
+                  <div class="hd-kpi-trend">↑ +12%</div>
+                </div>
+                <div class="hd-kpi">
+                  <div class="hd-kpi-num" data-count="4.8" data-suffix="" data-decimal="1">0</div>
+                  <div class="hd-kpi-label">平均滿意度</div>
+                  <div class="hd-kpi-trend">↑ +0.3</div>
+                </div>
+                <div class="hd-kpi">
+                  <div class="hd-kpi-num" data-count="92" data-suffix="">0</div>
+                  <div class="hd-kpi-label">本月諮商次數</div>
+                  <div class="hd-kpi-trend">↑ 穩定</div>
+                </div>
+              </div>
+              <div class="hd-chart">
+                <div class="hd-chart-label">月度使用趨勢</div>
+                <div class="hd-bars">
+                  <div class="hd-bar" style="--h:36%" data-i="0"></div>
+                  <div class="hd-bar" style="--h:48%" data-i="1"></div>
+                  <div class="hd-bar accent-bar" style="--h:44%" data-i="2"></div>
+                  <div class="hd-bar" style="--h:60%" data-i="3"></div>
+                  <div class="hd-bar accent-bar" style="--h:56%" data-i="4"></div>
+                  <div class="hd-bar" style="--h:72%" data-i="5"></div>
+                  <div class="hd-bar" style="--h:78%" data-i="6"></div>
+                  <div class="hd-bar accent-bar" style="--h:86%" data-i="7"></div>
+                  <div class="hd-bar" style="--h:82%" data-i="8"></div>
+                  <div class="hd-bar" style="--h:90%" data-i="9"></div>
+                  <div class="hd-bar accent-bar" style="--h:94%" data-i="10"></div>
+                  <div class="hd-bar" style="--h:98%" data-i="11"></div>
+                </div>
+              </div>
+              <div class="hd-tags">
+                <span class="hd-tag">✓ ESG 報表已匯出</span>
+                <span class="hd-tag g">3 位需要關懷</span>
+                <span class="hd-tag">Q1 季報完成</span>
+              </div>
+            </div>
+          </div>
+          <!-- Satellite cards -->
+          <div class="hero-sat hero-sat-1">
+            <div class="sat-icon orange">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--warm-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
+            </div>
+            <div>
+              <div class="sat-val orange">+34%</div>
+              <div class="sat-sub">本季改善指數</div>
+            </div>
+          </div>
+          <div class="hero-sat hero-sat-2">
+            <div class="sat-icon green">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--warm-green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div>
+              <div class="sat-val green">✓ 已匯出</div>
+              <div class="sat-sub">ESG 季報 PDF</div>
+            </div>
+          </div>
+          <div class="hero-sat hero-sat-3">
+            <div class="sat-icon gold">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--warm-gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div>
+              <div class="sat-val gold">完全匿名</div>
+              <div class="sat-sub">員工個資保護</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PAIN POINTS -->
+<section id="pain">
+  <div class="container">
+    <div style="text-align:center; margin-bottom: 56px;">
+      <div class="section-tag">痛點共鳴</div>
+      <h2 class="section-title">HR 和老闆最常遇到的困境</h2>
+      <p class="section-sub" style="margin: 0 auto;">員工心理健康的問題，往往在爆發之前完全看不見。<br>你熟悉這幾種狀況嗎？</p>
+    </div>
+    <div class="pain-grid">
+      <div class="pain-card" data-anim style="--d:0ms">
+        <div class="pain-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--warm-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+        </div>
+        <div class="pain-title">員工出問題才知道</div>
+        <p class="pain-desc">心理健康危機通常悄悄發生，HR 缺乏早期預警機制，等到離職或請假才意識到問題的嚴重性。</p>
+      </div>
+      <div class="pain-card" data-anim style="--d:300ms">
+        <div class="pain-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--warm-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
+        </div>
+        <div class="pain-title">方案買了，但不知道有沒有用</div>
+        <p class="pain-desc">傳統 EAP 方案看不到使用數據，無法評估成效，更不知道員工有沒有在用、用了有沒有改善。</p>
+      </div>
+      <div class="pain-card" data-anim style="--d:100ms">
+        <div class="pain-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--warm-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <div class="pain-title">ESG 報告需要心理健康數據</div>
+        <p class="pain-desc">主管要求提交 ESG 報告，但心理健康這塊苦無量化指標，每次都靠人工整理，效率極低。</p>
+      </div>
+      <div class="pain-card" data-anim style="--d:200ms">
+        <div class="pain-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--warm-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+        </div>
+        <div class="pain-title">員工離職成本高，但原因不清楚</div>
+        <p class="pain-desc">工作壓力、職場人際問題是離職主因，卻缺乏有效介入工具，只能等到面試才知道問題所在。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTION -->
+<section id="solution">
+  <div class="container">
+    <div class="section-tag">解決方案</div>
+    <h2 class="section-title">一個方案，解決三個核心需求</h2>
+    <p class="section-sub">聊心茶室不只是諮商媒合平台，而是「服務 + 後台 + 報表」的完整企業心理健康解決方案。</p>
+    <div class="solution-grid">
+      <div class="sol-card" data-anim style="--d:0ms">
+        <div class="sol-icon orange">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--warm-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="sol-num">核心功能 01</div>
+        <div class="sol-title">員工心理支持</div>
+        <ul class="sol-list">
+          <li>員工能找到最適合自己的服務者，而不是被系統隨機分配</li>
+          <li>自主預約，全程匿名，員工不擔心被公司知道</li>
+          <li>彈性時段，適合忙碌的上班族與輪班制員工</li>
+          <li>AI 語音陪伴（茶裏），休息空檔也能快速紓壓</li>
+        </ul>
+      </div>
+      <div class="sol-card featured" data-anim style="--d:120ms">
+        <div class="sol-icon green">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--warm-green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+        </div>
+        <div class="sol-num">核心功能 02</div>
+        <div class="sol-title">企業數據後台</div>
+        <ul class="sol-list">
+          <li>即時查看使用率、滿意度、心理態度趨勢，不再看不見成效</li>
+          <li>個案追蹤：HR 可在不知道姓名的前提下，關注需要關懷的員工</li>
+          <li>多帳號分層授權，Admin / HR / 部門主管各有適合的視圖</li>
+          <li>工作角色壓力分布，看清哪個部門需要優先關注</li>
+        </ul>
+      </div>
+      <div class="sol-card" data-anim style="--d:240ms">
+        <div class="sol-icon gold">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--warm-gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <div class="sol-num">核心功能 03</div>
+        <div class="sol-title">ESG 報告支援</div>
+        <ul class="sol-list">
+          <li>一鍵匯出 PDF / Excel / CSV，不需要人工整理資料</li>
+          <li>報表附企業 Logo 與時間戳記，可直接放進永續報告書</li>
+          <li>包含使用率、滿意度趨勢、議題分類等 ESG 所需的量化指標</li>
+          <li>月報、季報自動彙整，節省整理時間超過 65%</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCT PREVIEW -->
+<section id="preview">
+  <div class="container">
+    <div class="section-tag">功能預覽</div>
+    <h2 class="section-title">看見你未來可以操作的介面</h2>
+    <p class="section-sub">企業後台設計以 HR 視角出發，複雜數據一目了然，不需要技術背景也能上手。</p>
+    <div class="preview-tabs">
+      <button class="preview-tab active" onclick="switchPreview('dashboard', this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>使用率總覽</button>
+      <button class="preview-tab" onclick="switchPreview('tracking', this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>心理改善追蹤</button>
+      <button class="preview-tab" onclick="switchPreview('esg', this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>ESG 報表輸出</button>
+      <button class="preview-tab" onclick="switchPreview('account', this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>帳號權限管理</button>
+    </div>
+    <div class="preview-3d-scene">
+    <div class="preview-frame">
+      <div class="preview-frame-header">
+        <div class="chrome-dot" style="background:#FF5F57"></div>
+        <div class="chrome-dot" style="background:#FEBC2E;margin-left:6px"></div>
+        <div class="chrome-dot" style="background:#28C840;margin-left:6px"></div>
+        <div class="chrome-url">enterprise.healyou.io/dashboard</div>
+      </div>
+      <!-- Dashboard Panel -->
+      <div class="preview-content preview-panel active" id="panel-dashboard">
+        <div class="dash-header">
+          <div>
+            <div class="dash-title">使用率總覽</div>
+            <div class="dash-date">2026 年 Q1 / 1月－3月</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="export-btn outline" style="font-size:12px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:4px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>匯出報表</button>
+            <button class="export-btn primary" style="font-size:12px">個案追蹤</button>
+          </div>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi-card">
+            <div class="kpi-val">78.5%</div>
+            <div class="kpi-label">方案使用率</div>
+            <div class="kpi-change">↑ +12% vs 上季</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-val">4.8 / 5</div>
+            <div class="kpi-label">平均服務滿意度</div>
+            <div class="kpi-change">↑ 連續 3 季成長</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-val">92</div>
+            <div class="kpi-label">本月諮商次數</div>
+            <div class="kpi-change">↑ 穩定成長</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-val">3</div>
+            <div class="kpi-label">需關懷員工</div>
+            <div class="kpi-change" style="color:var(--warm-gold)">⚠ 建議追蹤</div>
+          </div>
+        </div>
+        <div class="chart-row">
+          <div class="chart-box">
+            <div class="chart-label">月度使用趨勢</div>
+            <div class="line-chart">
+              <div class="line-bar" style="height:35%"></div>
+              <div class="line-bar" style="height:45%"></div>
+              <div class="line-bar" style="height:40%"></div>
+              <div class="line-bar" style="height:55%"></div>
+              <div class="line-bar" style="height:60%"></div>
+              <div class="line-bar" style="height:58%"></div>
+              <div class="line-bar" style="height:70%"></div>
+              <div class="line-bar" style="height:65%"></div>
+              <div class="line-bar" style="height:75%"></div>
+              <div class="line-bar" style="height:80%"></div>
+              <div class="line-bar" style="height:78%"></div>
+              <div class="line-bar" style="height:90%"></div>
+            </div>
+          </div>
+          <div class="chart-box">
+            <div class="chart-label">使用率達成度</div>
+            <div class="donut-wrap" style="height:100px; justify-content:center;">
+              <div class="donut"></div>
+              <div class="donut-legend">目標 80% | 現況 78.5%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Tracking Panel -->
+      <div class="preview-content preview-panel" id="panel-tracking">
+        <div class="dash-header">
+          <div class="dash-title">心理改善追蹤</div>
+          <div style="display:flex;gap:8px">
+            <select style="font-size:12px;padding:6px 12px">
+              <option>全部員工</option><option>工程部門</option><option>業務部門</option>
+            </select>
+          </div>
+        </div>
+        <table class="case-table">
+          <thead>
+            <tr>
+              <th>員工代碼</th><th>諮商次數</th><th>主要議題</th><th>改善趨勢</th><th>狀態</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>EMP-0042</td>
+              <td>5 次</td>
+              <td>工作壓力</td>
+              <td><div class="trend-bar"><div class="t-bar" style="height:8px"></div><div class="t-bar" style="height:12px"></div><div class="t-bar" style="height:16px"></div><div class="t-bar" style="height:18px"></div><div class="t-bar" style="height:22px"></div></div></td>
+              <td><span class="status-badge done">已改善</span></td>
+            </tr>
+            <tr>
+              <td>EMP-0078</td>
+              <td>3 次</td>
+              <td>職場人際</td>
+              <td><div class="trend-bar"><div class="t-bar" style="height:14px"></div><div class="t-bar" style="height:14px"></div><div class="t-bar" style="height:18px"></div></div></td>
+              <td><span class="status-badge ongoing">進行中</span></td>
+            </tr>
+            <tr>
+              <td>EMP-0115</td>
+              <td>1 次</td>
+              <td>情緒調適</td>
+              <td><div class="trend-bar"><div class="t-bar" style="height:10px"></div></div></td>
+              <td><span class="status-badge watch">需關懷</span></td>
+            </tr>
+            <tr>
+              <td>EMP-0203</td>
+              <td>4 次</td>
+              <td>職涯發展</td>
+              <td><div class="trend-bar"><div class="t-bar" style="height:8px"></div><div class="t-bar" style="height:12px"></div><div class="t-bar" style="height:18px"></div><div class="t-bar" style="height:20px"></div></div></td>
+              <td><span class="status-badge ongoing">進行中</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="margin-top:12px;font-size:12px;color:var(--neutral-600)">⚠ 員工資料已匿名處理，HR 無法對應真實姓名</div>
+      </div>
+      <!-- ESG Panel -->
+      <div class="preview-content preview-panel" id="panel-esg">
+        <div class="dash-header">
+          <div class="dash-title">ESG 報表輸出</div>
+        </div>
+        <div style="font-size:14px;font-weight:600;color:var(--neutral-800);margin-bottom:12px">選擇報表類型</div>
+        <div class="esg-row">
+          <label class="esg-check"><input type="checkbox" checked> 方案使用率報表</label>
+          <label class="esg-check"><input type="checkbox" checked> 員工滿意度趨勢</label>
+          <label class="esg-check"><input type="checkbox"> 議題分類統計</label>
+          <label class="esg-check"><input type="checkbox" checked> 改善指數摘要</label>
+          <label class="esg-check"><input type="checkbox"> 部門分布分析</label>
+        </div>
+        <div style="font-size:14px;font-weight:600;color:var(--neutral-800);margin-bottom:12px;margin-top:16px">報告期間</div>
+        <div style="display:flex;gap:12px;margin-bottom:20px">
+          <select style="min-width:160px">
+            <option>2026 年 Q1</option><option>2025 年 Q4</option><option>自訂區間</option>
+          </select>
+          <select>
+            <option>繁體中文</option><option>English</option>
+          </select>
+        </div>
+        <div style="background:var(--warm-green-light);border-radius:var(--radius-md);padding:16px 20px;border-left:3px solid var(--warm-green);margin-bottom:20px;font-size:13px;color:var(--warm-green)">
+          ✓ 報表將附上企業 Logo 與時間戳記，可直接用於永續報告書
+        </div>
+        <div class="esg-export">
+          <button class="export-btn primary"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:4px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>匯出 PDF</button>
+          <button class="export-btn outline"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:4px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>匯出 Excel</button>
+          <button class="export-btn outline"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:4px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>匯出 CSV</button>
+        </div>
+      </div>
+      <!-- Account Panel -->
+      <div class="preview-content preview-panel" id="panel-account">
+        <div class="dash-header">
+          <div class="dash-title">帳號權限管理</div>
+          <button class="export-btn primary" style="font-size:12px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:4px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>新增成員</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px">
+          <div style="background:var(--warm-primary-pale);border-radius:var(--radius-md);padding:20px;text-align:center">
+            <div style="font-size:28px;font-weight:800;color:var(--warm-primary)">1</div>
+            <div style="font-size:13px;color:var(--warm-primary-dark);font-weight:600">Admin 管理員</div>
+            <div style="font-size:11px;color:var(--warm-primary-dark);margin-top:4px;opacity:.8">全功能存取</div>
+          </div>
+          <div style="background:var(--warm-gold-light);border-radius:var(--radius-md);padding:20px;text-align:center">
+            <div style="font-size:28px;font-weight:800;color:var(--warm-gold)">3</div>
+            <div style="font-size:13px;color:var(--warm-gold);font-weight:600">HR 主管</div>
+            <div style="font-size:11px;color:var(--warm-gold);margin-top:4px;opacity:.8">查看 + 匯出報表</div>
+          </div>
+          <div style="background:var(--warm-green-light);border-radius:var(--radius-md);padding:20px;text-align:center">
+            <div style="font-size:28px;font-weight:800;color:var(--warm-green)">5</div>
+            <div style="font-size:13px;color:var(--warm-green);font-weight:600">部門關懷專員</div>
+            <div style="font-size:11px;color:var(--warm-green);margin-top:4px;opacity:.8">查看所屬部門</div>
+          </div>
+        </div>
+        <div style="font-size:13px;color:var(--neutral-600);background:var(--neutral-100);border-radius:var(--radius-sm);padding:12px 16px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--neutral-600)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>各角色僅能查看對應權限的資料，HR 無法看到員工個人資訊，確保隱私安全。
+        </div>
+      </div>
+    </div>
+    </div><!-- end preview-3d-scene -->
+    <p class="preview-3d-hint">將滑鼠移至上方可查看互動效果</p>
+  </div>
+</section>
+
+<!-- USE CASES -->
+<section id="usecases">
+  <div class="container">
+    <div class="section-tag green">合作案例</div>
+    <h2 class="section-title">跨產業都有合作經驗</h2>
+    <p class="section-sub">不同產業有不同痛點，聊心茶室提供彈性的方案配置，找到最適合你的導入方式。</p>
+    <div class="uc-tabs">
+      <button class="uc-tab active" onclick="switchUC('medical', this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>醫療院所</button>
+      <button class="uc-tab" onclick="switchUC('care', this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>照護機構</button>
+      <button class="uc-tab" onclick="switchUC('finance', this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px"><line x1="3" y1="22" x2="21" y2="22"/><rect x="5" y="12" width="3" height="10"/><rect x="10.5" y="7" width="3" height="15"/><rect x="16" y="3" width="3" height="19"/></svg>金融保險</button>
+      <button class="uc-tab" onclick="switchUC('tech', this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>科技新創</button>
+      <button class="uc-tab" onclick="switchUC('retail', this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>零售連鎖</button>
+    </div>
+
+    <div class="uc-panel active" id="uc-medical">
+      <div data-anim="slide-left">
+        <div class="uc-label">醫療院所 / 診所</div>
+        <div class="uc-title">醫護人員的倦怠，<br>需要比藥方更好的解法</div>
+        <div class="uc-pain">
+          <div class="uc-pain-label">核心痛點</div>
+          <p>醫護人員承受高度工作壓力與情緒勞動，倦怠（Burnout）嚴重，離職直接影響醫療品質</p>
+        </div>
+        <ul class="uc-helps">
+          <li><span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--warm-green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>彈性諮商預約，不影響排班，醫護可在輪班空檔使用</li>
+          <li><span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--warm-green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg></span>後台追蹤員工壓力、焦慮指數趨勢，早期發現倦怠跡象</li>
+          <li><span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--warm-green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>個案追蹤識別高風險員工，HR 可及早介入與關懷</li>
+        </ul>
+        <div class="uc-outcome">
+          <span class="outcome-chip">員工留任率提升</span>
+          <span class="outcome-chip">倦怠比例下降</span>
+          <span class="outcome-chip">ESG 健康數據支援</span>
+        </div>
+      </div>
+      <div class="uc-visual-card uvc-orange" data-anim="slide-right">
+        <div class="uvc-tag">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          醫療院所 成效示意
+        </div>
+        <div class="uvc-hero">
+          <div class="uvc-big-num">↓28%</div>
+          <div class="uvc-big-label">倦怠相關離職率</div>
+          <div class="uvc-trend-label">vs. 導入前季度平均</div>
+        </div>
+        <div>
+          <div class="uvc-bar-chart">
+            <div class="uvc-bar dim" style="height:35%"></div>
+            <div class="uvc-bar dim" style="height:38%"></div>
+            <div class="uvc-bar dim" style="height:42%"></div>
+            <div class="uvc-bar" style="height:55%"></div>
+            <div class="uvc-bar" style="height:68%"></div>
+            <div class="uvc-bar" style="height:80%"></div>
+            <div class="uvc-bar" style="height:90%"></div>
+            <div class="uvc-bar" style="height:97%"></div>
+          </div>
+          <div class="uvc-bar-labels"><span>導入前</span><span>3 個月後</span></div>
+        </div>
+        <div class="uvc-stats">
+          <div class="uvc-stat"><div class="uvc-stat-num">4.9</div><div class="uvc-stat-label">服務滿意度</div></div>
+          <div class="uvc-stat"><div class="uvc-stat-num">83%</div><div class="uvc-stat-label">方案使用率</div></div>
+          <div class="uvc-stat accent"><div class="uvc-stat-num">✓ ESG</div><div class="uvc-stat-label">數據已匯出</div></div>
+          <div class="uvc-stat"><div class="uvc-stat-num">3個月</div><div class="uvc-stat-label">可見改善週期</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="uc-panel" id="uc-care">
+      <div>
+        <div class="uc-label">月子中心 / 照護機構</div>
+        <div class="uc-title">照護者也需要被照顧</div>
+        <div class="uc-pain">
+          <div class="uc-pain-label">核心痛點</div>
+          <p>照護工作高度情緒消耗，離職率偏高，新人培訓成本大，形成惡性循環</p>
+        </div>
+        <ul class="uc-helps">
+          <li><span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--warm-green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>批次匯入員工名單，快速開通全員使用資格，部署超快</li>
+          <li><span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--warm-green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>議題涵蓋「情緒調適」「職場人際」，針對照護職業設計</li>
+          <li><span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--warm-green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></span>QR Code 個案轉介，主管可直接將需要幫助的員工轉交心理師</li>
+        </ul>
+        <div class="uc-outcome">
+          <span class="outcome-chip">員工離職率降低</span>
+          <span class="outcome-chip">照護品質提升</span>
+          <span class="outcome-chip">培訓成本下降</span>
+        </div>
+      </div>
+      <div class="uc-visual-card uvc-green" data-anim="slide-right">
+        <div class="uvc-tag">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          照護機構 成效示意
+        </div>
+        <div class="uvc-hero">
+          <div class="uvc-big-num">↓35%</div>
+          <div class="uvc-big-label">年度員工離職率</div>
+          <div class="uvc-trend-label">持續導入後 6 個月數據</div>
+        </div>
+        <div>
+          <div class="uvc-bar-chart">
+            <div class="uvc-bar dim" style="height:80%"></div>
+            <div class="uvc-bar dim" style="height:78%"></div>
+            <div class="uvc-bar dim" style="height:75%"></div>
+            <div class="uvc-bar" style="height:62%"></div>
+            <div class="uvc-bar" style="height:55%"></div>
+            <div class="uvc-bar" style="height:48%"></div>
+            <div class="uvc-bar" style="height:43%"></div>
+            <div class="uvc-bar" style="height:37%"></div>
+          </div>
+          <div class="uvc-bar-labels"><span>導入前</span><span>6 個月後</span></div>
+        </div>
+        <div class="uvc-stats">
+          <div class="uvc-stat accent"><div class="uvc-stat-num">1天</div><div class="uvc-stat-label">完成部署時間</div></div>
+          <div class="uvc-stat"><div class="uvc-stat-num">91%</div><div class="uvc-stat-label">員工正向回饋</div></div>
+          <div class="uvc-stat"><div class="uvc-stat-num">↓40%</div><div class="uvc-stat-label">培訓重工成本</div></div>
+          <div class="uvc-stat accent"><div class="uvc-stat-num">QR</div><div class="uvc-stat-label">即時轉介機制</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="uc-panel" id="uc-finance">
+      <div>
+        <div class="uc-label">金融 / 保險業</div>
+        <div class="uc-title">ESG 報告需要的數字，<br>聊心茶室幫你準備好</div>
+        <div class="uc-pain">
+          <div class="uc-pain-label">核心痛點</div>
+          <p>業務人員高業績壓力，焦慮與自我懷疑普遍；ESG 報告需要心理健康量化指標卻難以取得</p>
+        </div>
+        <ul class="uc-helps">
+          <li><span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--warm-green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>心理健康方案提升業務人員心理韌性，穩定業績表現</li>
+          <li><span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--warm-green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg></span>後台報表直接輸出 ESG 所需數據，支援永續報告書撰寫</li>
+          <li><span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--warm-green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>配合監管機構要求，提供完整的員工健康計畫記錄</li>
+        </ul>
+        <div class="uc-outcome">
+          <span class="outcome-chip">ESG 報告有數據</span>
+          <span class="outcome-chip">業績穩定度提升</span>
+          <span class="outcome-chip">合規文件完整</span>
+        </div>
+      </div>
+      <div class="uc-visual-card uvc-gold" data-anim="slide-right">
+        <div class="uvc-tag">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="22" x2="21" y2="22"/><rect x="5" y="12" width="3" height="10"/><rect x="10.5" y="7" width="3" height="15"/><rect x="16" y="3" width="3" height="19"/></svg>
+          金融保險 成效示意
+        </div>
+        <div class="uvc-hero">
+          <div class="uvc-big-num">↓65%</div>
+          <div class="uvc-big-label">ESG 報告資料整理時間</div>
+          <div class="uvc-trend-label">一鍵匯出取代人工整理</div>
+        </div>
+        <div>
+          <div class="uvc-bar-chart">
+            <div class="uvc-bar dim" style="height:30%"></div>
+            <div class="uvc-bar dim" style="height:35%"></div>
+            <div class="uvc-bar dim" style="height:38%"></div>
+            <div class="uvc-bar" style="height:52%"></div>
+            <div class="uvc-bar" style="height:65%"></div>
+            <div class="uvc-bar" style="height:74%"></div>
+            <div class="uvc-bar" style="height:82%"></div>
+            <div class="uvc-bar" style="height:90%"></div>
+          </div>
+          <div class="uvc-bar-labels"><span>Q1</span><span>Q4</span></div>
+        </div>
+        <div class="uvc-stats">
+          <div class="uvc-stat accent"><div class="uvc-stat-num">+22%</div><div class="uvc-stat-label">業務穩定達標率</div></div>
+          <div class="uvc-stat"><div class="uvc-stat-num">4.7</div><div class="uvc-stat-label">員工滿意度</div></div>
+          <div class="uvc-stat accent"><div class="uvc-stat-num">季報</div><div class="uvc-stat-label">自動產出</div></div>
+          <div class="uvc-stat"><div class="uvc-stat-num">ESG</div><div class="uvc-stat-label">合規文件完整</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="uc-panel" id="uc-tech">
+      <div>
+        <div class="uc-label">科技 / 新創公司</div>
+        <div class="uc-title">小團隊也值得有<br>完整的心理健康方案</div>
+        <div class="uc-pain">
+          <div class="uc-pain-label">核心痛點</div>
+          <p>工程師、PM 長期高壓，遠距工作加劇孤立感；公司規模小，無資源建立正式 EAP</p>
+        </div>
+        <ul class="uc-helps">
+          <li><span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--warm-green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>彈性時段 + 線上預約，完美適合遠距工作者的生活型態</li>
+          <li><span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--warm-green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>方案不限員工數，10 人新創到千人企業都能導入</li>
+          <li><span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--warm-green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></span>AI 語音陪伴（茶裏），讓遠距工作者在孤立時也有支持</li>
+        </ul>
+        <div class="uc-outcome">
+          <span class="outcome-chip">工作滿意度提升</span>
+          <span class="outcome-chip">遠距凝聚力改善</span>
+          <span class="outcome-chip">快速導入無負擔</span>
+        </div>
+      </div>
+      <div class="uc-visual-card uvc-orange" data-anim="slide-right">
+        <div class="uvc-tag">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          科技新創 成效示意
+        </div>
+        <div class="uvc-hero">
+          <div class="uvc-big-num">+40%</div>
+          <div class="uvc-big-label">工作滿意度提升</div>
+          <div class="uvc-trend-label">導入後季度追蹤平均</div>
+        </div>
+        <div>
+          <div class="uvc-bar-chart">
+            <div class="uvc-bar dim" style="height:45%"></div>
+            <div class="uvc-bar dim" style="height:48%"></div>
+            <div class="uvc-bar dim" style="height:50%"></div>
+            <div class="uvc-bar" style="height:60%"></div>
+            <div class="uvc-bar" style="height:70%"></div>
+            <div class="uvc-bar" style="height:78%"></div>
+            <div class="uvc-bar" style="height:85%"></div>
+            <div class="uvc-bar" style="height:90%"></div>
+          </div>
+          <div class="uvc-bar-labels"><span>導入前</span><span>6 個月後</span></div>
+        </div>
+        <div class="uvc-stats">
+          <div class="uvc-stat accent"><div class="uvc-stat-num">10人</div><div class="uvc-stat-label">最小導入規模</div></div>
+          <div class="uvc-stat accent"><div class="uvc-stat-num">3天</div><div class="uvc-stat-label">完成導入設定</div></div>
+          <div class="uvc-stat"><div class="uvc-stat-num">遠距</div><div class="uvc-stat-label">完整支援</div></div>
+          <div class="uvc-stat"><div class="uvc-stat-num">AI</div><div class="uvc-stat-label">語音陪伴可用</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="uc-panel" id="uc-retail">
+      <div>
+        <div class="uc-label">零售 / 連鎖品牌</div>
+        <div class="uc-title">第一線員工的壓力，<br>值得被正視</div>
+        <div class="uc-pain">
+          <div class="uc-pain-label">核心痛點</div>
+          <p>第一線員工流動率極高；排班緊湊，難以安排固定諮商時段，傳統 EAP 完全不符合需求</p>
+        </div>
+        <ul class="uc-helps">
+          <li><span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--warm-green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></span>AI 語音陪伴（茶裏），員工在休息空檔也能快速紓壓</li>
+          <li><span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--warm-green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg></span>工作角色使用分布報表，清楚看到哪個部門壓力最高</li>
+          <li><span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--warm-green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>彈性短時段預約，配合輪班制度，不用等到有空才能求助</li>
+        </ul>
+        <div class="uc-outcome">
+          <span class="outcome-chip">離職率改善</span>
+          <span class="outcome-chip">人力管理成本降低</span>
+          <span class="outcome-chip">服務品質提升</span>
+        </div>
+      </div>
+      <div class="uc-visual-card uvc-green" data-anim="slide-right">
+        <div class="uvc-tag">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+          零售連鎖 成效示意
+        </div>
+        <div class="uvc-hero">
+          <div class="uvc-big-num">↓30%</div>
+          <div class="uvc-big-label">年度員工流動率</div>
+          <div class="uvc-trend-label">含 AI 語音陪伴方案導入後</div>
+        </div>
+        <div>
+          <div class="uvc-bar-chart">
+            <div class="uvc-bar dim" style="height:82%"></div>
+            <div class="uvc-bar dim" style="height:80%"></div>
+            <div class="uvc-bar dim" style="height:78%"></div>
+            <div class="uvc-bar" style="height:68%"></div>
+            <div class="uvc-bar" style="height:60%"></div>
+            <div class="uvc-bar" style="height:55%"></div>
+            <div class="uvc-bar" style="height:50%"></div>
+            <div class="uvc-bar" style="height:44%"></div>
+          </div>
+          <div class="uvc-bar-labels"><span>導入前</span><span>6 個月後</span></div>
+        </div>
+        <div class="uvc-stats">
+          <div class="uvc-stat accent"><div class="uvc-stat-num">5min</div><div class="uvc-stat-label">AI 最短使用時間</div></div>
+          <div class="uvc-stat"><div class="uvc-stat-num">76%</div><div class="uvc-stat-label">第一線員工使用率</div></div>
+          <div class="uvc-stat"><div class="uvc-stat-num">↓25%</div><div class="uvc-stat-label">人力招募成本</div></div>
+          <div class="uvc-stat accent"><div class="uvc-stat-num">輪班</div><div class="uvc-stat-label">完整配合</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MID-PAGE CTA -->
+<section id="mid-cta" style="background: linear-gradient(135deg, var(--warm-primary-pale) 0%, var(--warm-green-light) 100%); padding: 64px 0;">
+  <div class="container">
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 40px; flex-wrap: wrap;">
+      <div>
+        <div style="font-size: 24px; font-weight: 800; color: var(--neutral-800); margin-bottom: 8px;">
+          看到適合你的產業案例了嗎？
+        </div>
+        <p style="font-size: 16px; color: var(--text-sub); margin: 0;">讓我們了解你的需求，1 個工作天給你初步方案建議。</p>
+      </div>
+      <div style="display: flex; gap: 12px; flex-shrink: 0; flex-wrap: wrap;">
+        <a href="#cta" class="btn-primary">預約免費顧問諮詢 →</a>
+        <button class="btn-secondary" onclick="toggleVoice()">即時詢問</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section id="process">
+  <div class="container">
+    <div style="text-align:center; margin-bottom: 64px;">
+      <div class="section-tag">合作流程</div>
+      <h2 class="section-title">導入比你想像的簡單</h2>
+      <p class="section-sub" style="margin: 0 auto;">5 個步驟，最快 3 天讓員工開始使用。全程有聊心茶室團隊陪伴。</p>
+    </div>
+    <div class="process-steps">
+      <div class="process-step">
+        <div class="step-icon" style="font-size:20px;font-weight:900;color:var(--warm-primary);background:var(--warm-primary-pale)">1</div>
+        <div class="step-title">洽談需求</div>
+        <p class="step-desc">了解公司規模與需求，選擇適合的方案時數與服務類型</p>
+      </div>
+      <div class="process-step">
+        <div class="step-icon" style="font-size:20px;font-weight:900;color:var(--warm-primary);background:var(--warm-primary-pale)">2</div>
+        <div class="step-title">設定後台</div>
+        <p class="step-desc">聊心茶室協助開通企業帳號、匯入員工名單、設定帳號權限</p>
+      </div>
+      <div class="process-step">
+        <div class="step-icon" style="font-size:20px;font-weight:900;color:var(--warm-primary);background:var(--warm-primary-pale)">3</div>
+        <div class="step-title">員工開始使用</div>
+        <p class="step-desc">員工自主預約諮商，全程匿名保護隱私，無需真實姓名</p>
+      </div>
+      <div class="process-step">
+        <div class="step-icon" style="font-size:20px;font-weight:900;color:var(--warm-primary);background:var(--warm-primary-pale)">4</div>
+        <div class="step-title">後台追蹤成效</div>
+        <p class="step-desc">HR 定期查看儀表板，監控使用率與心理態度趨勢</p>
+      </div>
+      <div class="process-step">
+        <div class="step-icon" style="font-size:20px;font-weight:900;color:var(--warm-primary);background:var(--warm-primary-pale)">5</div>
+        <div class="step-title">產出報表</div>
+        <p class="step-desc">依需求匯出月報、季報，直接支援 ESG 報告或內部彙報</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="container">
+    <div style="text-align:center; margin-bottom: 56px;">
+      <div class="section-tag">常見問題</div>
+      <h2 class="section-title">洽談前最常被問到的問題</h2>
+    </div>
+    <div class="faq-grid">
+      <div class="faq-item open" onclick="toggleFAQ(this)">
+        <div class="faq-q">員工資料會被公司看到嗎？<span class="faq-chevron"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></div>
+        <div class="faq-a">完全匿名化機制，HR 後台只會顯示系統代碼（如 EMP-0042），無法對應到員工真實姓名、聯絡方式或個人資訊。諮商內容亦受保密原則保護。員工不需要擔心公司知道自己在使用，這也是方案能真正被使用的關鍵。</div>
+      </div>
+      <div class="faq-item" onclick="toggleFAQ(this)">
+        <div class="faq-q">費用怎麼計算？<span class="faq-chevron"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></div>
+        <div class="faq-a">依方案時數計算，可依公司員工規模與需求彈性調整。具體方案報價在洽談後確認，歡迎透過表單或 Voice Agent 詢問初步方向。</div>
+      </div>
+      <div class="faq-item" onclick="toggleFAQ(this)">
+        <div class="faq-q">員工人數很少也可以用嗎？<span class="faq-chevron"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></div>
+        <div class="faq-a">方案設計相當彈性，最小導入規模不受員工數限制，10 人新創團隊同樣能完整享有後台、報表、諮商服務等功能。</div>
+      </div>
+      <div class="faq-item" onclick="toggleFAQ(this)">
+        <div class="faq-q">導入需要多久時間？<span class="faq-chevron"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></div>
+        <div class="faq-a">一般情況下最快 3 天可完成設定。聊心茶室團隊會協助開通帳號、匯入員工名單、設定權限。全程有專責 Customer Success 陪伴，不需要公司自行配置技術資源。</div>
+      </div>
+      <div class="faq-item" onclick="toggleFAQ(this)">
+        <div class="faq-q">可以選擇哪些類型的服務者？<span class="faq-chevron"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></div>
+        <div class="faq-a">目前提供多元類別：持照心理師（諮商心理師、臨床心理師）、職涯教練、海外治療師（英語或多語言服務）。企業方案可依需求配置適合的服務類型。</div>
+      </div>
+      <div class="faq-item" onclick="toggleFAQ(this)">
+        <div class="faq-q">現有的 EAP 方案可以整合嗎？<span class="faq-chevron"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></div>
+        <div class="faq-a">聊心茶室是獨立平台，可與現有 EAP 方案並行使用，作為補充或擴充。我們也可以協助評估是否有整合或遷移的可能性，請在洽談時告知需求。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <div class="container cta-inner">
+    <div class="cta-grid">
+      <div>
+        <div class="section-tag" style="background:rgba(255,255,255,0.15);color:var(--warm-primary-light)">開始合作</div>
+        <div class="cta-heading">填寫需求，<br>1 個工作天內回覆</div>
+        <p class="cta-sub">讓 聊心茶室團隊了解你的狀況，我們會給你最適合的方案建議，無任何業績壓力。</p>
+        <ul class="cta-bullets">
+          <li>免費初步諮詢，不帶任何業績壓力</li>
+          <li>最快 3 天完成帳號設定，員工隔週即可使用</li>
+          <li>依公司規模與產業量身規劃報價</li>
+          <li>全程有專責 Customer Success 陪伴導入</li>
+        </ul>
+      </div>
+      <div>
+        <div class="contact-form">
+          <div class="form-title">洽談企業方案</div>
+          <div class="form-sub">填寫以下資訊，我們將在 1 個工作天內與你聯繫</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>公司名稱 *</label>
+              <input type="text" placeholder="例：聊心科技股份有限公司">
+            </div>
+            <div class="form-group">
+              <label>聯絡人姓名 *</label>
+              <input type="text" placeholder="您的姓名">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>電子信箱 *</label>
+              <input type="email" placeholder="name@company.com">
+            </div>
+            <div class="form-group">
+              <label>員工人數</label>
+              <select>
+                <option value="">請選擇</option>
+                <option>1–30 人</option>
+                <option>31–100 人</option>
+                <option>101–500 人</option>
+                <option>500 人以上</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-bottom:14px">
+            <label style="display:block;margin-bottom:8px">主要需求（可複選）</label>
+            <div class="needs-row">
+              <span class="need-chip" onclick="toggleChip(this)">員工諮商服務</span>
+              <span class="need-chip" onclick="toggleChip(this)">企業數據後台</span>
+              <span class="need-chip" onclick="toggleChip(this)">ESG 報告</span>
+              <span class="need-chip" onclick="toggleChip(this)">離職率改善</span>
+              <span class="need-chip" onclick="toggleChip(this)">其他</span>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group full">
+              <label>備註</label>
+              <textarea placeholder="其他想了解的事項、目前使用的方案、或特殊需求..."></textarea>
+            </div>
+          </div>
+          <button class="submit-btn" onclick="handleSubmit(this)">預約免費顧問諮詢 →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container footer-inner">
+    <div>© 2026 聊心茶室｜<a href="#">隱私政策</a>｜<a href="#">服務條款</a></div>
+    <div>企業方案洽詢：<a href="mailto:enterprise@healyou.io">enterprise@healyou.io</a></div>
+  </div>
+</footer>
+
+<!-- VOICE AGENT WIDGET -->
+<div class="voice-widget" id="voiceWidget">
+  <div class="voice-expanded" id="voiceExpanded">
+    <div class="ve-header">
+      <div class="ve-avatar"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+      <div>
+        <div class="ve-name">聊心企業顧問</div>
+        <div class="ve-status"><span style="display:inline-block;width:8px;height:8px;background:#4ade80;border-radius:50%;margin-right:5px;vertical-align:middle"></span>線上中，隨時可以詢問</div>
+      </div>
+      <button class="ve-close" onclick="closeVoice()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="ve-messages" id="veMessages">
+      <div class="ve-msg agent">嗨！我是聊心茶室的企業顧問，可以幫你了解企業方案的費用、功能、導入流程，或是根據你們公司的狀況給你初步建議。有什麼想問的嗎？😊</div>
+    </div>
+    <div class="ve-input-row">
+      <input class="ve-input" id="veInput" placeholder="輸入你的問題..." onkeydown="if(event.key==='Enter')sendMsg()">
+      <button class="ve-mic" title="語音輸入"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--neutral-600)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
+      <button class="ve-send" onclick="sendMsg()">➤</button>
+    </div>
+  </div>
+  <button class="voice-btn-pill" id="voiceBtn" onclick="toggleVoice()" title="開啟 AI 企業顧問對話">
+    <span class="vpill-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+    </span>
+    <span class="vpill-text">
+      <strong>AI 即時諮詢</strong>
+      <span>輸入或語音都可以</span>
+    </span>
+  </button>
+</div>
+
+<script>
+  // ===== HERO BAR + COUNTER ANIMATION =====
+  function animHeroBars() {
+    document.querySelectorAll('.hd-bar').forEach(bar => {
+      const i = parseInt(bar.dataset.i || 0);
+      bar.style.animation = `heroBarGrow 0.5s cubic-bezier(0.34,1.56,0.64,1) ${0.6 + i * 0.07}s forwards`;
+    });
+  }
+  function animCounters() {
+    document.querySelectorAll('[data-count]').forEach(el => {
+      const target = parseFloat(el.dataset.count);
+      const suffix = el.dataset.suffix || '';
+      const decimal = parseInt(el.dataset.decimal || 0);
+      const dur = 1400;
+      const start = performance.now();
+      const tick = (now) => {
+        const p = Math.min((now - start) / dur, 1);
+        const eased = 1 - Math.pow(1 - p, 3);
+        const val = target * eased;
+        el.textContent = (decimal ? val.toFixed(decimal) : Math.round(val)) + suffix;
+        if (p < 1) requestAnimationFrame(tick);
+      };
+      setTimeout(() => requestAnimationFrame(tick), 500);
+    });
+  }
+  window.addEventListener('load', () => { animHeroBars(); animCounters(); });
+
+  // ===== SCROLL ANIMATIONS =====
+  const animObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in-view');
+        animObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -60px 0px' });
+  document.querySelectorAll('[data-anim]').forEach(el => animObserver.observe(el));
+
+  // ===== PARALLAX (HERO BLOBS) =====
+  const blob1 = document.querySelector('.hero-blob-1');
+  const blob2 = document.querySelector('.hero-blob-2');
+  window.addEventListener('scroll', () => {
+    const y = window.scrollY;
+    if (blob1) blob1.style.transform = `translateY(${y * 0.25}px)`;
+    if (blob2) blob2.style.transform = `translateY(${y * -0.18}px)`;
+  }, { passive: true });
+
+  // Preview tabs
+  function switchPreview(id, btn) {
+    document.querySelectorAll('.preview-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.preview-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + id).classList.add('active');
+  }
+
+  // Use case tabs
+  function switchUC(id, btn) {
+    document.querySelectorAll('.uc-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.uc-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('uc-' + id).classList.add('active');
+  }
+
+  // FAQ accordion
+  function toggleFAQ(item) {
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  }
+
+  // Needs chips
+  function toggleChip(chip) {
+    chip.classList.toggle('selected');
+  }
+
+  // Submit simulation
+  function handleSubmit(btn) {
+    btn.textContent = '✓ 已收到，1 個工作天內聯繫您！';
+    btn.style.background = 'var(--warm-green)';
+    btn.style.boxShadow = '0 4px 20px rgba(106,158,127,0.4)';
+    btn.disabled = true;
+  }
+
+  // Voice widget
+  const micSVG = `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>`;
+  const closeSVG = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+  let voiceOpen = false;
+  function toggleVoice() {
+    voiceOpen = !voiceOpen;
+    document.getElementById('voiceExpanded').classList.toggle('show', voiceOpen);
+    document.getElementById('voiceBtn').innerHTML = voiceOpen ? closeSVG : micSVG;
+  }
+  function closeVoice() {
+    voiceOpen = false;
+    document.getElementById('voiceExpanded').classList.remove('show');
+    document.getElementById('voiceBtn').innerHTML = micSVG;
+  }
+  function sendMsg() {
+    const input = document.getElementById('veInput');
+    const msg = input.value.trim();
+    if (!msg) return;
+    const msgs = document.getElementById('veMessages');
+    msgs.innerHTML += `<div class="ve-msg user">${msg}</div>`;
+    input.value = '';
+    msgs.scrollTop = msgs.scrollHeight;
+    const responses = {
+      '費用': '方案費用依員工人數與時數方案計算，可以非常彈性調整。建議填寫上方的洽談表單，我們會在 1 個工作天內提供客製化報價。',
+      '導入': '導入流程很快！通常 3–5 個工作天即可完成，包含帳號開通、員工名單匯入、後台設定，全程有我們的 CS 團隊陪伴。',
+      '匿名': 'HR 後台只會顯示員工代碼，無法對應真實身份。諮商內容亦受保密原則保護，公司看不到任何個人諮商記錄。',
+      'esg': 'ESG 報表可一鍵匯出 PDF / Excel / CSV，包含使用率、滿意度、議題分類等數據，附上企業 Logo 可直接用於永續報告書。',
+    };
+    let reply = '謝謝你的詢問！這個問題建議直接填寫洽談表單，我們的顧問會給你最準確的解答。或是你可以問我費用、導入流程、匿名機制或 ESG 報表等問題。';
+    for (const [key, val] of Object.entries(responses)) {
+      if (msg.toLowerCase().includes(key.toLowerCase())) { reply = val; break; }
+    }
+    setTimeout(() => {
+      msgs.innerHTML += `<div class="ve-msg agent">${reply}</div>`;
+      msgs.scrollTop = msgs.scrollHeight;
+    }, 800);
+  }
+
+  // Nav scroll effect
+  window.addEventListener('scroll', () => {
+    const nav = document.querySelector('nav');
+    nav.style.boxShadow = window.scrollY > 20 ? '0 2px 20px rgba(45,36,22,0.1)' : 'none';
+  });
+</script>
+</body>
+</html>
