@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>Tomo — 畫面流程圖</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--paper:#f7f2ec;--ink:#2e2318;--ink2:rgba(46,35,24,.44);--glass:rgba(255,255,255,.55);--gb:rgba(255,255,255,.85);}
+
+/* ── page ── */
+body{background:#DDD8D0;font-family:'Noto Serif TC',serif;padding:52px 60px 120px;overflow-x:auto;}
+.page-header{margin-bottom:64px;min-width:max-content;}
+.page-title{font-family:'Playfair Display',serif;font-size:30px;color:#2e2318;margin-bottom:6px;}
+.page-meta{font-size:12px;color:rgba(46,35,24,.45);letter-spacing:.08em;line-height:2;}
+.legend{display:flex;gap:20px;flex-wrap:wrap;margin-top:16px;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:10px;color:rgba(46,35,24,.5);letter-spacing:.06em;}
+.legend-dot{width:8px;height:8px;border-radius:50%;}
+
+/* ── section ── */
+.section{margin-bottom:100px;}
+.section-header{display:flex;align-items:center;gap:14px;margin-bottom:40px;min-width:max-content;}
+.section-num{font-family:'Playfair Display',serif;font-style:italic;font-size:20px;color:rgba(46,35,24,.3);}
+.section-title{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(46,35,24,.5);font-weight:500;}
+.section-line{width:120px;height:1px;background:rgba(46,35,24,.15);}
+
+/* ── flow row ── */
+.flow-row{display:flex;align-items:flex-start;flex-wrap:nowrap;width:max-content;}
+
+/* ── arrow ── */
+/* Centers vertically against the iPhone frame (852 screen + 14 top + 20 bottom bezel = 886 total height) */
+.arrow-wrap{display:flex;align-items:center;margin-top:430px;flex-shrink:0;padding:0 8px;}
+.arrow-line{width:36px;height:1.5px;background:rgba(46,35,24,.3);}
+.arrow-head{width:0;height:0;border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:8px solid rgba(46,35,24,.3);}
+
+/* ── screen item ── */
+.screen-item{display:flex;flex-direction:column;align-items:center;flex-shrink:0;}
+.screen-label{margin-top:20px;text-align:center;max-width:420px;}
+.s-name{display:block;font-size:16px;color:#2e2318;font-weight:500;margin-bottom:6px;text-align:center;}
+.s-desc{display:block;font-size:14px;color:rgba(46,35,24,.55);letter-spacing:.02em;line-height:1.85;text-align:left;}
+.s-trigger{display:block;margin-top:10px;font-size:13px;color:rgba(46,35,24,.45);background:rgba(46,35,24,.08);border-radius:10px;padding:5px 12px;letter-spacing:.04em;text-align:center;}
+
+/* ══════════════════════════════════════
+   iPhone 17 Pro Frame
+   Screen: 393 × 852 px (natural size, no scaling)
+   Frame outer: ~429 × 906 px
+══════════════════════════════════════ */
+.iphone{
+  width:429px; /* 393 screen + 18px side bezel × 2 */
+  background:linear-gradient(145deg,#48484A 0%,#2C2C2E 45%,#1C1C1E 100%);
+  border-radius:60px;
+  padding:18px 18px 24px;
+  position:relative;
+  box-shadow:
+    0 0 0 1.5px rgba(255,255,255,.22),
+    0 0 0 3.5px rgba(0,0,0,.65),
+    0 0 0 5px rgba(255,255,255,.07),
+    0 40px 80px rgba(0,0,0,.5),
+    inset 0 1px 0 rgba(255,255,255,.15);
+  flex-shrink:0;
+}
+
+/* hardware buttons — positioned relative to device */
+.hw{position:absolute;background:linear-gradient(90deg,#3a3a3c,#424244);border-radius:2px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 1px 0 rgba(0,0,0,.5);}
+.hw-action{left:-5px;top:100px;width:5px;height:36px;border-radius:2px 0 0 2px;}
+.hw-volup{left:-5px;top:158px;width:5px;height:56px;border-radius:2px 0 0 2px;}
+.hw-voldn{left:-5px;top:228px;width:5px;height:56px;border-radius:2px 0 0 2px;}
+.hw-side{right:-5px;top:168px;width:5px;height:76px;border-radius:0 2px 2px 0;}
+
+/* screen viewport — exact iPhone 17 Pro resolution */
+.iphone-screen{
+  width:393px;
+  height:852px;
+  overflow:hidden;
+  border-radius:44px;
+  background:#000;
+  position:relative;
+}
+
+/* Dynamic Island */
+.di{
+  position:absolute;top:12px;left:50%;transform:translateX(-50%);
+  width:120px;height:34px;background:#000;border-radius:20px;z-index:200;pointer-events:none;
+}
+
+/* screen content — natural size, no scaling */
+.sc{
+  width:100%;
+  height:100%;
+  position:relative;
+  overflow:hidden;
+  font-family:'Noto Serif TC',serif;
+}
+.sc *{box-sizing:border-box;}
+
+/* ── watercolor backgrounds ── */
+
+/* Ambient: 對應原型 canvas 實際渲染色（AMBIENT 陣列色系，以冷色調為主）*/
+.wc-ob{background:
+  radial-gradient(ellipse 500px 440px at -5% 5%,rgba(175,210,205,.52) 0%,transparent 62%),
+  radial-gradient(ellipse 440px 380px at 105% 10%,rgba(195,215,200,.38) 0%,transparent 58%),
+  radial-gradient(ellipse 460px 500px at -2% 75%,rgba(180,195,220,.38) 0%,transparent 60%),
+  radial-gradient(ellipse 500px 440px at 108% 68%,rgba(175,205,215,.40) 0%,transparent 62%),
+  radial-gradient(ellipse 420px 480px at 50% 108%,rgba(185,200,225,.32) 0%,transparent 60%),
+  radial-gradient(ellipse 300px 280px at 52% 42%,rgba(210,195,175,.18) 0%,transparent 55%),
+  var(--paper);}
+
+/* 錄音主頁待機：偏冷藍綠 */
+.wc-calm{background:
+  radial-gradient(ellipse 380px 280px at 10% 28%,rgba(170,205,218,.55) 0%,transparent 68%),
+  radial-gradient(ellipse 260px 220px at 78% 52%,rgba(185,200,225,.36) 0%,transparent 62%),
+  radial-gradient(ellipse 220px 240px at 44% 84%,rgba(125,198,142,.26) 0%,transparent 60%),
+  var(--paper);}
+
+/* 錄音中 快樂：暖黃橙 */
+.wc-happy{background:
+  radial-gradient(ellipse 340px 260px at 14% 24%,rgba(255,210,80,.52) 0%,transparent 65%),
+  radial-gradient(ellipse 280px 230px at 68% 48%,rgba(255,125,65,.38) 0%,transparent 62%),
+  radial-gradient(ellipse 230px 250px at 42% 82%,rgba(250,190,180,.32) 0%,transparent 60%),
+  radial-gradient(ellipse 190px 200px at 88% 20%,rgba(125,198,142,.22) 0%,transparent 56%),
+  var(--paper);}
+
+/* 儲存確認背景 */
+.wc-grateful{background:
+  radial-gradient(ellipse 360px 270px at 18% 32%,rgba(125,198,142,.52) 0%,transparent 65%),
+  radial-gradient(ellipse 270px 240px at 74% 44%,rgba(250,190,180,.38) 0%,transparent 62%),
+  radial-gradient(ellipse 240px 220px at 48% 84%,rgba(255,210,80,.28) 0%,transparent 58%),
+  var(--paper);}
+
+/* 錄音中 悲傷：冷藍紫 */
+.wc-sad{background:
+  radial-gradient(ellipse 340px 260px at 16% 30%,rgba(95,120,198,.42) 0%,transparent 65%),
+  radial-gradient(ellipse 270px 230px at 70% 50%,rgba(170,205,218,.35) 0%,transparent 62%),
+  radial-gradient(ellipse 220px 250px at 44% 82%,rgba(112,92,155,.25) 0%,transparent 60%),
+  var(--paper);}
+
+/* 通用 default（Auth、Loading） */
+.wc-default{background:
+  radial-gradient(ellipse 320px 240px at 12% 22%,rgba(185,200,225,.45) 0%,transparent 68%),
+  radial-gradient(ellipse 270px 210px at 72% 50%,rgba(250,190,180,.38) 0%,transparent 65%),
+  radial-gradient(ellipse 210px 250px at 40% 80%,rgba(125,198,142,.26) 0%,transparent 62%),
+  var(--paper);}
+
+/* ── onboarding ── */
+.ob-wrap{height:100%;display:flex;flex-direction:column;position:relative;}
+.ob-skip{position:absolute;top:54px;right:22px;background:none;border:none;font-family:'Noto Serif TC',serif;font-size:13px;color:var(--ink2);padding:4px 8px;cursor:default;}
+.ob-illus{flex:1;display:flex;align-items:center;justify-content:center;padding-top:80px;max-height:340px;}
+.ob-brand-lg{font-family:'Playfair Display',serif;font-style:italic;font-size:72px;color:var(--ink);}
+.ob-text{padding:20px 32px 0;text-align:center;}
+.ob-tag{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink2);margin-bottom:10px;}
+.ob-title{font-family:'Playfair Display',serif;font-size:26px;line-height:1.35;color:var(--ink);margin-bottom:10px;}
+.ob-desc{font-size:13px;line-height:2.1;color:var(--ink2);max-width:280px;margin:0 auto;}
+.ob-footer{padding:20px 32px 44px;display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:auto;}
+.ob-dots{display:flex;gap:6px;align-items:center;}
+.ob-dot{width:6px;height:6px;border-radius:50%;background:rgba(46,35,24,.18);}
+.ob-dot.active{width:20px;border-radius:3px;background:var(--ink);}
+.ob-cta{width:100%;max-width:280px;padding:15px;background:var(--glass);border:1px solid var(--gb);border-radius:50px;font-family:'Noto Serif TC',serif;font-size:15px;color:var(--ink);letter-spacing:.06em;box-shadow:0 4px 20px rgba(0,0,0,.07);cursor:default;}
+
+/* voice illustration */
+.ob-voice-wrap{position:relative;width:160px;height:160px;display:flex;align-items:center;justify-content:center;}
+.ob-wave{position:absolute;border-radius:50%;border:1.5px solid rgba(46,35,24,.13);}
+.ob-wave:nth-child(1){width:80px;height:80px;opacity:.6;}
+.ob-wave:nth-child(2){width:115px;height:115px;opacity:.38;}
+.ob-wave:nth-child(3){width:148px;height:148px;opacity:.2;}
+.ob-wave:nth-child(4){width:182px;height:182px;opacity:.1;}
+.ob-mic-c{width:54px;height:54px;border-radius:50%;background:var(--glass);border:1px solid var(--gb);display:flex;align-items:center;justify-content:center;z-index:1;box-shadow:0 6px 20px rgba(0,0,0,.08);}
+
+/* mood grid — 7×3, 28px dots, 8px gap（與原型 JS 相同） */
+.ob-mood-wrap{display:flex;flex-direction:column;gap:8px;align-items:center;}
+.ob-mood-row{display:flex;gap:8px;}
+.ob-mdot{width:28px;height:28px;border-radius:8px;opacity:.75;}
+
+/* reflection illustration */
+.ob-ref-wrap{display:flex;flex-direction:column;align-items:flex-start;gap:12px;max-width:290px;padding:0 10px;}
+.ob-bubble{background:var(--glass);border:1px solid var(--gb);border-radius:16px;padding:12px 16px;font-size:13px;line-height:1.8;color:var(--ink);box-shadow:0 4px 14px rgba(0,0,0,.06);}
+.ob-bubble.past{border-radius:16px 16px 16px 4px;opacity:.6;font-size:12px;}
+.ob-bubble.now{align-self:flex-end;border-radius:16px 16px 4px 16px;background:rgba(255,255,255,.82);}
+.ob-rlabel{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);padding:0 4px;}
+
+/* ── auth ── */
+.auth-full{height:100%;display:flex;align-items:center;justify-content:center;}
+.auth-wrap{width:100%;padding:0 28px;display:flex;flex-direction:column;align-items:center;gap:20px;}
+.auth-brand{font-family:'Playfair Display',serif;font-style:italic;font-size:36px;color:var(--ink);}
+.auth-sub{font-size:13px;color:var(--ink2);letter-spacing:.05em;text-align:center;line-height:2;margin-top:-8px;}
+.auth-card{width:100%;background:var(--glass);border:1px solid var(--gb);border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:10px;}
+.auth-lbl{font-size:11px;color:var(--ink2);letter-spacing:.1em;text-align:center;padding-bottom:2px;}
+.auth-back{display:flex;align-items:center;gap:4px;background:none;border:none;font-family:'Noto Serif TC',serif;font-size:12px;color:var(--ink2);cursor:default;}
+.btn-apple{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:14px;border-radius:13px;background:#1a1a1a;color:#fff;font-family:'Noto Serif TC',serif;font-size:14px;border:none;letter-spacing:.04em;cursor:default;}
+.btn-google{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:14px;border-radius:13px;background:rgba(255,255,255,.92);color:var(--ink);font-family:'Noto Serif TC',serif;font-size:14px;border:1px solid rgba(46,35,24,.14);letter-spacing:.04em;cursor:default;}
+.auth-note{font-size:11px;color:rgba(46,35,24,.3);letter-spacing:.06em;text-align:center;}
+
+/* ── loading ── */
+.loading-full{height:100%;display:flex;align-items:center;justify-content:center;}
+.loading-card{background:var(--glass);border:1px solid var(--gb);border-radius:24px;padding:28px 44px;display:flex;flex-direction:column;align-items:center;gap:14px;}
+.spinner-ring{width:28px;height:28px;border:2.5px solid rgba(46,35,24,.1);border-top-color:rgba(46,35,24,.4);border-radius:50%;}
+.loading-lbl{font-size:12px;color:var(--ink2);letter-spacing:.1em;}
+
+/* ── record ── */
+.rec-full{height:100%;display:flex;flex-direction:column;}
+.rec-header{padding:54px 24px 0;display:flex;justify-content:space-between;align-items:flex-start;}
+.brand{font-family:'Playfair Display',serif;font-style:italic;font-size:20px;color:var(--ink);}
+.rec-date-lbl{font-size:11px;color:var(--ink2);margin-top:2px;letter-spacing:.05em;}
+.diary-btn{display:flex;align-items:center;gap:6px;background:var(--glass);border:1px solid var(--gb);border-radius:20px;padding:8px 14px;font-size:12px;color:#5a4a3a;font-family:'Noto Serif TC',serif;cursor:default;}
+.diary-cnt{background:rgba(46,35,24,.12);border-radius:10px;padding:1px 7px;font-size:11px;min-width:20px;text-align:center;}
+.emotion-pill{align-self:center;display:flex;align-items:center;gap:7px;background:var(--glass);border:1px solid var(--gb);border-radius:20px;padding:7px 16px;font-size:12px;color:#5a4a3a;margin-top:16px;}
+.pill-dot{width:7px;height:7px;border-radius:50%;background:#c9b99a;}
+.transcript-area{flex:1;display:flex;align-items:center;justify-content:center;padding:32px;}
+.transcript-box{max-width:300px;width:100%;text-align:center;}
+.ref-eyebrow-sm{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink2);margin-bottom:14px;}
+.transcript-text{font-size:15px;line-height:2.1;color:var(--ink);font-weight:300;font-style:italic;}
+.rec-controls{padding:16px 32px 40px;display:flex;flex-direction:column;align-items:center;gap:12px;}
+.vol-viz{display:flex;align-items:center;gap:2px;height:18px;}
+.vbar{width:3px;background:rgba(120,90,70,.38);border-radius:2px;}
+.btn-row{display:flex;align-items:center;position:relative;width:100%;justify-content:center;}
+.mic-btn{width:68px;height:68px;border-radius:50%;border:1.5px solid rgba(255,255,255,.88);background:rgba(255,255,255,.68);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 28px rgba(0,0,0,.09),inset 0 1px 0 rgba(255,255,255,.9);cursor:default;}
+.mic-btn.rec{background:rgba(200,80,60,.13);border-color:rgba(200,80,60,.4);box-shadow:0 0 0 10px rgba(200,80,60,.07),0 8px 28px rgba(200,80,60,.18),inset 0 1px 0 rgba(255,255,255,.9);}
+.status-lbl{font-size:11px;letter-spacing:.11em;text-transform:uppercase;color:rgba(90,70,55,.5);}
+.status-lbl.rec{color:rgba(200,80,60,.65);}
+.rec-progress-hint{font-size:11px;color:rgba(90,70,55,.38);letter-spacing:.04em;height:16px;}
+.side-btn-abs{position:absolute;right:0;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:default;}
+.side-icon{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.65);border:1px solid rgba(255,255,255,.88);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.07);}
+.side-lbl{font-size:10px;letter-spacing:.12em;color:var(--ink2);}
+
+/* reflection inline card */
+.ref-inline{position:absolute;width:calc(100% - 64px);max-width:300px;background:rgba(255,255,255,.82);border:1px solid rgba(255,255,255,.96);border-radius:20px;padding:16px 18px 14px;z-index:12;box-shadow:0 8px 32px rgba(0,0,0,.1);}
+.ref-inline-eyebrow{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);margin-bottom:8px;}
+.ref-inline-quote{font-size:13px;line-height:1.95;color:var(--ink);font-weight:300;margin-bottom:10px;}
+.ref-inline-close{position:absolute;top:10px;right:12px;background:none;border:none;font-size:16px;color:rgba(46,35,24,.3);line-height:1;}
+.ref-more{font-size:11px;color:var(--ink2);letter-spacing:.06em;}
+
+/* ── recording progress ring ── */
+.rec-ring-svg{position:absolute;width:86px;height:86px;transform:rotate(-90deg);pointer-events:none;}
+.rec-ring-track{fill:none;stroke:rgba(46,35,24,.1);stroke-width:2.5;}
+.rec-ring-fill{fill:none;stroke:rgba(46,35,24,.45);stroke-width:2.5;stroke-linecap:round;stroke-dasharray:226;stroke-dashoffset:122;}
+
+/* ── done sheet ── */
+.done-overlay{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;}
+.done-sheet{background:var(--paper);border-radius:24px 24px 0 0;box-shadow:0 -8px 40px rgba(0,0,0,.16);padding:12px 24px 44px;}
+.done-handle{width:36px;height:4px;border-radius:2px;background:rgba(46,35,24,.16);margin:0 auto 16px;}
+.done-canvas-wrap{border-radius:14px;overflow:hidden;width:100%;height:150px;margin-bottom:14px;}
+.done-canvas-prev{width:100%;height:100%;background:
+  radial-gradient(ellipse 200px 130px at 18% 40%,rgba(125,198,142,.62) 0%,transparent 58%),
+  radial-gradient(ellipse 160px 120px at 64% 32%,rgba(255,210,80,.52) 0%,transparent 55%),
+  radial-gradient(ellipse 140px 110px at 48% 82%,rgba(250,190,180,.48) 0%,transparent 52%),
+  radial-gradient(ellipse 120px 100px at 82% 66%,rgba(185,200,225,.44) 0%,transparent 52%),
+  var(--paper);}
+.done-text-card{background:rgba(255,255,255,.65);border:1px solid rgba(255,255,255,.9);border-radius:14px;padding:12px 16px;font-size:13px;line-height:2;color:var(--ink);font-weight:300;margin-bottom:12px;max-height:110px;overflow:hidden;}
+.done-tags{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px;}
+.done-tag{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.9);border-radius:20px;padding:5px 11px;font-size:11px;color:var(--ink);letter-spacing:.05em;}
+.done-tag-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.done-confirm{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:14px;background:var(--ink);border:none;border-radius:14px;font-family:'Noto Serif TC',serif;font-size:14px;color:#f7f2ec;margin-bottom:8px;letter-spacing:.06em;cursor:default;}
+.done-restart{display:flex;align-items:center;justify-content:center;width:100%;padding:10px;background:none;border:none;font-family:'Noto Serif TC',serif;font-size:13px;color:var(--ink2);cursor:default;}
+
+/* ── diary ── */
+.diary-full{height:100%;display:flex;flex-direction:column;background:var(--paper);}
+.diary-hd{padding:54px 24px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(46,35,24,.08);}
+.diary-title{font-family:'Playfair Display',serif;font-size:22px;color:var(--ink);}
+.new-rec-btn{display:flex;align-items:center;gap:7px;background:var(--ink);border:none;border-radius:20px;padding:9px 16px;font-family:'Noto Serif TC',serif;font-size:12px;color:#f7f2ec;letter-spacing:.04em;cursor:default;}
+.entries-list{padding:24px 24px 80px;display:flex;flex-direction:column;gap:16px;overflow:hidden;flex:1;}
+
+/* empty state */
+.entry-empty{display:flex;flex-direction:column;align-items:center;padding:60px 32px 40px;text-align:center;flex:1;}
+.empty-dots{display:flex;gap:10px;margin-bottom:32px;}
+.empty-dot{width:22px;height:22px;border-radius:50%;opacity:.55;}
+.empty-title{font-family:'Playfair Display',serif;font-size:22px;color:var(--ink);margin-bottom:10px;line-height:1.4;}
+.empty-sub{font-size:13px;color:var(--ink2);line-height:2.1;max-width:240px;margin-bottom:32px;}
+.empty-cta{display:flex;align-items:center;gap:8px;background:var(--ink);border:none;border-radius:50px;padding:14px 28px;font-family:'Noto Serif TC',serif;font-size:14px;color:#f7f2ec;letter-spacing:.06em;box-shadow:0 6px 22px rgba(46,35,24,.18);cursor:default;}
+
+/* entry cards */
+.entry-wrap{position:relative;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.07);flex-shrink:0;}
+.entry-img{display:block;width:100%;height:160px;}
+.entry-overlay{position:absolute;inset:0;padding:14px 18px;display:flex;flex-direction:column;justify-content:flex-end;background:linear-gradient(to top,rgba(247,242,236,.96) 0%,rgba(247,242,236,.15) 42%,transparent 100%);}
+.em-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.entry-meta{display:flex;align-items:center;gap:7px;margin-bottom:4px;}
+.em-name{font-size:11px;color:var(--ink2);letter-spacing:.07em;}
+.em-time{font-size:11px;color:var(--ink2);margin-left:auto;}
+.entry-text{font-size:13px;line-height:1.7;color:var(--ink);font-weight:300;}
+.ep1{background:
+  radial-gradient(ellipse 200px 140px at 14% 38%,rgba(255,210,80,.65) 0%,transparent 58%),
+  radial-gradient(ellipse 160px 120px at 66% 30%,rgba(255,125,65,.5) 0%,transparent 54%),
+  radial-gradient(ellipse 140px 110px at 44% 82%,rgba(250,190,180,.44) 0%,transparent 52%),var(--paper);}
+.ep2{background:
+  radial-gradient(ellipse 200px 140px at 16% 36%,rgba(170,205,218,.65) 0%,transparent 58%),
+  radial-gradient(ellipse 160px 120px at 62% 44%,rgba(185,200,225,.5) 0%,transparent 54%),
+  radial-gradient(ellipse 140px 110px at 48% 84%,rgba(125,198,142,.38) 0%,transparent 52%),var(--paper);}
+.ep3{background:
+  radial-gradient(ellipse 200px 140px at 16% 38%,rgba(125,198,142,.65) 0%,transparent 58%),
+  radial-gradient(ellipse 160px 120px at 66% 40%,rgba(250,190,180,.5) 0%,transparent 54%),
+  radial-gradient(ellipse 140px 110px at 40% 80%,rgba(255,210,80,.38) 0%,transparent 52%),var(--paper);}
+
+/* ── modal ── */
+.modal-overlay{position:absolute;inset:0;background:rgba(46,35,24,.38);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50;}
+.modal-card{background:var(--paper);border-radius:20px;width:100%;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.2);position:relative;}
+.modal-img{width:100%;height:160px;display:block;flex-shrink:0;}
+.modal-body{padding:20px 24px 24px;overflow:hidden;}
+.modal-meta{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+.modal-time{font-size:11px;color:var(--ink2);margin-left:auto;}
+.modal-text{font-size:14px;line-height:2;color:var(--ink);font-weight:300;}
+.modal-close{position:absolute;top:12px;right:12px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.78);border:none;display:flex;align-items:center;justify-content:center;color:var(--ink2);font-size:14px;z-index:2;cursor:default;}
+.modal-tag{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.9);border-radius:20px;padding:4px 10px;font-size:11px;color:var(--ink);}
+
+/* ── reflection panel ── */
+.ref-panel-overlay{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;z-index:40;}
+.ref-panel{background:var(--paper);border-radius:24px 24px 0 0;box-shadow:0 -8px 40px rgba(0,0,0,.14);padding:12px 28px 48px;}
+.ref-handle{width:36px;height:4px;border-radius:2px;background:rgba(46,35,24,.16);margin:0 auto 22px;}
+.ref-eyebrow{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink2);margin-bottom:10px;}
+.ref-from{font-size:12px;color:var(--ink2);margin-bottom:8px;}
+.ref-quote-card{background:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.9);border-radius:16px;padding:16px 18px;font-size:14px;line-height:2;color:var(--ink);font-style:italic;margin-bottom:18px;position:relative;}
+.ref-quote-card::before{content:'\201C';font-family:'Playfair Display',serif;font-size:36px;color:rgba(46,35,24,.1);position:absolute;top:-4px;left:12px;line-height:1;}
+.ref-play{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;background:rgba(46,35,24,.07);border:1px solid rgba(46,35,24,.12);border-radius:14px;font-family:'Noto Serif TC',serif;font-size:13px;color:var(--ink);margin-bottom:10px;cursor:default;}
+.ref-dismiss{display:flex;align-items:center;justify-content:center;width:100%;padding:12px;background:none;border:none;font-family:'Noto Serif TC',serif;font-size:13px;color:var(--ink2);cursor:default;}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1 class="page-title">Tomo — 畫面流程圖</h1>
+  <p class="page-meta">iOS App Prototype &nbsp;·&nbsp; 10 個畫面狀態 &nbsp;·&nbsp; iPhone 17 Pro（393 × 852 pt，原始尺寸）&nbsp;·&nbsp; 2026-03-22</p>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#F5C030"></div>快樂</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#F07030"></div>興奮</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#8BB8C8"></div>平靜</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#6478C0"></div>悲傷</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#C09ADC"></div>焦慮</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#DC4840"></div>憤怒</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#80C888"></div>感激</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#9E9488"></div>疲倦</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#FCC0B5"></div>溫柔</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#7460A0"></div>孤獨</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 1 — 初次使用流程
+══════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">01</span>
+    <span class="section-title">初次使用流程 — Onboarding → Auth → Loading</span>
+    <div class="section-line"></div>
+  </div>
+  <div class="flow-row">
+
+    <!-- OB1: Brand -->
+    <div class="screen-item">
+      <div class="iphone">
+        <div class="hw hw-action"></div><div class="hw hw-volup"></div><div class="hw hw-voldn"></div><div class="hw hw-side"></div>
+        <div class="iphone-screen">
+          <div class="di"></div>
+          <div class="sc wc-ob">
+            <div class="ob-wrap">
+              <button class="ob-skip">略過</button>
+              <div class="ob-illus"><div class="ob-brand-lg">Tomo</div></div>
+              <div class="ob-text">
+                <div class="ob-tag">心境水彩日記</div>
+                <div class="ob-title">說出今天的心情<br>讓水彩替你留下來</div>
+                <div class="ob-desc">說話，記錄，感受。你的每一段話，都是獨一無二的。</div>
+              </div>
+              <div class="ob-footer">
+                <div class="ob-dots"><div class="ob-dot active"></div><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot"></div></div>
+                <button class="ob-cta">繼續</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="screen-label">
+        <span class="s-name">Onboarding 1／4 — 品牌 Splash</span>
+        <span class="s-desc">
+          • App 首次啟動自動顯示<br>
+          • 左右滑動切換頁（touchstart → touchend，位移 &gt; 40px）<br>
+          • 右上角「略過」直接跳登入畫面<br>
+          • 「繼續」進下一頁，最後一頁 CTA 文字改為「開始使用」
+        </span>
+      </div>
+    </div>
+
+    <div class="arrow-wrap"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+    <!-- OB2: Voice -->
+    <div class="screen-item">
+      <div class="iphone">
+        <div class="hw hw-action"></div><div class="hw hw-volup"></div><div class="hw hw-voldn"></div><div class="hw hw-side"></div>
+        <div class="iphone-screen">
+          <div class="di"></div>
+          <div class="sc wc-ob">
+            <div class="ob-wrap">
+              <button class="ob-skip">略過</button>
+              <div class="ob-illus">
+                <div class="ob-voice-wrap">
+                  <div class="ob-wave"></div><div class="ob-wave"></div><div class="ob-wave"></div><div class="ob-wave"></div>
+                  <div class="ob-mic-c">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2e2318" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
+                      <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
+                      <line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div class="ob-text">
+                <div class="ob-tag">語音記錄</div>
+                <div class="ob-title">用聲音捕捉<br>當下的心境</div>
+                <div class="ob-desc">按下麥克風，說出你的感受。Tomo 會即時感應你的情緒。</div>
+              </div>
+              <div class="ob-footer">
+                <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot active"></div><div class="ob-dot"></div><div class="ob-dot"></div></div>
+                <button class="ob-cta">繼續</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="screen-label">
+        <span class="s-name">Onboarding 2／4 — 語音介紹</span>
+        <span class="s-desc">
+          • 同 OB1 左右滑動邏輯<br>
+          • 麥克風音波：4 圈 ring，CSS animation waveEx<br>
+            （2.4s ease-out infinite，每圈 delay +0.55s）
+        </span>
+      </div>
+    </div>
+
+    <div class="arrow-wrap"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+    <!-- OB3: Mood Grid -->
+    <div class="screen-item">
+      <div class="iphone">
+        <div class="hw hw-action"></div><div class="hw hw-volup"></div><div class="hw hw-voldn"></div><div class="hw hw-side"></div>
+        <div class="iphone-screen">
+          <div class="di"></div>
+          <div class="sc wc-ob">
+            <div class="ob-wrap">
+              <button class="ob-skip">略過</button>
+              <div class="ob-illus">
+                <div class="ob-mood-wrap">
+                  <!-- Row 1: pal index 0–6 -->
+                  <div class="ob-mood-row">
+                    <div class="ob-mdot" style="background:#F5D08A"></div>
+                    <div class="ob-mdot" style="background:#F5D08A"></div>
+                    <div class="ob-mdot" style="background:#F07030"></div>
+                    <div class="ob-mdot" style="background:#F5C030"></div>
+                    <div class="ob-mdot" style="background:#80C888"></div>
+                    <div class="ob-mdot" style="background:#9E9488"></div>
+                    <div class="ob-mdot" style="background:#F5D08A"></div>
+                  </div>
+                  <!-- Row 2: pal index 7–13 -->
+                  <div class="ob-mood-row">
+                    <div class="ob-mdot" style="background:#6478C0"></div>
+                    <div class="ob-mdot" style="background:#F5C030"></div>
+                    <div class="ob-mdot" style="background:#FCC0B5"></div>
+                    <div class="ob-mdot" style="background:#80C888"></div>
+                    <div class="ob-mdot" style="background:#F07030"></div>
+                    <div class="ob-mdot" style="background:#F5D08A"></div>
+                    <div class="ob-mdot" style="background:#8BB8C8"></div>
+                  </div>
+                  <!-- Row 3: pal index 14–20 -->
+                  <div class="ob-mood-row">
+                    <div class="ob-mdot" style="background:#F5C030"></div>
+                    <div class="ob-mdot" style="background:#9E9488"></div>
+                    <div class="ob-mdot" style="background:#80C888"></div>
+                    <div class="ob-mdot" style="background:#F5D08A"></div>
+                    <div class="ob-mdot" style="background:#6478C0"></div>
+                    <div class="ob-mdot" style="background:#F5C030"></div>
+                    <div class="ob-mdot" style="background:#80C888"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="ob-text">
+                <div class="ob-tag">圖像化呈現</div>
+                <div class="ob-title">每一天的心情<br>都成為一幅水彩</div>
+                <div class="ob-desc">情緒轉化為色彩，記憶化為畫面。回頭看，你會看見自己走過的路。</div>
+              </div>
+              <div class="ob-footer">
+                <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot active"></div><div class="ob-dot"></div></div>
+                <button class="ob-cta">繼續</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="screen-label">
+        <span class="s-name">Onboarding 3／4 — 情緒色彩</span>
+        <span class="s-desc">
+          • 7×3 = 21 個色塊，JS 動態生成<br>
+          • 依序淡入（animationDelay 每格 +0.05s，共 ~1s 完成）<br>
+          • 顏色來自原型 palette 陣列（非情緒對應色）
+        </span>
+      </div>
+    </div>
+
+    <div class="arrow-wrap"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+    <!-- OB4: Reflection -->
+    <div class="screen-item">
+      <div class="iphone">
+        <div class="hw hw-action"></div><div class="hw hw-volup"></div><div class="hw hw-voldn"></div><div class="hw hw-side"></div>
+        <div class="iphone-screen">
+          <div class="di"></div>
+          <div class="sc wc-ob">
+            <div class="ob-wrap">
+              <button class="ob-skip">略過</button>
+              <div class="ob-illus">
+                <div class="ob-ref-wrap">
+                  <div class="ob-rlabel">三週前，你說過…</div>
+                  <div class="ob-bubble past">「今天真的很感謝，克服了很難的一關，覺得自己還是可以的。」</div>
+                  <div class="ob-rlabel" style="align-self:flex-end;">今天錄音時</div>
+                  <div class="ob-bubble now" style="font-style:italic;font-size:13px;opacity:.78;">這段話，悄悄出現在你眼前</div>
+                </div>
+              </div>
+              <div class="ob-text">
+                <div class="ob-tag">Reflection</div>
+                <div class="ob-title">過去的你<br>支持現在的你</div>
+                <div class="ob-desc">錄音時偵測到低落情緒，你曾說過的感恩話語會靜靜浮現，讓過去的自己陪你走過現在。</div>
+              </div>
+              <div class="ob-footer">
+                <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot active"></div></div>
+                <button class="ob-cta">開始使用</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="screen-label">
+        <span class="s-name">Onboarding 4／4 — Reflection 預覽</span>
+        <span class="s-desc">
+          • CTA 文字變為「開始使用」<br>
+          • 點「開始使用」→ skipOb() → 跳登入畫面<br>
+          • 對話泡泡為靜態示範，非真實資料
+        </span>
+      </div>
+    </div>
+
+    <div class="arrow-wrap"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+    <!-- Auth -->
+    <div class="screen-item">
+      <div class="iphone">
+        <div class="hw hw-action"></div><div class="hw hw-volup"></div><div class="hw hw-voldn"></div><div class="hw hw-side"></div>
+        <div class="iphone-screen">
+          <div class="di"></div>
+          <div class="sc wc-default">
+            <div class="auth-full">
+              <div class="auth-wrap">
+                <div class="auth-brand">Tomo</div>
+                <div class="auth-sub">登入後開始記錄你的心情</div>
+                <div class="auth-card">
+                  <div class="auth-back">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                    返回
+                  </div>
+                  <div class="auth-lbl">選擇登入方式繼續</div>
+                  <button class="btn-apple">
+                    <svg width="16" height="16" viewBox="0 0 24 24" style="fill:white;flex-shrink:0"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.3.04-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+                    以 Apple 登入
+                  </button>
+                  <button class="btn-google">
+                    <svg width="17" height="17" viewBox="0 0 24 24" style="flex-shrink:0"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                    以 Google 登入
+                  </button>
+                  <div class="auth-note">首次登入即自動建立帳號</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="screen-label">
+        <span class="s-name">登入</span>
+        <span class="s-desc">
+          • 點 Apple 或 Google 按鈕 → 立即切換 Loading<br>
+          • 首次登入自動建立帳號<br>
+          • 「返回」回到 OB 最後一頁<br>
+          • 原型目前為 demo，無真實 OAuth
+        </span>
+      </div>
+    </div>
+
+    <div class="arrow-wrap"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+    <!-- Loading -->
+    <div class="screen-item">
+      <div class="iphone">
+        <div class="hw hw-action"></div><div class="hw hw-volup"></div><div class="hw hw-voldn"></div><div class="hw hw-side"></div>
+        <div class="iphone-screen">
+          <div class="di"></div>
+          <div class="sc wc-default">
+            <div class="loading-full">
+              <div class="loading-card">
+                <div class="spinner-ring"></div>
+                <div class="loading-lbl">登入中…</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="screen-label">
+        <span class="s-name">Loading — 驗證中</span>
+        <span class="s-desc">
+          • 點登入按鈕後立即切換至此畫面（無延遲）<br>
+          • 1000ms 後文字從「登入中…」改為「正在準備你的空間…」<br>
+          • 2200ms 後自動跳轉到錄音主頁（doLogin() → showView('record')）<br>
+          • 同時執行 openDiary()：如日記數 &gt; 0 則自動開啟日記簿<br>
+          • Spinner 為純 CSS border-top 旋轉動畫（無 SVG）
+        </span>
+        <span class="s-trigger">▶ 點選登入方式後</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 2 — 錄音流程
+══════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">02</span>
+    <span class="section-title">錄音流程 — 待機 → 錄音中 → Reflection 浮現 → 儲存確認</span>
+    <div class="section-line"></div>
+  </div>
+  <div class="flow-row">
+
+    <!-- Record Idle -->
+    <div class="screen-item">
+      <div class="iphone">
+        <div class="hw hw-action"></div><div class="hw hw-volup"></div><div class="hw hw-voldn"></div><div class="hw hw-side"></div>
+        <div class="iphone-screen">
+          <div class="di"></div>
+          <div class="sc wc-calm">
+            <div class="rec-full">
+              <div class="rec-header">
+                <div><div class="brand">Tomo</div><div class="rec-date-lbl">2026年3月22日 星期日</div></div>
+                <div class="diary-btn">日記簿 <span class="diary-cnt">0</span></div>
+              </div>
+              <div class="emotion-pill"><div class="pill-dot"></div><span>靜待…</span></div>
+              <div class="transcript-area"></div>
+              <div class="rec-controls">
+                <div class="vol-viz" style="opacity:0">
+                  <div class="vbar" style="height:4px"></div><div class="vbar" style="height:4px"></div><div class="vbar" style="height:4px"></div><div class="vbar" style="height:4px"></div><div class="vbar" style="height:4px"></div>
+                </div>
+                <div class="btn-row">
+                  <div class="mic-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7a5c4a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
+                      <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
+                      <line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="status-lbl">點擊錄音</div>
+                <div class="rec-progress-hint"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="screen-label">
+        <span class="s-name">錄音主頁 — 待機</span>
+        <span class="s-desc">
+          • 進入後 canvas 重置（clearRect），開始 animateCanvas()<br>
+          • 每 60 幀 spawn 一個 ambient blob（AMBIENT 色系，低飽和度）<br>
+          • 情緒 pill 顯示「靜待…」，pill-dot 無色<br>
+          • 音量條隱藏（opacity:0），「完成」按鈕不顯示<br>
+          • 右上角「日記簿」顯示目前日記數（seed 不算）<br>
+          • 點麥克風按鈕 → 請求麥克風權限 → 啟動 SpeechRecognition
+        </span>
+        <span class="s-trigger">▶ Loading 完成後</span>
+      </div>
+    </div>
+
+    <div class="arrow-wrap"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+    <!-- Record Recording -->
+    <div class="screen-item">
+      <div class="iphone">
+        <div class="hw hw-action"></div><div class="hw hw-volup"></div><div class="hw hw-voldn"></div><div class="hw hw-side"></div>
+        <div class="iphone-screen">
+          <div class="di"></div>
+          <div class="sc wc-happy">
+            <div class="rec-full">
+              <div class="rec-header">
+                <div><div class="brand">Tomo</div><div class="rec-date-lbl">2026年3月22日 星期日</div></div>
+                <div class="diary-btn">日記簿 <span class="diary-cnt">2</span></div>
+              </div>
+              <div class="emotion-pill">
+                <div class="pill-dot" style="background:#F5C030"></div>
+                <span>快樂</span>
+              </div>
+              <div class="transcript-area"></div>
+              <div class="rec-controls">
+                <div class="vol-viz" style="opacity:1">
+                  <div class="vbar" style="height:8px"></div><div class="vbar" style="height:14px"></div>
+                  <div class="vbar" style="height:10px"></div><div class="vbar" style="height:16px"></div>
+                  <div class="vbar" style="height:6px"></div><div class="vbar" style="height:12px"></div>
+                  <div class="vbar" style="height:9px"></div>
+                </div>
+                <div class="btn-row">
+                  <div style="position:relative;display:flex;align-items:center;justify-content:center;">
+                    <svg class="rec-ring-svg" viewBox="0 0 86 86">
+                      <circle class="rec-ring-track" cx="43" cy="43" r="36"/>
+                      <circle class="rec-ring-fill" cx="43" cy="43" r="36"/>
+                    </svg>
+                    <div class="mic-btn rec">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c84c3c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
+                        <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
+                        <line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="side-btn-abs">
+                    <div class="side-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="#7a5c4a" stroke="none"><rect x="4" y="4" width="16" height="16" rx="2"/></svg></div>
+                    <span class="side-lbl">完成</span>
+                  </div>
+                </div>
+                <div class="status-lbl rec">● 錄音中</div>
+                <div class="rec-progress-hint" style="opacity:1">今天的日記已填滿 46%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="screen-label">
+        <span class="s-name">錄音主頁 — 錄音中</span>
+        <span class="s-desc">
+          • 麥克風按鈕變紅色脈衝光暈（pulse keyframe animation）<br>
+          • 麥克風外圍出現 SVG 進度環（r=36，circumference=226）<br>
+            stroke-dashoffset 隨錄音字數佔比更新，顯示今日日記填滿百分比<br>
+          • 提示文字格式：「今天的日記已填滿 X%」，≥70% 改為「快填滿了」<br>
+          • 音量條出現（Web Audio AnalyserNode，每幀更新高度）<br>
+          • 右側出現「完成」按鈕（fade + scale in）<br>
+          • SpeechRecognition onresult：每 600ms 分析新增文字片段<br>
+          • detectEmotion()：掃描 keywords，否定詞前綴時分數減半<br>
+          • 情緒更新 → pill 顏色/文字同步，canvas bloom 3–5 個（stagger 160ms）<br>
+          • 錄音中每 8 幀 spawn 一個 ambient blob（vs 待機 60 幀）
+        </span>
+        <span class="s-trigger">▶ 點麥克風按鈕</span>
+      </div>
+    </div>
+
+    <div class="arrow-wrap"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+    <!-- Record + Reflection inline -->
+    <div class="screen-item">
+      <div class="iphone">
+        <div class="hw hw-action"></div><div class="hw hw-volup"></div><div class="hw hw-voldn"></div><div class="hw hw-side"></div>
+        <div class="iphone-screen">
+          <div class="di"></div>
+          <div class="sc wc-sad" style="position:relative;">
+            <div class="rec-full" style="opacity:0.65;">
+              <div class="rec-header">
+                <div><div class="brand">Tomo</div><div class="rec-date-lbl">2026年3月22日 星期日</div></div>
+                <div class="diary-btn">日記簿 <span class="diary-cnt">2</span></div>
+              </div>
+              <div class="emotion-pill">
+                <div class="pill-dot" style="background:#6478C0"></div>
+                <span>悲傷</span>
+              </div>
+              <div class="transcript-area"></div>
+              <div class="rec-controls">
+                <div class="vol-viz" style="opacity:1">
+                  <div class="vbar" style="height:5px"></div><div class="vbar" style="height:9px"></div>
+                  <div class="vbar" style="height:6px"></div><div class="vbar" style="height:4px"></div>
+                  <div class="vbar" style="height:8px"></div><div class="vbar" style="height:5px"></div>
+                  <div class="vbar" style="height:4px"></div>
+                </div>
+                <div class="btn-row">
+                  <div style="position:relative;display:flex;align-items:center;justify-content:center;">
+                    <svg class="rec-ring-svg" viewBox="0 0 86 86">
+                      <circle class="rec-ring-track" cx="43" cy="43" r="36"/>
+                      <circle class="rec-ring-fill" cx="43" cy="43" r="36" style="stroke-dashoffset:68;"/>
+                    </svg>
+                    <div class="mic-btn rec">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c84c3c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
+                        <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
+                        <line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="side-btn-abs">
+                    <div class="side-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="#7a5c4a" stroke="none"><rect x="4" y="4" width="16" height="16" rx="2"/></svg></div>
+                    <span class="side-lbl">完成</span>
+                  </div>
+                </div>
+                <div class="status-lbl rec">● 錄音中</div>
+              </div>
+            </div>
+            <!-- Reflection text — 直接浮現在畫面中央，無框（對應 #ref-area） -->
+            <div style="position:absolute;top:0;left:0;right:0;bottom:180px;display:flex;align-items:center;justify-content:center;padding:32px;pointer-events:none;">
+              <div style="max-width:300px;width:100%;text-align:center;">
+                <div style="font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink2);margin-bottom:14px;">3月22日的自己想對你說…</div>
+                <div style="font-size:15px;line-height:2.1;color:var(--ink);font-weight:300;font-style:italic;">今天真的很感謝，克服了很難的一關，覺得自己還是可以的。</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="screen-label">
+        <span class="s-name">錄音中 — Reflection 浮現</span>
+        <span class="s-desc">
+          • 觸發條件：情緒為 悲傷／焦慮／憤怒／孤獨（NEGATIVE set）<br>
+          • 且日記庫中存在 isGratitude 標記的條目（感恩類日記）<br>
+          • 延遲 1400ms 後執行 showRefArea()：#ref-area opacity 0→1<br>
+            （CSS transition 0.8s ease，無框、無背景）<br>
+          • 文字浮現在畫面中央，疊在 canvas 之上（z-index 12）<br>
+          • 眉標文字格式：「X月X日的自己想對你說…」<br>
+          • 過去感恩語句以斜體呈現，font-weight 300<br>
+          • 原型預載 3 筆 seed 感恩日記供 demo 使用<br>
+          • 錄音仍持續進行，控制區仍可操作
+        </span>
+        <span class="s-trigger">▶ 情緒偵測結果為負面情緒</span>
+      </div>
+    </div>
+
+    <div class="arrow-wrap"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+    <!-- Done Sheet -->
+    <div class="screen-item">
+      <div class="iphone">
+        <div class="hw hw-action"></div><div class="hw hw-volup"></div><div class="hw hw-voldn"></div><div class="hw hw-side"></div>
+        <div class="iphone-screen">
+          <div class="di"></div>
+          <div class="sc" style="position:relative;">
+            <div style="position:absolute;inset:0;background:
+              radial-gradient(ellipse 300px 220px at 12% 22%,rgba(125,198,142,.42) 0%,transparent 68%),
+              radial-gradient(ellipse 260px 200px at 72% 50%,rgba(255,210,80,.36) 0%,transparent 64%),
+              var(--paper);filter:blur(5px);"></div>
+            <div style="position:absolute;inset:0;background:rgba(247,242,236,.2);"></div>
+            <div class="done-overlay">
+              <div class="done-sheet">
+                <div class="done-handle"></div>
+                <div class="done-canvas-wrap"><div class="done-canvas-prev"></div></div>
+                <div class="done-text-card">今天出去走走，心情真的好多了，看到路邊的貓，很可愛。回到家煮了咖哩，覺得自己好像慢慢找回一點感覺了。</div>
+                <div class="done-tags">
+                  <div class="done-tag"><div class="done-tag-dot" style="background:#F5C030"></div>快樂</div>
+                  <div class="done-tag"><div class="done-tag-dot" style="background:#80C888"></div>感激</div>
+                  <div class="done-tag"><div class="done-tag-dot" style="background:#FCC0B5"></div>溫柔</div>
+                </div>
+                <button class="done-confirm">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f7f2ec" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  確定儲存
+                </button>
+                <button class="done-restart">重新開始</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="screen-label">
+        <span class="s-name">儲存確認 (Done Sheet)</span>
+        <span class="s-desc">
+          • 停止錄音後立即執行 canvas.toDataURL()，擷取水彩快照（640×220）<br>
+          • Bottom sheet 從底部滑入：translateY(100%) → 0<br>
+            （transition 0.45s cubic-bezier(.4, 0, .2, 1)，加上 open class 觸發）<br>
+          • 水彩快照以 &lt;img&gt; 呈現在卡片頂端（border-radius 14px）<br>
+          • 語音轉文字內容顯示於玻璃質感卡片（最多 3 行，overflow hidden）<br>
+          • 情緒標籤列出本次偵測到的所有情緒（帶色點）<br>
+          • 「確定儲存」→ saveDiary() → diaryEntries.unshift()，跳至日記簿<br>
+          • 「重新開始」→ 清除文字與情緒，canvas 重置，回到待機狀態
+        </span>
+        <span class="s-trigger">▶ 點「完成」停止錄音</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 3 — 日記庫
+══════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">03</span>
+    <span class="section-title">日記庫 — 列表 → 日記詳情</span>
+    <div class="section-line"></div>
+  </div>
+  <div class="flow-row">
+
+    <!-- Diary Empty -->
+    <div class="screen-item">
+      <div class="iphone">
+        <div class="hw hw-action"></div><div class="hw hw-volup"></div><div class="hw hw-voldn"></div><div class="hw hw-side"></div>
+        <div class="iphone-screen">
+          <div class="di"></div>
+          <div class="sc">
+            <div class="diary-full">
+              <div class="diary-hd">
+                <div class="diary-title">日記簿</div>
+                <div class="new-rec-btn">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f7f2ec" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/></svg>
+                  新增日記
+                </div>
+              </div>
+              <div class="entry-empty">
+                <div class="empty-dots">
+                  <div class="empty-dot" style="background:#F5D08A"></div>
+                  <div class="empty-dot" style="background:#80C888"></div>
+                  <div class="empty-dot" style="background:#8BB8C8"></div>
+                  <div class="empty-dot" style="background:#FCC0B5"></div>
+                  <div class="empty-dot" style="background:#C09ADC"></div>
+                </div>
+                <div class="empty-title">還沒有日記</div>
+                <div class="empty-sub">說出第一段心情，<br>讓水彩替你留下來</div>
+                <button class="empty-cta">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f7f2ec" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/></svg>
+                  開始第一篇
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="screen-label">
+        <span class="s-name">日記簿 — 空白</span>
+        <span class="s-desc">
+          • 觸發條件：diaryEntries 過濾掉 isGratitude seed 條目後數量為 0<br>
+          • 顯示 5 個彩色浮點（CSS animation float，各自不同 delay）<br>
+          • 「開始第一篇」按鈕點擊 → closeDiary() → 回到錄音待機畫面<br>
+          • 右上「新增日記」同效果
+        </span>
+        <span class="s-trigger">▶ 點「日記簿」(日記數為 0)</span>
+      </div>
+    </div>
+
+    <div class="arrow-wrap"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+    <!-- Diary With Entries -->
+    <div class="screen-item">
+      <div class="iphone">
+        <div class="hw hw-action"></div><div class="hw hw-volup"></div><div class="hw hw-voldn"></div><div class="hw hw-side"></div>
+        <div class="iphone-screen">
+          <div class="di"></div>
+          <div class="sc">
+            <div class="diary-full">
+              <div class="diary-hd">
+                <div class="diary-title">日記簿</div>
+                <div class="new-rec-btn">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f7f2ec" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/></svg>
+                  新增日記
+                </div>
+              </div>
+              <div class="entries-list">
+                <div class="entry-wrap">
+                  <div class="entry-img ep1"></div>
+                  <div class="entry-overlay">
+                    <div class="entry-meta"><div class="em-dot" style="background:#F5C030"></div><span class="em-name">快樂</span><span class="em-time">下午 3:24</span></div>
+                    <div class="entry-text">今天出去走走，心情真的好多了，看到路邊的貓很可愛。</div>
+                  </div>
+                </div>
+                <div class="entry-wrap">
+                  <div class="entry-img ep2"></div>
+                  <div class="entry-overlay">
+                    <div class="entry-meta"><div class="em-dot" style="background:#8BB8C8"></div><span class="em-name">平靜</span><span class="em-time">昨天 晚上 9:12</span></div>
+                    <div class="entry-text">泡了杯茶，讀了一點書，感覺還不錯，慢慢的一天。</div>
+                  </div>
+                </div>
+                <div class="entry-wrap">
+                  <div class="entry-img ep3"></div>
+                  <div class="entry-overlay">
+                    <div class="entry-meta"><div class="em-dot" style="background:#80C888"></div><span class="em-name">感激</span><span class="em-time">3月20日</span></div>
+                    <div class="entry-text">朋友突然傳訊問我還好嗎，好暖，很感謝有這樣的人。</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="screen-label">
+        <span class="s-name">日記簿 — 有日記</span>
+        <span class="s-desc">
+          • 條目以 diaryEntries.unshift() 方式新增，最新排最上<br>
+          • 每張卡片：canvas 快照作為背景圖（entry-img），<br>
+            漸層遮罩讓底部文字可讀（linear-gradient to top）<br>
+          • 情緒色點 + 情緒名稱 + 時間戳記（formatTime()）<br>
+          • 點擊任意卡片 → openEntry(id) → 開啟 Modal<br>
+          • 右上「新增日記」→ closeDiary() → 回到錄音待機<br>
+          • 列表為 overflow hidden（scroll 未實作）
+        </span>
+        <span class="s-trigger">▶ 儲存後 / 重新開啟日記簿</span>
+      </div>
+    </div>
+
+    <div class="arrow-wrap"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+    <!-- Entry Modal -->
+    <div class="screen-item">
+      <div class="iphone">
+        <div class="hw hw-action"></div><div class="hw hw-volup"></div><div class="hw hw-voldn"></div><div class="hw hw-side"></div>
+        <div class="iphone-screen">
+          <div class="di"></div>
+          <div class="sc" style="position:relative;background:var(--paper);">
+            <div style="position:absolute;inset:0;background:var(--paper);opacity:.5;filter:blur(3px);z-index:0;"></div>
+            <div class="modal-overlay">
+              <div class="modal-card" style="position:relative;">
+                <div class="modal-img ep1"></div>
+                <button class="modal-close">×</button>
+                <div class="modal-body">
+                  <div class="modal-meta">
+                    <div class="modal-tag"><div class="em-dot" style="background:#F5C030"></div>快樂</div>
+                    <div class="modal-tag"><div class="em-dot" style="background:#80C888"></div>感激</div>
+                    <span class="modal-time">下午 3:24</span>
+                  </div>
+                  <div class="modal-text">今天出去走走，心情真的好多了，看到路邊的貓，很可愛。回到家煮了咖哩，覺得自己好像慢慢找回一點感覺了。陽光很好，下午三點的光很暖。</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="screen-label">
+        <span class="s-name">日記詳情 (Modal)</span>
+        <span class="s-desc">
+          • 點擊卡片後 Modal overlay opacity 0→1（transition 0.3s ease）<br>
+          • modal-card 同時 translateY(12px)→0（向上滑入感）<br>
+          • 頂部為完整 canvas 快照（160px 高，全幅）<br>
+          • 情緒標籤列（可能多個）+ 右側時間戳記<br>
+          • 完整語音轉文字內容（無字數限制）<br>
+          • 右上角「×」關閉按鈕 → opacity 1→0 → display:none<br>
+          • 點擊 overlay 背景也可關閉
+        </span>
+        <span class="s-trigger">▶ 點擊日記卡片</span>
+      </div>
+    </div>
+
+
+  </div>
+</div>
+
+</body>
+</html>
