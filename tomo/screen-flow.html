@@ -14,6 +14,10 @@ body{background:#DDD8D0;font-family:'Noto Serif TC',serif;padding:52px 60px 120p
 .page-header{margin-bottom:64px;min-width:max-content;}
 .page-title{font-family:'Playfair Display',serif;font-size:30px;color:#2e2318;margin-bottom:6px;}
 .page-meta{font-size:12px;color:rgba(46,35,24,.45);letter-spacing:.08em;line-height:2;}
+.page-nav{display:flex;gap:16px;margin-top:12px;}
+.page-nav a{font-size:12px;color:rgba(46,35,24,.5);letter-spacing:.08em;text-decoration:none;padding:5px 12px;background:rgba(46,35,24,.07);border-radius:20px;transition:background .2s;}
+.page-nav a:hover{background:rgba(46,35,24,.13);}
+.page-nav a.active{background:rgba(46,35,24,.14);color:rgba(46,35,24,.8);}
 .legend{display:flex;gap:20px;flex-wrap:wrap;margin-top:16px;}
 .legend-item{display:flex;align-items:center;gap:6px;font-size:10px;color:rgba(46,35,24,.5);letter-spacing:.06em;}
 .legend-dot{width:8px;height:8px;border-radius:50%;}
@@ -317,7 +321,11 @@ body{background:#DDD8D0;font-family:'Noto Serif TC',serif;padding:52px 60px 120p
 
 <div class="page-header">
   <h1 class="page-title">Tomo — 畫面流程圖</h1>
-  <p class="page-meta">iOS App Prototype &nbsp;·&nbsp; 10 個畫面狀態 &nbsp;·&nbsp; iPhone 17 Pro（393 × 852 pt，原始尺寸）&nbsp;·&nbsp; 2026-03-22</p>
+  <p class="page-meta">iOS App Prototype &nbsp;·&nbsp; 10 個畫面狀態 &nbsp;·&nbsp; iPhone 17 Pro（393 × 852 pt，原始尺寸）<br>所有畫面截圖來源：voice-diary.html &nbsp;·&nbsp; 2026-03-22</p>
+  <nav class="page-nav">
+    <a href="screen-flow.html" class="active">Screen Flow</a>
+    <a href="component-library.html">Component Library</a>
+  </nav>
   <div class="legend">
     <div class="legend-item"><div class="legend-dot" style="background:#F5C030"></div>快樂</div>
     <div class="legend-item"><div class="legend-dot" style="background:#F07030"></div>興奮</div>

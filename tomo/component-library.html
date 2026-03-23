@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>Tomo — 元件庫</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --paper:#f7f2ec;
+  --ink:#2e2318;
+  --ink2:rgba(46,35,24,.44);
+  --glass:rgba(255,255,255,.55);
+  --gb:rgba(255,255,255,.85);
+}
+
+body{background:#DDD8D0;font-family:'Noto Serif TC',serif;overflow-x:auto;}
+
+/* ── page header (full-width bar) ── */
+.page-header{padding:52px 60px 40px;margin-bottom:0;}
+.page-title{font-family:'Playfair Display',serif;font-size:30px;color:#2e2318;margin-bottom:6px;}
+.page-meta{font-size:12px;color:rgba(46,35,24,.45);letter-spacing:.08em;line-height:2;min-height:48px;}
+.page-nav{display:flex;gap:16px;margin-top:12px;}
+.page-nav a{font-size:12px;color:rgba(46,35,24,.5);letter-spacing:.08em;text-decoration:none;padding:5px 12px;background:rgba(46,35,24,.07);border-radius:20px;transition:background .2s;}
+.page-nav a:hover{background:rgba(46,35,24,.13);}
+.page-nav a.active{background:rgba(46,35,24,.14);color:rgba(46,35,24,.8);}
+
+/* ── two-column layout ── */
+.content-layout{display:flex;align-items:flex-start;}
+.sidebar{width:200px;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto;padding:32px 16px 60px 60px;scrollbar-width:none;border-right:1px solid rgba(46,35,24,.1);}
+.sidebar::-webkit-scrollbar{display:none;}
+.sidebar-section{margin-bottom:24px;}
+.sidebar-section-label{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:rgba(46,35,24,.35);margin-bottom:8px;padding:0 4px;}
+.sidebar-link{display:block;font-size:12px;color:rgba(46,35,24,.5);text-decoration:none;padding:5px 8px;border-radius:6px;transition:background .15s,color .15s;line-height:1.4;}
+.sidebar-link:hover{background:rgba(46,35,24,.07);color:rgba(46,35,24,.8);}
+.sidebar-link.active{background:rgba(46,35,24,.1);color:var(--ink);}
+.sidebar-link.sub{padding-left:16px;font-size:11px;color:rgba(46,35,24,.42);}
+.sidebar-link.sub:hover{color:rgba(46,35,24,.75);}
+.sidebar-link.sub.active{color:var(--ink);}
+.content-sections{flex:1;min-width:0;padding:32px 60px 120px 48px;}
+
+/* ── section ── */
+.section{margin-bottom:80px;}
+.section-header{display:flex;align-items:center;gap:14px;margin-bottom:40px;}
+.section-num{font-family:'Playfair Display',serif;font-style:italic;font-size:20px;color:rgba(46,35,24,.3);}
+.section-title{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(46,35,24,.5);font-weight:500;}
+.section-line{width:120px;height:1px;background:rgba(46,35,24,.15);}
+
+/* ── component card ── */
+.comp-grid{display:flex;flex-wrap:wrap;gap:24px;}
+.comp-card{background:var(--paper);border-radius:16px;padding:28px;min-width:280px;flex:1;max-width:460px;}
+.comp-card.wide{max-width:100%;flex-basis:100%;}
+.comp-label{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink2);margin-bottom:6px;}
+.comp-name{font-size:15px;color:var(--ink);margin-bottom:20px;font-weight:500;}
+.comp-demo{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:20px;}
+.comp-demo.vertical{flex-direction:column;align-items:flex-start;}
+.comp-demo.center{justify-content:center;}
+.comp-spec{border-top:1px solid rgba(46,35,24,.08);padding-top:16px;display:flex;flex-direction:column;gap:6px;}
+.spec-row{display:flex;gap:8px;font-size:11px;line-height:1.6;}
+.spec-key{color:rgba(46,35,24,.4);min-width:110px;letter-spacing:.04em;}
+.spec-val{color:var(--ink);font-family:monospace;font-size:10.5px;}
+.state-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(46,35,24,.35);margin-top:4px;text-align:center;}
+
+/* ── colour system ── */
+.emotion-grid{display:flex;flex-wrap:wrap;gap:16px;}
+.emotion-col{display:flex;flex-direction:column;gap:0;border-radius:12px;overflow:hidden;min-width:120px;flex:1;max-width:160px;box-shadow:0 2px 10px rgba(0,0,0,.07);}
+.emotion-swatch{height:64px;display:flex;flex-direction:column;justify-content:flex-end;padding:8px 10px;}
+.emotion-swatch.high{height:56px;}
+.emotion-swatch.medium{height:72px;}
+.emotion-swatch.low{height:56px;}
+.swatch-meta{display:flex;flex-direction:column;gap:2px;}
+.swatch-intensity{font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.65);}
+.swatch-state{font-size:10px;color:rgba(255,255,255,.9);font-weight:400;}
+.swatch-hex{font-size:9px;color:rgba(255,255,255,.7);font-family:monospace;letter-spacing:.05em;}
+.emotion-label{background:#f0ebe3;padding:6px 10px;text-align:center;}
+.emotion-label-zh{font-size:12px;color:var(--ink);}
+.emotion-label-en{font-size:9px;color:var(--ink2);letter-spacing:.08em;margin-top:1px;}
+
+/* neutral special */
+.emotion-col.neutral .emotion-swatch{height:188px;}
+
+/* ui colours */
+.ui-swatches{display:flex;gap:12px;flex-wrap:wrap;}
+.ui-swatch{display:flex;flex-direction:column;gap:8px;align-items:center;}
+.ui-chip{height:48px;width:100px;border-radius:10px;border:1px solid rgba(46,35,24,.08);}
+.ui-chip-label{font-size:10px;color:var(--ink2);letter-spacing:.05em;text-align:center;}
+.ui-chip-hex{font-size:9px;color:rgba(46,35,24,.38);font-family:monospace;text-align:center;}
+
+/* ── typography ── */
+.type-row{display:flex;flex-direction:column;gap:0;border-bottom:1px solid rgba(46,35,24,.06);padding:14px 0;}
+.type-row:last-child{border-bottom:none;}
+.type-sample{color:var(--ink);line-height:1.4;}
+.type-meta{display:flex;gap:16px;margin-top:6px;flex-wrap:wrap;}
+.type-tag{font-size:10px;color:var(--ink2);background:rgba(46,35,24,.06);border-radius:20px;padding:2px 9px;letter-spacing:.04em;}
+
+/* ── mic button ── */
+.mic-btn-demo{width:68px;height:68px;border-radius:50%;border:1.5px solid rgba(255,255,255,.88);background:rgba(255,255,255,.68);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 8px 28px rgba(0,0,0,.09),inset 0 1px 0 rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s,box-shadow .2s,transform .12s;}
+.mic-btn-demo:hover{background:rgba(255,255,255,.85);box-shadow:0 10px 32px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.9);}
+.mic-btn-demo:active{transform:scale(.94);}
+.mic-btn-demo svg{fill:none;stroke:#7a5c4a;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.mic-btn-demo.rec{background:rgba(200,80,60,.13);animation:pulse 2s infinite;}
+.mic-btn-demo.rec svg{stroke:#c84c3c;}
+@keyframes pulse{
+  0%{box-shadow:0 0 0 0 rgba(200,80,60,.22),0 8px 28px rgba(200,80,60,.18);}
+  70%{box-shadow:0 0 0 16px rgba(200,80,60,0),0 8px 28px rgba(200,80,60,.18);}
+  100%{box-shadow:0 0 0 0 rgba(200,80,60,0),0 8px 28px rgba(200,80,60,.18);}
+}
+
+/* ── progress ring ── */
+.ring-wrap{width:86px;height:86px;position:relative;transform:rotate(-90deg);}
+.ring-wrap svg{width:86px;height:86px;}
+.ring-track{fill:none;stroke:rgba(46,35,24,.1);stroke-width:2.5;}
+.ring-fill{fill:none;stroke:rgba(46,35,24,.45);stroke-width:2.5;stroke-linecap:round;stroke-dasharray:226;stroke-dashoffset:226;transition:stroke-dashoffset .4s linear;}
+.ring-fill.p60{stroke-dashoffset:90;}
+.ring-fill.p100{stroke-dashoffset:0;}
+.ring-demo-wrap{position:relative;display:inline-flex;align-items:center;justify-content:center;}
+.ring-inner-label{position:absolute;font-size:9px;color:var(--ink2);transform:rotate(90deg);letter-spacing:.06em;text-align:center;line-height:1.3;}
+
+/* ── emotion pill ── */
+.pill-demo{display:flex;align-items:center;gap:7px;background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--gb);border-radius:20px;padding:7px 16px;font-size:12px;color:#5a4a3a;}
+.pill-dot-demo{width:7px;height:7px;border-radius:50%;background:#c9b99a;transition:background 1s;flex-shrink:0;}
+
+/* ── volume viz ── */
+.vol-viz-demo{display:flex;align-items:center;gap:2px;height:18px;}
+.vbar-demo{width:3px;background:rgba(120,90,70,.38);border-radius:2px;}
+
+/* ── side button ── */
+.side-btn-demo{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;}
+.side-icon-demo{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.65);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.88);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.07);transition:background .2s,transform .12s;}
+.side-btn-demo:hover .side-icon-demo{background:rgba(255,255,255,.85);}
+.side-btn-demo:active .side-icon-demo{transform:scale(.92);}
+.side-icon-demo svg{fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;}
+.side-lbl-demo{font-size:10px;letter-spacing:.12em;color:var(--ink2);}
+
+/* ── glass card ── */
+.glass-card-demo{background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--gb);}
+.glass-card-24{border-radius:24px;padding:20px 24px;}
+.glass-card-16{border-radius:16px;padding:16px 20px;}
+.glass-card-14{border-radius:14px;padding:14px 16px;}
+.glass-card-content{font-size:13px;color:var(--ink);line-height:1.7;}
+
+/* ── done sheet ── */
+.sheet-demo{width:100%;background:var(--paper);border-radius:24px 24px 0 0;box-shadow:0 -8px 40px rgba(0,0,0,.16);padding:12px 24px 28px;overflow:hidden;}
+.sheet-handle-demo{width:36px;height:4px;border-radius:2px;background:rgba(46,35,24,.16);margin:0 auto 18px;}
+
+/* ── modal ── */
+.modal-demo-wrap{position:relative;width:100%;border-radius:20px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.18);}
+.modal-demo-overlay{background:rgba(46,35,24,.35);padding:20px;display:flex;align-items:center;justify-content:center;}
+.modal-demo-card{background:var(--paper);border-radius:20px;width:100%;max-width:380px;overflow:hidden;}
+.modal-demo-img{width:100%;height:100px;object-fit:cover;background:linear-gradient(135deg,#afd2cd,#c3d7c8,#b4c3dc);}
+.modal-demo-body{padding:16px 20px 20px;}
+.modal-demo-meta{display:flex;align-items:center;gap:6px;margin-bottom:10px;}
+.modal-demo-text{font-size:13px;line-height:2;color:var(--ink);font-weight:300;}
+.modal-close-demo{position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.75);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--ink2);}
+
+/* ── entry card ── */
+.entry-card-demo{border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.07);position:relative;width:100%;}
+.entry-img-demo{width:100%;height:180px;display:block;background:linear-gradient(135deg,rgba(170,205,218,.6),rgba(185,200,225,.5),rgba(125,198,142,.4)),var(--paper);}
+.entry-overlay-demo{position:absolute;inset:0;padding:16px 20px;display:flex;flex-direction:column;justify-content:flex-end;background:linear-gradient(to top,rgba(247,242,236,.96) 0%,rgba(247,242,236,.2) 45%,transparent 100%);}
+.entry-meta-demo{display:flex;align-items:center;gap:7px;margin-bottom:5px;}
+.em-dot-demo{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.em-name-demo{font-size:11px;color:var(--ink2);letter-spacing:.07em;}
+.em-time-demo{font-size:11px;color:var(--ink2);margin-left:auto;}
+.entry-text-demo{font-size:13px;line-height:1.75;color:var(--ink);font-weight:300;}
+
+/* ── auth button ── */
+.btn-apple-demo{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:14px 20px;border-radius:13px;background:#1a1a1a;color:#fff;font-family:'Noto Serif TC',serif;font-size:14px;letter-spacing:.04em;cursor:pointer;border:none;transition:opacity .15s,transform .12s;}
+.btn-apple-demo:hover{opacity:.85;}
+.btn-apple-demo:active{transform:scale(.97);opacity:.75;}
+.btn-google-demo{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:14px 20px;border-radius:13px;background:rgba(255,255,255,.92);color:var(--ink);border:1px solid rgba(46,35,24,.14);font-family:'Noto Serif TC',serif;font-size:14px;letter-spacing:.04em;cursor:pointer;transition:background .15s,transform .12s;}
+.btn-google-demo:hover{background:rgba(255,255,255,1);}
+.btn-google-demo:active{transform:scale(.97);}
+
+/* ── ob dots ── */
+.dots-demo{display:flex;gap:6px;align-items:center;}
+.dot-demo{width:6px;height:6px;border-radius:50%;background:rgba(46,35,24,.18);transition:all .3s;}
+.dot-demo.active{width:20px;border-radius:3px;background:var(--ink);}
+
+/* ── cta button ── */
+.cta-btn-demo{display:flex;align-items:center;justify-content:center;width:100%;max-width:280px;padding:15px;background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--gb);border-radius:50px;font-family:'Noto Serif TC',serif;font-size:15px;color:var(--ink);cursor:pointer;letter-spacing:.06em;box-shadow:0 4px 20px rgba(0,0,0,.07);transition:all .2s;}
+.cta-btn-demo:hover{background:rgba(255,255,255,.72);box-shadow:0 6px 24px rgba(0,0,0,.1);}
+.cta-btn-demo:active{transform:scale(.97);box-shadow:0 2px 12px rgba(0,0,0,.07);}
+
+/* ── component usage ── */
+.comp-usage{font-size:13px;color:var(--ink2);line-height:1.85;margin-bottom:20px;padding-left:12px;border-left:2px solid rgba(46,35,24,.1);}
+
+/* ── states panel ── */
+.states-divider{border-top:1px solid rgba(46,35,24,.08);margin:4px 0 18px;}
+.states-title{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:rgba(46,35,24,.4);margin-bottom:14px;}
+.states-row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:20px;}
+.state-col{flex:1;min-width:108px;display:flex;flex-direction:column;gap:0;}
+.state-col-visual{display:flex;align-items:center;justify-content:center;min-height:80px;background:rgba(46,35,24,.03);border-radius:10px 10px 0 0;padding:16px 12px;}
+.state-col-name{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(46,35,24,.45);text-align:center;padding:7px 4px;border-bottom:1px solid rgba(46,35,24,.07);}
+.state-col-specs{padding:10px 2px 0;display:flex;flex-direction:column;gap:5px;}
+.state-spec-item{display:flex;flex-direction:column;gap:1px;}
+.state-spec-key{font-size:10px;color:rgba(46,35,24,.38);letter-spacing:.02em;}
+.state-spec-val{font-family:monospace;font-size:10.5px;color:var(--ink);line-height:1.5;}
+
+/* ── done confirm button (interactive) ── */
+.done-confirm-btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:15px;background:var(--ink);border:none;border-radius:14px;font-family:'Noto Serif TC',serif;font-size:14px;color:#f7f2ec;cursor:pointer;letter-spacing:.06em;transition:opacity .2s,transform .12s;margin-bottom:10px;}
+.done-confirm-btn:hover{opacity:.85;}
+.done-confirm-btn:active{transform:scale(.97);opacity:.75;}
+.done-restart-btn{display:flex;align-items:center;justify-content:center;width:100%;padding:12px;background:none;border:none;font-family:'Noto Serif TC',serif;font-size:13px;color:var(--ink2);cursor:pointer;letter-spacing:.04em;transition:color .2s,transform .12s;}
+.done-restart-btn:hover{color:var(--ink);}
+.done-restart-btn:active{transform:scale(.97);}
+
+/* ── animation spec card ── */
+.anim-row{display:flex;flex-direction:column;gap:0;border-bottom:1px solid rgba(46,35,24,.06);padding:16px 0;}
+.anim-row:last-child{border-bottom:none;}
+.anim-name{font-size:14px;color:var(--ink);margin-bottom:5px;font-weight:500;}
+.anim-spec{font-family:monospace;font-size:13px;color:rgba(46,35,24,.6);line-height:1.75;}
+.anim-desc{font-size:13px;color:var(--ink2);margin-top:4px;line-height:1.7;}
+
+/* ── demo canvas placeholder ── */
+.canvas-demo{width:100%;height:160px;border-radius:14px;overflow:hidden;background:linear-gradient(135deg,rgba(170,205,218,.55) 0%,rgba(185,200,225,.38) 40%,rgba(125,198,142,.28) 70%,rgba(247,242,236,1) 100%);}
+</style>
+</head>
+<body>
+
+<!-- PAGE HEADER (full-width) -->
+<div class="page-header">
+  <div class="page-title">Tomo — 元件庫</div>
+  <div class="page-meta">
+    Component Library · Visual Spec for Swift Engineers<br>
+    所有數值來源：voice-diary.html CSS　情緒色系來源：spec_emotion-color-mapping.md
+  </div>
+  <nav class="page-nav">
+    <a href="screen-flow.html">Screen Flow</a>
+    <a href="component-library.html" class="active">Component Library</a>
+  </nav>
+</div>
+
+<!-- TWO-COLUMN LAYOUT -->
+<div class="content-layout">
+
+<!-- LEFT SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-section">
+    <a href="#colours" class="sidebar-link">01 — 色彩系統</a>
+    <a href="#typography" class="sidebar-link">02 — 字型系統</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">03 — 元件</div>
+    <a href="#mic-button" class="sidebar-link sub">Mic Button</a>
+    <a href="#progress-ring" class="sidebar-link sub">Progress Ring</a>
+    <a href="#emotion-pill" class="sidebar-link sub">Emotion Pill</a>
+    <a href="#volume-viz" class="sidebar-link sub">Volume Viz</a>
+    <a href="#side-button" class="sidebar-link sub">Side Button</a>
+    <a href="#glass-card" class="sidebar-link sub">Glass Card</a>
+    <a href="#bottom-sheet" class="sidebar-link sub">Bottom Sheet</a>
+    <a href="#modal" class="sidebar-link sub">Modal</a>
+    <a href="#entry-card" class="sidebar-link sub">Entry Card</a>
+    <a href="#auth-button" class="sidebar-link sub">Auth Button</a>
+    <a href="#ob-dots" class="sidebar-link sub">OB Dots</a>
+    <a href="#cta-button" class="sidebar-link sub">CTA Button</a>
+  </div>
+  <div class="sidebar-section">
+    <a href="#animations" class="sidebar-link">04 — 動畫規格</a>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<div class="content-sections">
+
+<!-- ══════════════════════════════════════════════
+     SECTION 1: 色彩系統
+══════════════════════════════════════════════ -->
+<div class="section" id="colours">
+  <div class="section-header">
+    <span class="section-num">01</span>
+    <span class="section-title">色彩系統 · Colour System</span>
+    <div class="section-line"></div>
+  </div>
+
+  <!-- 1-A: 情緒色 -->
+  <div class="comp-card wide" style="margin-bottom:24px;">
+    <div class="comp-label">Emotion Colours</div>
+    <div class="comp-name">情緒色票 — 8 種情緒 × 3 強度層 + 中性</div>
+    <div style="font-size:11px;color:var(--ink2);margin-bottom:20px;line-height:2;">
+      依據 Plutchik 情緒輪 × 色彩心理學。High = 強烈飽和，Medium = 基礎色，Low = 淡柔輕盈。<br>
+      LLM 回傳 <code style="font-size:10px;background:rgba(46,35,24,.06);padding:1px 5px;border-radius:4px;">{ emotion, intensity }</code>，查表即得對應顏色。
+    </div>
+    <div class="emotion-grid">
+
+      <!-- 喜悅 joy -->
+      <div class="emotion-col">
+        <div class="emotion-swatch high" style="background:#D4872A;">
+          <div class="swatch-meta">
+            <div class="swatch-intensity">High</div>
+            <div class="swatch-state">狂喜 Ecstasy</div>
+            <div class="swatch-hex">#D4872A</div>
+          </div>
+        </div>
+        <div class="emotion-swatch medium" style="background:#E49F3C;">
+          <div class="swatch-meta">
+            <div class="swatch-intensity">Medium</div>
+            <div class="swatch-state">喜悅 Joy</div>
+            <div class="swatch-hex">#E49F3C</div>
+          </div>
+        </div>
+        <div class="emotion-swatch low" style="background:#F5D08A;">
+          <div class="swatch-meta">
+            <div class="swatch-intensity" style="color:rgba(46,35,24,.45);">Low</div>
+            <div class="swatch-state" style="color:rgba(46,35,24,.75);">寧靜 Serenity</div>
+            <div class="swatch-hex" style="color:rgba(46,35,24,.45);">#F5D08A</div>
+          </div>
+        </div>
+        <div class="emotion-label">
+          <div class="emotion-label-zh">喜悅</div>
+          <div class="emotion-label-en">joy</div>
+        </div>
+      </div>
+
+      <!-- 悲傷 sadness -->
+      <div class="emotion-col">
+        <div class="emotion-swatch high" style="background:#1A2A6E;">
+          <div class="swatch-meta">
+            <div class="swatch-intensity">High</div>
+            <div class="swatch-state">悲痛 Grief</div>
+            <div class="swatch-hex">#1A2A6E</div>
+          </div>
+        </div>
+        <div class="emotion-swatch medium" style="background:#303F84;">
+          <div class="swatch-meta">
+            <div class="swatch-intensity">Medium</div>
+            <div class="swatch-state">悲傷 Sadness</div>
+            <div class="swatch-hex">#303F84</div>
+          </div>
+        </div>
+        <div class="emotion-swatch low" style="background:#8090C0;">
+          <div class="swatch-meta">
+            <div class="swatch-intensity">Low</div>
+            <div class="swatch-state">沉思 Pensiveness</div>
+            <div class="swatch-hex">#8090C0</div>
+          </div>
+        </div>
+        <div class="emotion-label">
+          <div class="emotion-label-zh">悲傷</div>
+          <div class="emotion-label-en">sadness</div>
+        </div>
+      </div>
+
+      <!-- 憤怒 anger -->
+      <div class="emotion-col">
+        <div class="emotion-swatch high" style="background:#5A1A14;">
+          <div class="swatch-meta">
+            <div class="swatch-intensity">High</div>
+            <div class="swatch-state">狂怒 Rage</div>
+            <div class="swatch-hex">#5A1A14</div>
+          </div>
+        </div>
+        <div class="emotion-swatch medium" style="background:#7E2D26;">
+          <div class="swatch-meta">
+            <div class="swatch-intensity">Medium</div>
+            <div class="swatch-state">憤怒 Anger</div>
+            <div class="swatch-hex">#7E2D26</div>
+          </div>
+        </div>
+        <div class="emotion-swatch low" style="background:#C47A75;">
+          <div class="swatch-meta">
+            <div class="swatch-intensity">Low</div>
+            <div class="swatch-state">煩惱 Annoyance</div>
+            <div class="swatch-hex">#C47A75</div>
+          </div>
+        </div>
+        <div class="emotion-label">
+          <div class="emotion-label-zh">憤怒</div>
+          <div class="emotion-label-en">anger</div>
+        </div>
+      </div>
+
+      <!-- 恐懼 fear -->
+      <div class="emotion-col">
+        <div class="emotion-swatch high" style="background:#1E3020;">
+          <div class="swatch-meta">
+            <div class="swatch-intensity">High</div>
+            <div class="swatch-state">恐慌 Terror</div>
+            <div class="swatch-hex">#1E3020</div>
+          </div>
+        </div>
+        <div class="emotion-swatch medium" style="background:#3C5240;">
+          <div class="swatch-meta">
+            <div class="swatch-intensity">Medium</div>
+            <div class="swatch-state">恐懼 Fear</div>
+            <div class="swatch-hex">#3C5240</div>
+          </div>
+        </div>
+        <div class="emotion-swatch low" style="background:#7A9078;">
+          <div class="swatch-meta">
+            <div class="swatch-intensity" style="color:rgba(46,35,24,.45);">Low</div>
+            <div class="swatch-state" style="color:rgba(46,35,24,.75);">憂慮 Apprehension</div>
+            <div class="swatch-hex" style="color:rgba(46,35,24,.45);">#7A9078</div>
+          </div>
+        </div>
+        <div class="emotion-label">
+          <div class="emotion-label-zh">恐懼</div>
+          <div class="emotion-label-en">fear</div>
+        </div>
+      </div>
+
+      <!-- 厭惡 disgust -->
+      <div class="emotion-col">
+        <div class="emotion-swatch high" style="background:#3D1F4E;">
+          <div class="swatch-meta">
+            <div class="swatch-intensity">High</div>
+            <div class="swatch-state">憎惡 Loathing</div>
+            <div class="swatch-hex">#3D1F4E</div>
+          </div>
+        </div>
+        <div class="emotion-swatch medium" style="background:#693880;">
+          <div class="swatch-meta">
+            <div class="swatch-intensity">Medium</div>
+            <div class="swatch-state">厭惡 Disgust</div>
+            <div class="swatch-hex">#693880</div>
+          </div>
+        </div>
+        <div class="emotion-swatch low" style="background:#B090C0;">
+          <div class="swatch-meta">
+            <div class="swatch-intensity">Low</div>
+            <div class="swatch-state">無聊 Boredom</div>
+            <div class="swatch-hex">#B090C0</div>
+          </div>
+        </div>
+        <div class="emotion-label">
+          <div class="emotion-label-zh">厭惡</div>
+          <div class="emotion-label-en">disgust</div>
+        </div>
+      </div>
+
+      <!-- 信任 trust -->
+      <div class="emotion-col">
+        <div class="emotion-swatch high" style="background:#2A7A50;">
+          <div class="swatch-meta">
+            <div class="swatch-intensity">High</div>
+            <div class="swatch-state">欽佩 Admiration</div>
+            <div class="swatch-hex">#2A7A50</div>
+          </div>
+        </div>
+        <div class="emotion-swatch medium" style="background:#4AA878;">
+          <div class="swatch-meta">
+            <div class="swatch-intensity">Medium</div>
+            <div class="swatch-state">信任 Trust</div>
+            <div class="swatch-hex">#4AA878</div>
+          </div>
+        </div>
+        <div class="emotion-swatch low" style="background:#9FD4B8;">
+          <div class="swatch-meta">
+            <div class="swatch-intensity">Low</div>
+            <div class="swatch-state">接受 Acceptance</div>
+            <div class="swatch-hex">#9FD4B8</div>
+          </div>
+        </div>
+        <div class="emotion-label">
+          <div class="emotion-label-zh">信任</div>
+          <div class="emotion-label-en">trust</div>
+        </div>
+      </div>
+
+      <!-- 期待 anticipation -->
+      <div class="emotion-col">
+        <div class="emotion-swatch high" style="background:#C45500;">
+          <div class="swatch-meta">
+            <div class="swatch-intensity">High</div>
+            <div class="swatch-state">警惕 Vigilance</div>
+            <div class="swatch-hex">#C45500</div>
+          </div>
+        </div>
+        <div class="emotion-swatch medium" style="background:#E87818;">
+          <div class="swatch-meta">
+            <div class="swatch-intensity">Medium</div>
+            <div class="swatch-state">期待 Anticipation</div>
+            <div class="swatch-hex">#E87818</div>
+          </div>
+        </div>
+        <div class="emotion-swatch low" style="background:#F5B870;">
+          <div class="swatch-meta">
+            <div class="swatch-intensity">Low</div>
+            <div class="swatch-state">興趣 Interest</div>
+            <div class="swatch-hex">#F5B870</div>
+          </div>
+        </div>
+        <div class="emotion-label">
+          <div class="emotion-label-zh">期待</div>
+          <div class="emotion-label-en">anticipation</div>
+        </div>
+      </div>
+
+      <!-- 驚訝 surprise -->
+      <div class="emotion-col">
+        <div class="emotion-swatch high" style="background:#1A7A9A;">
+          <div class="swatch-meta">
+            <div class="swatch-intensity">High</div>
+            <div class="swatch-state">驚嘆 Amazement</div>
+            <div class="swatch-hex">#1A7A9A</div>
+          </div>
+        </div>
+        <div class="emotion-swatch medium" style="background:#40A8C8;">
+          <div class="swatch-meta">
+            <div class="swatch-intensity">Medium</div>
+            <div class="swatch-state">驚訝 Surprise</div>
+            <div class="swatch-hex">#40A8C8</div>
+          </div>
+        </div>
+        <div class="emotion-swatch low" style="background:#A0D8E8;">
+          <div class="swatch-meta">
+            <div class="swatch-intensity">Low</div>
+            <div class="swatch-state" style="color:rgba(46,35,24,.75);">分心 Distraction</div>
+            <div class="swatch-hex" style="color:rgba(46,35,24,.45);">#A0D8E8</div>
+          </div>
+        </div>
+        <div class="emotion-label">
+          <div class="emotion-label-zh">驚訝</div>
+          <div class="emotion-label-en">surprise</div>
+        </div>
+      </div>
+
+      <!-- 中性 neutral -->
+      <div class="emotion-col neutral">
+        <div class="emotion-swatch" style="background:#B0B8C0;">
+          <div class="swatch-meta">
+            <div class="swatch-intensity">Any intensity</div>
+            <div class="swatch-state">平靜 / 中性</div>
+            <div class="swatch-hex">#B0B8C0</div>
+          </div>
+        </div>
+        <div class="emotion-label">
+          <div class="emotion-label-zh">中性</div>
+          <div class="emotion-label-en">neutral</div>
+        </div>
+      </div>
+
+    </div><!-- /emotion-grid -->
+  </div>
+
+  <!-- 1-B: UI 基礎色 -->
+  <div class="comp-card">
+    <div class="comp-label">UI Base Colours</div>
+    <div class="comp-name">介面基礎色</div>
+    <div class="ui-swatches">
+      <div class="ui-swatch">
+        <div class="ui-chip" style="background:#f7f2ec;"></div>
+        <div class="ui-chip-label">--paper</div>
+        <div class="ui-chip-hex">#f7f2ec</div>
+      </div>
+      <div class="ui-swatch">
+        <div class="ui-chip" style="background:#2e2318;"></div>
+        <div class="ui-chip-label">--ink</div>
+        <div class="ui-chip-hex">#2e2318</div>
+      </div>
+      <div class="ui-swatch">
+        <div class="ui-chip" style="background:rgba(46,35,24,.44);border:1px solid rgba(46,35,24,.1);"></div>
+        <div class="ui-chip-label">--ink2</div>
+        <div class="ui-chip-hex">rgba(46,35,24,.44)</div>
+      </div>
+      <div class="ui-swatch">
+        <div class="ui-chip" style="background:rgba(255,255,255,.55);border:1px solid rgba(46,35,24,.08);backdrop-filter:blur(8px);"></div>
+        <div class="ui-chip-label">--glass</div>
+        <div class="ui-chip-hex">rgba(255,255,255,.55)</div>
+      </div>
+      <div class="ui-swatch">
+        <div class="ui-chip" style="background:rgba(255,255,255,.85);border:1px solid rgba(46,35,24,.08);"></div>
+        <div class="ui-chip-label">--gb (glass border)</div>
+        <div class="ui-chip-hex">rgba(255,255,255,.85)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     SECTION 2: 字型系統
+══════════════════════════════════════════════ -->
+<div class="section" id="typography">
+  <div class="section-header">
+    <span class="section-num">02</span>
+    <span class="section-title">字型系統 · Typography</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="comp-grid">
+    <div class="comp-card wide">
+      <div class="comp-label">Playfair Display Italic</div>
+      <div class="comp-name">品牌字體 — 大標題、品牌名</div>
+      <div class="type-row">
+        <div class="type-sample" style="font-family:'Playfair Display',serif;font-style:italic;font-size:72px;line-height:1;">Tomo</div>
+        <div class="type-meta">
+          <span class="type-tag">72px</span>
+          <span class="type-tag">Onboarding Splash 品牌大字</span>
+        </div>
+      </div>
+      <div class="type-row">
+        <div class="type-sample" style="font-family:'Playfair Display',serif;font-style:italic;font-size:36px;">Tomo</div>
+        <div class="type-meta">
+          <span class="type-tag">36px</span>
+          <span class="type-tag">Auth 頁品牌名</span>
+        </div>
+      </div>
+      <div class="type-row">
+        <div class="type-sample" style="font-family:'Playfair Display',serif;font-style:italic;font-size:26px;">說出今天的心情</div>
+        <div class="type-meta">
+          <span class="type-tag">26px</span>
+          <span class="type-tag">Onboarding 標題</span>
+        </div>
+      </div>
+      <div class="type-row">
+        <div class="type-sample" style="font-family:'Playfair Display',serif;font-size:22px;">心境水彩日記</div>
+        <div class="type-meta">
+          <span class="type-tag">22px</span>
+          <span class="type-tag">日記簿標題（non-italic）</span>
+        </div>
+      </div>
+      <div class="type-row">
+        <div class="type-sample" style="font-family:'Playfair Display',serif;font-style:italic;font-size:20px;">Tomo</div>
+        <div class="type-meta">
+          <span class="type-tag">20px</span>
+          <span class="type-tag">錄音頁 Header 品牌名</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="comp-card wide">
+      <div class="comp-label">Noto Serif TC</div>
+      <div class="comp-name">UI 字體 — 所有介面文字</div>
+      <div class="type-row">
+        <div class="type-sample" style="font-size:15px;font-weight:300;line-height:2.1;font-style:italic;">今天真的覺得很感謝，克服了一個很難的關卡，才發現原來自己還是可以的。</div>
+        <div class="type-meta">
+          <span class="type-tag">15px / weight 300</span>
+          <span class="type-tag">轉錄文字、正文</span>
+        </div>
+      </div>
+      <div class="type-row">
+        <div class="type-sample" style="font-size:14px;line-height:2;">開始錄音　儲存日記　按鈕文字</div>
+        <div class="type-meta">
+          <span class="type-tag">14px</span>
+          <span class="type-tag">按鈕、卡片內文</span>
+        </div>
+      </div>
+      <div class="type-row">
+        <div class="type-sample" style="font-size:13px;line-height:2;color:var(--ink2);">說話，記錄，感受。你的每一段話，都是獨一無二的。</div>
+        <div class="type-meta">
+          <span class="type-tag">13px</span>
+          <span class="type-tag">副文字、描述</span>
+        </div>
+      </div>
+      <div class="type-row">
+        <div class="type-sample" style="font-size:12px;color:var(--ink2);">選擇登入方式繼續　日記清單　情緒分析</div>
+        <div class="type-meta">
+          <span class="type-tag">12px</span>
+          <span class="type-tag">標籤、輔助文字</span>
+        </div>
+      </div>
+      <div class="type-row">
+        <div class="type-sample" style="font-size:11px;color:var(--ink2);letter-spacing:.07em;">喜悅　　09:41</div>
+        <div class="type-meta">
+          <span class="type-tag">11px</span>
+          <span class="type-tag">meta、時間、badge</span>
+        </div>
+      </div>
+      <div class="type-row">
+        <div class="type-sample" style="font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink2);">Voice Diary</div>
+        <div class="type-meta">
+          <span class="type-tag">10px / letter-spacing .18em / UPPERCASE</span>
+          <span class="type-tag">眉標文字（eyebrow）</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     SECTION 3: 元件
+══════════════════════════════════════════════ -->
+<div class="section" id="components">
+  <div class="section-header">
+    <span class="section-num">03</span>
+    <span class="section-title">元件 · Components</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="comp-grid">
+
+    <!-- Mic Button -->
+    <div class="comp-card" id="mic-button">
+      <div class="comp-label">Component</div>
+      <div class="comp-name">Mic Button</div>
+      <p class="comp-usage">錄音頁的核心操作元件。Idle 時等待使用者按下；Recording 時顯示紅色脈動光暈，圓環計時與音量視覺化同步啟動。兩個狀態互斥，由 JS 切換 CSS class。</p>
+      <div class="comp-demo center" style="gap:40px;padding:20px 0;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+          <div class="mic-btn-demo">
+            <svg width="24" height="24" viewBox="0 0 24 24">
+              <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
+              <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
+              <line x1="12" y1="19" x2="12" y2="22"/>
+              <line x1="8" y1="22" x2="16" y2="22"/>
+            </svg>
+          </div>
+          <div class="state-label">Idle</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+          <div class="mic-btn-demo rec">
+            <svg width="24" height="24" viewBox="0 0 24 24">
+              <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
+              <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
+              <line x1="12" y1="19" x2="12" y2="22"/>
+              <line x1="8" y1="22" x2="16" y2="22"/>
+            </svg>
+          </div>
+          <div class="state-label">Recording</div>
+        </div>
+      </div>
+      <div class="comp-spec">
+        <div class="spec-row"><span class="spec-key">尺寸</span><span class="spec-val">68 × 68 pt</span></div>
+        <div class="spec-row"><span class="spec-key">border-radius</span><span class="spec-val">50%</span></div>
+        <div class="spec-row"><span class="spec-key">border</span><span class="spec-val">1.5px solid rgba(255,255,255,.88)</span></div>
+        <div class="spec-row"><span class="spec-key">background (idle)</span><span class="spec-val">rgba(255,255,255,.68)</span></div>
+        <div class="spec-row"><span class="spec-key">backdrop-filter</span><span class="spec-val">blur(20px)</span></div>
+        <div class="spec-row"><span class="spec-key">box-shadow (idle)</span><span class="spec-val">0 8px 28px rgba(0,0,0,.09),<br>inset 0 1px 0 rgba(255,255,255,.9)</span></div>
+        <div class="spec-row"><span class="spec-key">icon stroke</span><span class="spec-val">#7a5c4a / stroke-width 1.8</span></div>
+        <div class="spec-row"><span class="spec-key">background (rec)</span><span class="spec-val">rgba(200,80,60,.13)</span></div>
+        <div class="spec-row"><span class="spec-key">icon stroke (rec)</span><span class="spec-val">#c84c3c</span></div>
+        <div class="spec-row"><span class="spec-key">animation (rec)</span><span class="spec-val">pulse 2s infinite</span></div>
+        <div class="spec-row"><span class="spec-key">pulse keyframe</span><span class="spec-val">box-shadow 0→16px rgba(200,80,60,.22)→0</span></div>
+      </div>
+      <div class="states-divider"></div>
+      <div class="states-title">互動狀態 · Interactive States（Idle）</div>
+      <div class="states-row">
+        <div class="state-col">
+          <div class="state-col-visual"><div class="mic-btn-demo" style="pointer-events:none;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7a5c4a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></div></div>
+          <div class="state-col-name">Default</div>
+          <div class="state-col-specs">
+            <div class="state-spec-item"><span class="state-spec-key">background</span><span class="state-spec-val">rgba(255,255,255,.68)</span></div>
+            <div class="state-spec-item"><span class="state-spec-key">box-shadow</span><span class="state-spec-val">0 8px 28px rgba(0,0,0,.09)</span></div>
+            <div class="state-spec-item"><span class="state-spec-key">transform</span><span class="state-spec-val">none</span></div>
+          </div>
+        </div>
+        <div class="state-col">
+          <div class="state-col-visual"><div class="mic-btn-demo" style="pointer-events:none;background:rgba(255,255,255,.85);box-shadow:0 10px 32px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.9);"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7a5c4a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></div></div>
+          <div class="state-col-name">Hover</div>
+          <div class="state-col-specs">
+            <div class="state-spec-item"><span class="state-spec-key">background</span><span class="state-spec-val">rgba(255,255,255,.85)</span></div>
+            <div class="state-spec-item"><span class="state-spec-key">box-shadow</span><span class="state-spec-val">0 10px 32px rgba(0,0,0,.12)</span></div>
+            <div class="state-spec-item"><span class="state-spec-key">transition</span><span class="state-spec-val">background .2s, box-shadow .2s</span></div>
+          </div>
+        </div>
+        <div class="state-col">
+          <div class="state-col-visual"><div class="mic-btn-demo" style="pointer-events:none;transform:scale(.94);"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7a5c4a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></div></div>
+          <div class="state-col-name">Active（按下）</div>
+          <div class="state-col-specs">
+            <div class="state-spec-item"><span class="state-spec-key">transform</span><span class="state-spec-val">scale(.94)</span></div>
+            <div class="state-spec-item"><span class="state-spec-key">transition</span><span class="state-spec-val">.12s</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="comp-spec">
+        <div class="spec-row"><span class="spec-key">尺寸</span><span class="spec-val">68 × 68 pt</span></div>
+        <div class="spec-row"><span class="spec-key">border-radius</span><span class="spec-val">50%</span></div>
+        <div class="spec-row"><span class="spec-key">border</span><span class="spec-val">1.5px solid rgba(255,255,255,.88)</span></div>
+        <div class="spec-row"><span class="spec-key">background (idle)</span><span class="spec-val">rgba(255,255,255,.68)</span></div>
+        <div class="spec-row"><span class="spec-key">backdrop-filter</span><span class="spec-val">blur(20px)</span></div>
+        <div class="spec-row"><span class="spec-key">box-shadow (idle)</span><span class="spec-val">0 8px 28px rgba(0,0,0,.09), inset 0 1px 0 rgba(255,255,255,.9)</span></div>
+        <div class="spec-row"><span class="spec-key">icon stroke</span><span class="spec-val">#7a5c4a / stroke-width 1.8</span></div>
+        <div class="spec-row"><span class="spec-key">background (rec)</span><span class="spec-val">rgba(200,80,60,.13)</span></div>
+        <div class="spec-row"><span class="spec-key">icon stroke (rec)</span><span class="spec-val">#c84c3c</span></div>
+        <div class="spec-row"><span class="spec-key">pulse animation</span><span class="spec-val">2s infinite — box-shadow 0→16px rgba(200,80,60,.22)→0</span></div>
+      </div>
+    </div>
+
+    <!-- Progress Ring -->
+    <div class="comp-card" id="progress-ring">
+      <div class="comp-label">Component</div>
+      <div class="comp-name">Progress Ring</div>
+      <p class="comp-usage">圍繞 Mic Button 的計時指示圓環，純視覺回饋、不可點擊。stroke-dashoffset 從 226（0%）以 .4s linear 持續遞減至 0（100%）。錄音開始時淡入，停止後消失。</p>
+      <div class="comp-demo center" style="gap:36px;padding:16px 0;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+          <div class="ring-demo-wrap">
+            <div class="ring-wrap">
+              <svg viewBox="0 0 86 86">
+                <circle class="ring-track" cx="43" cy="43" r="36"/>
+                <circle class="ring-fill" cx="43" cy="43" r="36"/>
+              </svg>
+            </div>
+            <div class="ring-inner-label">0%</div>
+          </div>
+          <div class="state-label">Empty</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+          <div class="ring-demo-wrap">
+            <div class="ring-wrap">
+              <svg viewBox="0 0 86 86">
+                <circle class="ring-track" cx="43" cy="43" r="36"/>
+                <circle class="ring-fill p60" cx="43" cy="43" r="36"/>
+              </svg>
+            </div>
+            <div class="ring-inner-label">60%</div>
+          </div>
+          <div class="state-label">60%</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+          <div class="ring-demo-wrap">
+            <div class="ring-wrap">
+              <svg viewBox="0 0 86 86">
+                <circle class="ring-track" cx="43" cy="43" r="36"/>
+                <circle class="ring-fill p100" cx="43" cy="43" r="36"/>
+              </svg>
+            </div>
+            <div class="ring-inner-label">100%</div>
+          </div>
+          <div class="state-label">Full</div>
+        </div>
+      </div>
+      <div class="comp-spec">
+        <div class="spec-row"><span class="spec-key">尺寸</span><span class="spec-val">86 × 86 pt（含 mic button）</span></div>
+        <div class="spec-row"><span class="spec-key">circle r</span><span class="spec-val">36</span></div>
+        <div class="spec-row"><span class="spec-key">circumference</span><span class="spec-val">2π × 36 ≈ 226</span></div>
+        <div class="spec-row"><span class="spec-key">track stroke</span><span class="spec-val">rgba(46,35,24,.1) / width 2.5</span></div>
+        <div class="spec-row"><span class="spec-key">fill stroke</span><span class="spec-val">rgba(46,35,24,.45) / width 2.5</span></div>
+        <div class="spec-row"><span class="spec-key">stroke-linecap</span><span class="spec-val">round</span></div>
+        <div class="spec-row"><span class="spec-key">stroke-dasharray</span><span class="spec-val">226</span></div>
+        <div class="spec-row"><span class="spec-key">stroke-dashoffset</span><span class="spec-val">226（empty）→ 0（full）</span></div>
+        <div class="spec-row"><span class="spec-key">rotation</span><span class="spec-val">rotate(-90deg)（從 12 點開始）</span></div>
+        <div class="spec-row"><span class="spec-key">transition</span><span class="spec-val">stroke-dashoffset .4s linear</span></div>
+        <div class="spec-row"><span class="spec-key">visibility</span><span class="spec-val">opacity 0→1 .4s，錄音中顯示</span></div>
+      </div>
+    </div>
+
+    <!-- Emotion Pill -->
+    <div class="comp-card" id="emotion-pill">
+      <div class="comp-label">Component</div>
+      <div class="comp-name">Emotion Pill</div>
+      <p class="comp-usage">錄音頁頂部的即時情緒標籤。LLM 分析完成前顯示「靜待…」與無色圓點；分析完成後以 .6s transition 切換文字，圓點以 1s transition 漸變至對應情緒的 medium 強度色。pointer-events: none，不可點擊。</p>
+      <div class="comp-demo vertical" style="gap:16px;padding:12px 0;">
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div class="pill-demo">
+            <div class="pill-dot-demo"></div>
+            靜待…
+          </div>
+          <div class="state-label" style="text-align:left;">Idle（無情緒）</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div class="pill-demo">
+            <div class="pill-dot-demo" style="background:#E49F3C;"></div>
+            喜悅
+          </div>
+          <div class="state-label" style="text-align:left;">偵測到情緒（喜悅）</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div class="pill-demo">
+            <div class="pill-dot-demo" style="background:#303F84;"></div>
+            悲傷
+          </div>
+          <div class="state-label" style="text-align:left;">偵測到情緒（悲傷）</div>
+        </div>
+      </div>
+      <div class="comp-spec">
+        <div class="spec-row"><span class="spec-key">background</span><span class="spec-val">rgba(255,255,255,.55)（--glass）</span></div>
+        <div class="spec-row"><span class="spec-key">backdrop-filter</span><span class="spec-val">blur(16px)</span></div>
+        <div class="spec-row"><span class="spec-key">border</span><span class="spec-val">1px solid rgba(255,255,255,.85)（--gb）</span></div>
+        <div class="spec-row"><span class="spec-key">border-radius</span><span class="spec-val">20px</span></div>
+        <div class="spec-row"><span class="spec-key">padding</span><span class="spec-val">7px 16px</span></div>
+        <div class="spec-row"><span class="spec-key">font-size</span><span class="spec-val">12px / color #5a4a3a</span></div>
+        <div class="spec-row"><span class="spec-key">dot 尺寸</span><span class="spec-val">7 × 7 pt / border-radius 50%</span></div>
+        <div class="spec-row"><span class="spec-key">dot color (idle)</span><span class="spec-val">#c9b99a</span></div>
+        <div class="spec-row"><span class="spec-key">dot color (emotion)</span><span class="spec-val">情緒 medium 強度色</span></div>
+        <div class="spec-row"><span class="spec-key">transition</span><span class="spec-val">all .6s（pill）/ background 1s（dot）</span></div>
+      </div>
+    </div>
+
+    <!-- Volume Viz -->
+    <div class="comp-card" id="volume-viz">
+      <div class="comp-label">Component</div>
+      <div class="comp-name">Volume Viz</div>
+      <p class="comp-usage">麥克風音量的即時波形視覺，5 條 bar 高度每 70ms 跟隨 Web Audio API analyser 數值更新。最小高度 4px（靜音底線），最大 18px（容器高）。錄音開始時 opacity 0→1 .3s 淡入，停止後淡出。</p>
+      <div class="comp-demo center" style="flex-direction:column;gap:24px;padding:16px 0;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+          <div class="vol-viz-demo">
+            <div class="vbar-demo" style="height:4px;"></div>
+            <div class="vbar-demo" style="height:4px;"></div>
+            <div class="vbar-demo" style="height:4px;"></div>
+            <div class="vbar-demo" style="height:4px;"></div>
+            <div class="vbar-demo" style="height:4px;"></div>
+          </div>
+          <div class="state-label">Idle（靜音）</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+          <div class="vol-viz-demo">
+            <div class="vbar-demo" style="height:6px;"></div>
+            <div class="vbar-demo" style="height:14px;"></div>
+            <div class="vbar-demo" style="height:18px;"></div>
+            <div class="vbar-demo" style="height:10px;"></div>
+            <div class="vbar-demo" style="height:7px;"></div>
+          </div>
+          <div class="state-label">Recording（音量中等）</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+          <div class="vol-viz-demo">
+            <div class="vbar-demo" style="height:10px;"></div>
+            <div class="vbar-demo" style="height:18px;"></div>
+            <div class="vbar-demo" style="height:18px;"></div>
+            <div class="vbar-demo" style="height:18px;"></div>
+            <div class="vbar-demo" style="height:12px;"></div>
+          </div>
+          <div class="state-label">Recording（音量大）</div>
+        </div>
+      </div>
+      <div class="comp-spec">
+        <div class="spec-row"><span class="spec-key">bar 數量</span><span class="spec-val">5（可 5–7 條）</span></div>
+        <div class="spec-row"><span class="spec-key">bar 寬度</span><span class="spec-val">3px</span></div>
+        <div class="spec-row"><span class="spec-key">bar 間距</span><span class="spec-val">gap: 2px</span></div>
+        <div class="spec-row"><span class="spec-key">bar border-radius</span><span class="spec-val">2px</span></div>
+        <div class="spec-row"><span class="spec-key">bar color</span><span class="spec-val">rgba(120,90,70,.38)</span></div>
+        <div class="spec-row"><span class="spec-key">bar height (idle)</span><span class="spec-val">4px（最小）</span></div>
+        <div class="spec-row"><span class="spec-key">bar height (max)</span><span class="spec-val">18px（container height）</span></div>
+        <div class="spec-row"><span class="spec-key">height transition</span><span class="spec-val">.07s（快速跟隨音量）</span></div>
+        <div class="spec-row"><span class="spec-key">visibility</span><span class="spec-val">opacity 0→1 .3s，錄音中顯示</span></div>
+      </div>
+    </div>
+
+    <!-- Side Button -->
+    <div class="comp-card" id="side-button">
+      <div class="comp-label">Component</div>
+      <div class="comp-name">Side Button（完成）</div>
+      <p class="comp-usage">錄音開始後才從透明淡入的輔助操作，放置於 Mic Button 右側固定位置（left: calc(50% + 56px)）。點擊後停止錄音並觸發 Done Sheet 滑入。</p>
+      <div class="comp-demo center" style="gap:32px;padding:16px 0;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+          <div class="side-btn-demo">
+            <div class="side-icon-demo">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+            <div class="side-lbl-demo">完成</div>
+          </div>
+          <div class="state-label">可互動</div>
+        </div>
+      </div>
+      <div class="states-divider"></div>
+      <div class="states-title">互動狀態 · Interactive States</div>
+      <div class="states-row">
+        <div class="state-col">
+          <div class="state-col-visual"><div style="width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.65);border:1px solid rgba(255,255,255,.88);box-shadow:0 4px 16px rgba(0,0,0,.07);display:flex;align-items:center;justify-content:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+          <div class="state-col-name">Default</div>
+          <div class="state-col-specs">
+            <div class="state-spec-item"><span class="state-spec-key">background</span><span class="state-spec-val">rgba(255,255,255,.65)</span></div>
+            <div class="state-spec-item"><span class="state-spec-key">box-shadow</span><span class="state-spec-val">0 4px 16px rgba(0,0,0,.07)</span></div>
+          </div>
+        </div>
+        <div class="state-col">
+          <div class="state-col-visual"><div style="width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.88);box-shadow:0 4px 16px rgba(0,0,0,.07);display:flex;align-items:center;justify-content:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+          <div class="state-col-name">Hover</div>
+          <div class="state-col-specs">
+            <div class="state-spec-item"><span class="state-spec-key">background</span><span class="state-spec-val">rgba(255,255,255,.85)</span></div>
+            <div class="state-spec-item"><span class="state-spec-key">transition</span><span class="state-spec-val">background .2s</span></div>
+          </div>
+        </div>
+        <div class="state-col">
+          <div class="state-col-visual"><div style="width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.65);border:1px solid rgba(255,255,255,.88);box-shadow:0 4px 16px rgba(0,0,0,.07);display:flex;align-items:center;justify-content:center;transform:scale(.92);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+          <div class="state-col-name">Active（按下）</div>
+          <div class="state-col-specs">
+            <div class="state-spec-item"><span class="state-spec-key">transform</span><span class="state-spec-val">scale(.92)</span></div>
+            <div class="state-spec-item"><span class="state-spec-key">transition</span><span class="state-spec-val">.12s</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="comp-spec">
+        <div class="spec-row"><span class="spec-key">尺寸</span><span class="spec-val">48 × 48 pt</span></div>
+        <div class="spec-row"><span class="spec-key">border-radius</span><span class="spec-val">50%</span></div>
+        <div class="spec-row"><span class="spec-key">backdrop-filter</span><span class="spec-val">blur(14px)</span></div>
+        <div class="spec-row"><span class="spec-key">border</span><span class="spec-val">1px solid rgba(255,255,255,.88)</span></div>
+        <div class="spec-row"><span class="spec-key">label</span><span class="spec-val">10px / letter-spacing .12em / --ink2</span></div>
+        <div class="spec-row"><span class="spec-key">出現動畫</span><span class="spec-val">opacity 0→1 + scale .85→1 / .3s</span></div>
+        <div class="spec-row"><span class="spec-key">位置</span><span class="spec-val">left: calc(50% + 56px)</span></div>
+      </div>
+    </div>
+
+    <!-- Glass Card -->
+    <div class="comp-card" id="glass-card">
+      <div class="comp-label">Component</div>
+      <div class="comp-name">Glass Card</div>
+      <p class="comp-usage">全站共用的玻璃質感容器。background + backdrop-filter + border 固定不變，border-radius 依脈絡調整：24px 用於大型容器（Auth 卡片）、16px 用於浮層卡片、14px 用於內容片段。</p>
+      <div class="comp-demo vertical" style="gap:14px;padding:12px 0;">
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <div class="glass-card-demo glass-card-24" style="width:100%;">
+            <div class="glass-card-content">border-radius: 24px<br><span style="font-size:11px;color:var(--ink2);">Auth 卡片、Loading 卡片</span></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <div class="glass-card-demo glass-card-16" style="width:100%;">
+            <div class="glass-card-content">border-radius: 16px<br><span style="font-size:11px;color:var(--ink2);">Reflection 卡片</span></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <div class="glass-card-demo glass-card-14" style="width:100%;">
+            <div class="glass-card-content">border-radius: 14px<br><span style="font-size:11px;color:var(--ink2);">Done Sheet 文字卡、Canvas 預覽</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="comp-spec">
+        <div class="spec-row"><span class="spec-key">background</span><span class="spec-val">rgba(255,255,255,.55)（--glass）</span></div>
+        <div class="spec-row"><span class="spec-key">backdrop-filter</span><span class="spec-val">blur(20px)</span></div>
+        <div class="spec-row"><span class="spec-key">border</span><span class="spec-val">1px solid rgba(255,255,255,.85)（--gb）</span></div>
+        <div class="spec-row"><span class="spec-key">border-radius 規格</span><span class="spec-val">24px / 16px / 14px（視脈絡）</span></div>
+      </div>
+    </div>
+
+    <!-- Bottom Sheet -->
+    <div class="comp-card wide" id="bottom-sheet">
+      <div class="comp-label">Component</div>
+      <div class="comp-name">Bottom Sheet（Done Sheet）</div>
+      <p class="comp-usage">停止錄音後從底部以 .45s cubic-bezier(.4,0,.2,1) 滑入的確認面板。使用者可查看水彩快照與轉錄文字，選擇儲存或重錄。sheet 本身不可互動（僅顯示）；兩個操作按鈕分別有各自的互動狀態。</p>
+      <div class="comp-demo" style="padding:12px 0;">
+        <div class="sheet-demo" style="width:100%;max-width:400px;">
+          <div class="sheet-handle-demo"></div>
+          <div style="font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink2);margin-bottom:8px;">水彩快照</div>
+          <div class="canvas-demo" style="margin-bottom:16px;"></div>
+          <div class="glass-card-demo glass-card-14" style="margin-bottom:14px;font-size:13px;color:var(--ink);line-height:2;font-weight:300;padding:14px 16px 36px;position:relative;overflow:hidden;">
+            今天覺得很感謝，克服了一個很難的關卡…
+            <div style="position:absolute;bottom:0;left:0;right:0;height:40px;background:linear-gradient(transparent,rgba(255,255,255,.65));"></div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:22px;">
+            <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.9);border-radius:20px;padding:5px 11px;font-size:11px;color:var(--ink);letter-spacing:.05em;"><div style="width:6px;height:6px;border-radius:50%;background:#E49F3C;flex-shrink:0;"></div>喜悅</div>
+            <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.9);border-radius:20px;padding:5px 11px;font-size:11px;color:var(--ink);letter-spacing:.05em;"><div style="width:6px;height:6px;border-radius:50%;background:#4AA878;flex-shrink:0;"></div>信任</div>
+          </div>
+          <button class="done-confirm-btn">儲存日記</button>
+          <button class="done-restart-btn">重新錄音</button>
+        </div>
+      </div>
+
+      <!-- 儲存日記 button states -->
+      <div class="states-divider"></div>
+      <div class="states-title">「儲存日記」按鈕互動狀態</div>
+      <div class="states-row">
+        <div class="state-col">
+          <div class="state-col-visual"><button style="width:100%;padding:13px;background:var(--ink);border:none;border-radius:14px;font-family:'Noto Serif TC',serif;font-size:13px;color:#f7f2ec;letter-spacing:.06em;cursor:default;opacity:1;">儲存日記</button></div>
+          <div class="state-col-name">Default</div>
+          <div class="state-col-specs">
+            <div class="state-spec-item"><span class="state-spec-key">background</span><span class="state-spec-val">#2e2318（--ink）</span></div>
+            <div class="state-spec-item"><span class="state-spec-key">opacity</span><span class="state-spec-val">1</span></div>
+            <div class="state-spec-item"><span class="state-spec-key">transform</span><span class="state-spec-val">none</span></div>
+          </div>
+        </div>
+        <div class="state-col">
+          <div class="state-col-visual"><button style="width:100%;padding:13px;background:var(--ink);border:none;border-radius:14px;font-family:'Noto Serif TC',serif;font-size:13px;color:#f7f2ec;letter-spacing:.06em;cursor:default;opacity:.85;">儲存日記</button></div>
+          <div class="state-col-name">Hover</div>
+          <div class="state-col-specs">
+            <div class="state-spec-item"><span class="state-spec-key">opacity</span><span class="state-spec-val">.85</span></div>
+            <div class="state-spec-item"><span class="state-spec-key">transition</span><span class="state-spec-val">opacity .2s</span></div>
+          </div>
+        </div>
+        <div class="state-col">
+          <div class="state-col-visual"><button style="width:100%;padding:13px;background:var(--ink);border:none;border-radius:14px;font-family:'Noto Serif TC',serif;font-size:13px;color:#f7f2ec;letter-spacing:.06em;cursor:default;opacity:.75;transform:scale(.97);">儲存日記</button></div>
+          <div class="state-col-name">Active（按下）</div>
+          <div class="state-col-specs">
+            <div class="state-spec-item"><span class="state-spec-key">opacity</span><span class="state-spec-val">.75</span></div>
+            <div class="state-spec-item"><span class="state-spec-key">transform</span><span class="state-spec-val">scale(.97)</span></div>
+            <div class="state-spec-item"><span class="state-spec-key">transition</span><span class="state-spec-val">.12s</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 重新錄音 button states -->
+      <div class="states-title" style="margin-top:4px;">「重新錄音」按鈕互動狀態</div>
+      <div class="states-row">
+        <div class="state-col">
+          <div class="state-col-visual" style="min-height:56px;"><button style="background:none;border:none;font-family:'Noto Serif TC',serif;font-size:13px;color:var(--ink2);letter-spacing:.04em;cursor:default;">重新錄音</button></div>
+          <div class="state-col-name">Default</div>
+          <div class="state-col-specs">
+            <div class="state-spec-item"><span class="state-spec-key">color</span><span class="state-spec-val">--ink2 rgba(46,35,24,.44)</span></div>
+          </div>
+        </div>
+        <div class="state-col">
+          <div class="state-col-visual" style="min-height:56px;"><button style="background:none;border:none;font-family:'Noto Serif TC',serif;font-size:13px;color:var(--ink);letter-spacing:.04em;cursor:default;">重新錄音</button></div>
+          <div class="state-col-name">Hover</div>
+          <div class="state-col-specs">
+            <div class="state-spec-item"><span class="state-spec-key">color</span><span class="state-spec-val">--ink #2e2318</span></div>
+            <div class="state-spec-item"><span class="state-spec-key">transition</span><span class="state-spec-val">color .2s</span></div>
+          </div>
+        </div>
+        <div class="state-col">
+          <div class="state-col-visual" style="min-height:56px;"><button style="background:none;border:none;font-family:'Noto Serif TC',serif;font-size:13px;color:var(--ink);letter-spacing:.04em;cursor:default;transform:scale(.97);">重新錄音</button></div>
+          <div class="state-col-name">Active（按下）</div>
+          <div class="state-col-specs">
+            <div class="state-spec-item"><span class="state-spec-key">transform</span><span class="state-spec-val">scale(.97)</span></div>
+            <div class="state-spec-item"><span class="state-spec-key">transition</span><span class="state-spec-val">.12s</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="comp-spec">
+        <div class="spec-row"><span class="spec-key">background</span><span class="spec-val">--paper (#f7f2ec)</span></div>
+        <div class="spec-row"><span class="spec-key">border-radius</span><span class="spec-val">24px 24px 0 0</span></div>
+        <div class="spec-row"><span class="spec-key">box-shadow</span><span class="spec-val">0 -8px 40px rgba(0,0,0,.16)</span></div>
+        <div class="spec-row"><span class="spec-key">padding</span><span class="spec-val">12px 24px 44px</span></div>
+        <div class="spec-row"><span class="spec-key">handle</span><span class="spec-val">36 × 4px / border-radius 2px / rgba(46,35,24,.16)</span></div>
+        <div class="spec-row"><span class="spec-key">canvas preview 高度</span><span class="spec-val">160px / border-radius 14px</span></div>
+        <div class="spec-row"><span class="spec-key">text card 遮罩</span><span class="spec-val">linear-gradient(transparent, rgba(255,255,255,.65)) 底部 40px</span></div>
+        <div class="spec-row"><span class="spec-key">slide-in 動畫</span><span class="spec-val">translateY(100%)→0 / .45s cubic-bezier(.4,0,.2,1)</span></div>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="comp-card wide" id="modal">
+      <div class="comp-label">Component</div>
+      <div class="comp-name">Modal（日記詳情）</div>
+      <p class="comp-usage">點擊 Entry Card 後出現，全螢幕查看完整日記。overlay 以模糊背景（blur(6px) + 半透明遮罩）強調焦點。出現時 card 從 translateY(12px) 上移歸位，製造輕盈浮現感。</p>
+      <div class="comp-demo center" style="padding:12px 0;">
+        <div style="width:100%;max-width:420px;background:rgba(46,35,24,.35);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-radius:16px;padding:20px;display:flex;align-items:center;justify-content:center;position:relative;">
+          <div class="modal-demo-card" style="position:relative;">
+            <div class="modal-demo-img"></div>
+            <div class="modal-demo-body">
+              <div class="modal-demo-meta">
+                <div style="width:7px;height:7px;border-radius:50%;background:#E49F3C;flex-shrink:0;"></div>
+                <span style="font-size:11px;color:var(--ink2);letter-spacing:.07em;">喜悅</span>
+                <span style="font-size:11px;color:var(--ink2);margin-left:auto;">09:41</span>
+              </div>
+              <div class="modal-demo-text">今天覺得很感謝，克服了一個很難的關卡，才發現原來自己還是可以的。</div>
+            </div>
+            <div class="modal-close-demo" style="position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.75);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--ink2);">×</div>
+          </div>
+        </div>
+      </div>
+      <div class="comp-spec">
+        <div class="spec-row"><span class="spec-key">overlay background</span><span class="spec-val">rgba(46,35,24,.35)</span></div>
+        <div class="spec-row"><span class="spec-key">overlay backdrop-filter</span><span class="spec-val">blur(6px)</span></div>
+        <div class="spec-row"><span class="spec-key">card background</span><span class="spec-val">--paper (#f7f2ec)</span></div>
+        <div class="spec-row"><span class="spec-key">card border-radius</span><span class="spec-val">20px</span></div>
+        <div class="spec-row"><span class="spec-key">card max-width</span><span class="spec-val">600px / max-height 88vh</span></div>
+        <div class="spec-row"><span class="spec-key">card box-shadow</span><span class="spec-val">0 24px 64px rgba(0,0,0,.18)</span></div>
+        <div class="spec-row"><span class="spec-key">watercolor img 高度</span><span class="spec-val">180px</span></div>
+        <div class="spec-row"><span class="spec-key">body padding</span><span class="spec-val">22px 26px 28px</span></div>
+        <div class="spec-row"><span class="spec-key">text font</span><span class="spec-val">15px / weight 300 / line-height 2.1</span></div>
+        <div class="spec-row"><span class="spec-key">close button</span><span class="spec-val">30 × 30px / border-radius 50% / rgba(255,255,255,.75)</span></div>
+        <div class="spec-row"><span class="spec-key">appear animation</span><span class="spec-val">opacity 0→1 0.3s + translateY(12px)→0 0.3s</span></div>
+      </div>
+    </div>
+
+    <!-- Entry Card -->
+    <div class="comp-card" id="entry-card">
+      <div class="comp-label">Component</div>
+      <div class="comp-name">Entry Card（日記卡片）</div>
+      <p class="comp-usage">日記列表的縮覽卡片。水彩快照圖片佔滿上層，漸層遮罩（紙色→透明）覆蓋底部，露出情緒 meta 與摘要文字。hover 時輕微上浮（translateY(-2px)）提示可點擊。</p>
+      <div class="comp-demo" style="padding:12px 0;">
+        <div class="entry-card-demo">
+          <div class="entry-img-demo"></div>
+          <div class="entry-overlay-demo">
+            <div class="entry-meta-demo">
+              <div class="em-dot-demo" style="background:#E49F3C;"></div>
+              <span class="em-name-demo">喜悅</span>
+              <span class="em-time-demo">09:41</span>
+            </div>
+            <div class="entry-text-demo">今天覺得很感謝，克服了一個很難的關卡</div>
+          </div>
+        </div>
+      </div>
+      <div class="comp-spec">
+        <div class="spec-row"><span class="spec-key">border-radius</span><span class="spec-val">16px</span></div>
+        <div class="spec-row"><span class="spec-key">box-shadow</span><span class="spec-val">0 4px 20px rgba(0,0,0,.07)</span></div>
+        <div class="spec-row"><span class="spec-key">watercolor img 高度</span><span class="spec-val">180px</span></div>
+        <div class="spec-row"><span class="spec-key">overlay gradient</span><span class="spec-val">to top: rgba(247,242,236,.96) → rgba(247,242,236,.2) 45% → transparent</span></div>
+        <div class="spec-row"><span class="spec-key">emotion dot</span><span class="spec-val">7 × 7px / border-radius 50%</span></div>
+        <div class="spec-row"><span class="spec-key">emotion name</span><span class="spec-val">11px / --ink2 / letter-spacing .07em</span></div>
+        <div class="spec-row"><span class="spec-key">time</span><span class="spec-val">11px / --ink2 / margin-left auto</span></div>
+        <div class="spec-row"><span class="spec-key">text font</span><span class="spec-val">13px / weight 300 / line-height 1.75</span></div>
+        <div class="spec-row"><span class="spec-key">text clamp</span><span class="spec-val">-webkit-line-clamp: 2</span></div>
+        <div class="spec-row"><span class="spec-key">hover</span><span class="spec-val">translateY(-2px) + box-shadow 0 8px 28px rgba(0,0,0,.11)</span></div>
+      </div>
+    </div>
+
+    <!-- Auth Buttons -->
+    <div class="comp-card" id="auth-button">
+      <div class="comp-label">Component</div>
+      <div class="comp-name">Auth Button</div>
+      <p class="comp-usage">登入頁兩個 OAuth 按鈕，視覺上互為對比（黑底/白底），排列於 Glass Card 容器內。兩者共用相同的 padding、border-radius、font-size，只有 background/color 不同。</p>
+      <div class="comp-demo vertical" style="gap:12px;padding:12px 0;">
+        <div style="width:100%;">
+          <button class="btn-apple-demo">
+            <svg width="16" height="16" viewBox="0 0 24 24" style="fill:white;flex-shrink:0"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.3.04-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+            以 Apple 登入
+          </button>
+          <div class="state-label" style="text-align:left;margin-top:6px;">Apple（黑底白字）</div>
+        </div>
+        <div style="width:100%;">
+          <button class="btn-google-demo">
+            <svg width="16" height="16" viewBox="0 0 24 24" style="flex-shrink:0"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            以 Google 登入
+          </button>
+          <div class="state-label" style="text-align:left;margin-top:6px;">Google（白底黑字）</div>
+        </div>
+      </div>
+      <div class="comp-spec">
+        <div class="spec-row"><span class="spec-key">padding</span><span class="spec-val">14px 20px</span></div>
+        <div class="spec-row"><span class="spec-key">border-radius</span><span class="spec-val">13px</span></div>
+        <div class="spec-row"><span class="spec-key">font-size</span><span class="spec-val">14px / letter-spacing .04em</span></div>
+        <div class="spec-row"><span class="spec-key">Apple background</span><span class="spec-val">#1a1a1a</span></div>
+        <div class="spec-row"><span class="spec-key">Apple color</span><span class="spec-val">#ffffff</span></div>
+        <div class="spec-row"><span class="spec-key">Google background</span><span class="spec-val">rgba(255,255,255,.92)</span></div>
+        <div class="spec-row"><span class="spec-key">Google color</span><span class="spec-val">--ink</span></div>
+        <div class="spec-row"><span class="spec-key">Google border</span><span class="spec-val">1px solid rgba(46,35,24,.14)</span></div>
+      </div>
+      <div class="states-divider"></div>
+      <div class="states-title">Apple 按鈕互動狀態</div>
+      <div class="states-row">
+        <div class="state-col">
+          <div class="state-col-visual"><button style="width:100%;padding:12px;background:#1a1a1a;border:none;border-radius:13px;font-family:'Noto Serif TC',serif;font-size:13px;color:#fff;letter-spacing:.04em;cursor:default;opacity:1;">以 Apple 登入</button></div>
+          <div class="state-col-name">Default</div>
+          <div class="state-col-specs">
+            <div class="state-spec-item"><span class="state-spec-key">opacity</span><span class="state-spec-val">1</span></div>
+            <div class="state-spec-item"><span class="state-spec-key">transform</span><span class="state-spec-val">none</span></div>
+          </div>
+        </div>
+        <div class="state-col">
+          <div class="state-col-visual"><button style="width:100%;padding:12px;background:#1a1a1a;border:none;border-radius:13px;font-family:'Noto Serif TC',serif;font-size:13px;color:#fff;letter-spacing:.04em;cursor:default;opacity:.85;">以 Apple 登入</button></div>
+          <div class="state-col-name">Hover</div>
+          <div class="state-col-specs">
+            <div class="state-spec-item"><span class="state-spec-key">opacity</span><span class="state-spec-val">.85</span></div>
+            <div class="state-spec-item"><span class="state-spec-key">transition</span><span class="state-spec-val">opacity .15s</span></div>
+          </div>
+        </div>
+        <div class="state-col">
+          <div class="state-col-visual"><button style="width:100%;padding:12px;background:#1a1a1a;border:none;border-radius:13px;font-family:'Noto Serif TC',serif;font-size:13px;color:#fff;letter-spacing:.04em;cursor:default;opacity:.75;transform:scale(.97);">以 Apple 登入</button></div>
+          <div class="state-col-name">Active</div>
+          <div class="state-col-specs">
+            <div class="state-spec-item"><span class="state-spec-key">opacity</span><span class="state-spec-val">.75</span></div>
+            <div class="state-spec-item"><span class="state-spec-key">transform</span><span class="state-spec-val">scale(.97)</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="states-title" style="margin-top:4px;">Google 按鈕互動狀態</div>
+      <div class="states-row">
+        <div class="state-col">
+          <div class="state-col-visual"><button style="width:100%;padding:12px;background:rgba(255,255,255,.92);border:1px solid rgba(46,35,24,.14);border-radius:13px;font-family:'Noto Serif TC',serif;font-size:13px;color:var(--ink);letter-spacing:.04em;cursor:default;">以 Google 登入</button></div>
+          <div class="state-col-name">Default</div>
+          <div class="state-col-specs">
+            <div class="state-spec-item"><span class="state-spec-key">background</span><span class="state-spec-val">rgba(255,255,255,.92)</span></div>
+          </div>
+        </div>
+        <div class="state-col">
+          <div class="state-col-visual"><button style="width:100%;padding:12px;background:rgba(255,255,255,1);border:1px solid rgba(46,35,24,.14);border-radius:13px;font-family:'Noto Serif TC',serif;font-size:13px;color:var(--ink);letter-spacing:.04em;cursor:default;">以 Google 登入</button></div>
+          <div class="state-col-name">Hover</div>
+          <div class="state-col-specs">
+            <div class="state-spec-item"><span class="state-spec-key">background</span><span class="state-spec-val">rgba(255,255,255,1)</span></div>
+            <div class="state-spec-item"><span class="state-spec-key">transition</span><span class="state-spec-val">background .15s</span></div>
+          </div>
+        </div>
+        <div class="state-col">
+          <div class="state-col-visual"><button style="width:100%;padding:12px;background:rgba(255,255,255,1);border:1px solid rgba(46,35,24,.14);border-radius:13px;font-family:'Noto Serif TC',serif;font-size:13px;color:var(--ink);letter-spacing:.04em;cursor:default;transform:scale(.97);">以 Google 登入</button></div>
+          <div class="state-col-name">Active</div>
+          <div class="state-col-specs">
+            <div class="state-spec-item"><span class="state-spec-key">transform</span><span class="state-spec-val">scale(.97)</span></div>
+            <div class="state-spec-item"><span class="state-spec-key">transition</span><span class="state-spec-val">.12s</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OB Dots -->
+    <div class="comp-card" id="ob-dots">
+      <div class="comp-label">Component</div>
+      <div class="comp-name">OB Dots（分頁指示點）</div>
+      <p class="comp-usage">Onboarding 頁底部的分頁進度指示器，純視覺、不可點擊。active 狀態時圓點以 all .3s transition 從 6px 圓形擴展為 20px 短橫條，直觀標示當前位置。</p>
+      <div class="comp-demo vertical" style="gap:20px;padding:12px 0;">
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="dots-demo">
+            <div class="dot-demo active"></div>
+            <div class="dot-demo"></div>
+            <div class="dot-demo"></div>
+            <div class="dot-demo"></div>
+          </div>
+          <div class="state-label" style="text-align:left;">第 1 頁（active）</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="dots-demo">
+            <div class="dot-demo"></div>
+            <div class="dot-demo active"></div>
+            <div class="dot-demo"></div>
+            <div class="dot-demo"></div>
+          </div>
+          <div class="state-label" style="text-align:left;">第 2 頁（active）</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="dots-demo">
+            <div class="dot-demo"></div>
+            <div class="dot-demo"></div>
+            <div class="dot-demo"></div>
+            <div class="dot-demo active"></div>
+          </div>
+          <div class="state-label" style="text-align:left;">第 4 頁（active）</div>
+        </div>
+      </div>
+      <div class="comp-spec">
+        <div class="spec-row"><span class="spec-key">dot 尺寸（inactive）</span><span class="spec-val">6 × 6pt / border-radius 50%</span></div>
+        <div class="spec-row"><span class="spec-key">dot color（inactive）</span><span class="spec-val">rgba(46,35,24,.18)</span></div>
+        <div class="spec-row"><span class="spec-key">dot 寬度（active）</span><span class="spec-val">20px / border-radius 3px</span></div>
+        <div class="spec-row"><span class="spec-key">dot color（active）</span><span class="spec-val">--ink (#2e2318)</span></div>
+        <div class="spec-row"><span class="spec-key">gap</span><span class="spec-val">6px</span></div>
+        <div class="spec-row"><span class="spec-key">transition</span><span class="spec-val">all .3s</span></div>
+      </div>
+    </div>
+
+    <!-- CTA Button -->
+    <div class="comp-card" id="cta-button">
+      <div class="comp-label">Component</div>
+      <div class="comp-name">CTA Button（全幅行動）</div>
+      <p class="comp-usage">Onboarding 頁底部的主要行動按鈕，玻璃膠囊形設計與背景水彩融為一體。最後一頁文字變為「開始使用」，其餘頁顯示「繼續」。</p>
+      <div class="comp-demo center" style="padding:20px 0;">
+        <button class="cta-btn-demo">繼續</button>
+      </div>
+      <div class="states-divider"></div>
+      <div class="states-title">互動狀態 · Interactive States</div>
+      <div class="states-row">
+        <div class="state-col">
+          <div class="state-col-visual"><button style="width:100%;padding:14px;background:rgba(255,255,255,.55);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.85);border-radius:50px;font-family:'Noto Serif TC',serif;font-size:14px;color:var(--ink);letter-spacing:.06em;cursor:default;box-shadow:0 4px 20px rgba(0,0,0,.07);">繼續</button></div>
+          <div class="state-col-name">Default</div>
+          <div class="state-col-specs">
+            <div class="state-spec-item"><span class="state-spec-key">background</span><span class="state-spec-val">rgba(255,255,255,.55)</span></div>
+            <div class="state-spec-item"><span class="state-spec-key">box-shadow</span><span class="state-spec-val">0 4px 20px rgba(0,0,0,.07)</span></div>
+          </div>
+        </div>
+        <div class="state-col">
+          <div class="state-col-visual"><button style="width:100%;padding:14px;background:rgba(255,255,255,.72);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.85);border-radius:50px;font-family:'Noto Serif TC',serif;font-size:14px;color:var(--ink);letter-spacing:.06em;cursor:default;box-shadow:0 6px 24px rgba(0,0,0,.1);">繼續</button></div>
+          <div class="state-col-name">Hover</div>
+          <div class="state-col-specs">
+            <div class="state-spec-item"><span class="state-spec-key">background</span><span class="state-spec-val">rgba(255,255,255,.72)</span></div>
+            <div class="state-spec-item"><span class="state-spec-key">box-shadow</span><span class="state-spec-val">0 6px 24px rgba(0,0,0,.1)</span></div>
+          </div>
+        </div>
+        <div class="state-col">
+          <div class="state-col-visual"><button style="width:100%;padding:14px;background:rgba(255,255,255,.72);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.85);border-radius:50px;font-family:'Noto Serif TC',serif;font-size:14px;color:var(--ink);letter-spacing:.06em;cursor:default;box-shadow:0 2px 12px rgba(0,0,0,.07);transform:scale(.97);">繼續</button></div>
+          <div class="state-col-name">Active（按下）</div>
+          <div class="state-col-specs">
+            <div class="state-spec-item"><span class="state-spec-key">transform</span><span class="state-spec-val">scale(.97)</span></div>
+            <div class="state-spec-item"><span class="state-spec-key">box-shadow</span><span class="state-spec-val">0 2px 12px rgba(0,0,0,.07)</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="comp-spec">
+        <div class="spec-row"><span class="spec-key">max-width</span><span class="spec-val">280px（全幅）</span></div>
+        <div class="spec-row"><span class="spec-key">padding</span><span class="spec-val">15px（上下）</span></div>
+        <div class="spec-row"><span class="spec-key">background</span><span class="spec-val">rgba(255,255,255,.55)（--glass）</span></div>
+        <div class="spec-row"><span class="spec-key">backdrop-filter</span><span class="spec-val">blur(20px)</span></div>
+        <div class="spec-row"><span class="spec-key">border</span><span class="spec-val">1px solid rgba(255,255,255,.85)（--gb）</span></div>
+        <div class="spec-row"><span class="spec-key">border-radius</span><span class="spec-val">50px（膠囊形）</span></div>
+        <div class="spec-row"><span class="spec-key">font-size</span><span class="spec-val">15px / letter-spacing .06em</span></div>
+        <div class="spec-row"><span class="spec-key">box-shadow</span><span class="spec-val">0 4px 20px rgba(0,0,0,.07)</span></div>
+        <div class="spec-row"><span class="spec-key">transition</span><span class="spec-val">all .2s</span></div>
+      </div>
+    </div>
+
+  </div><!-- /comp-grid -->
+</div>
+
+<!-- ══════════════════════════════════════════════
+     SECTION 4: 動畫規格
+══════════════════════════════════════════════ -->
+<div class="section" id="animations">
+  <div class="section-header">
+    <span class="section-num">04</span>
+    <span class="section-title">動畫規格 · Animation Spec</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="comp-card wide">
+    <div class="comp-label">頁面層級 · Page-level Transitions</div>
+    <div class="comp-name">元件相關動畫已移至各元件頁面</div>
+
+    <div class="anim-row">
+      <div class="anim-name">Onboarding 頁切換</div>
+      <div class="anim-spec">transform: translateX(−100vw × n) / transition: .45s cubic-bezier(.4,0,.2,1)</div>
+      <div class="anim-desc">ob-track 整條水平位移；easing 為 Material Design standard curve，帶有輕微的加速/減速感</div>
+    </div>
+
+    <div class="anim-row">
+      <div class="anim-name">Reflection Panel 滑入</div>
+      <div class="anim-spec">transform: translateY(100%) → translateY(0) / transition: .45s cubic-bezier(.4,0,.2,1)</div>
+      <div class="anim-desc">同 Done Sheet 滑入。全域共用相同 easing 和 duration，保持動畫語言一致</div>
+    </div>
+
+    <div class="anim-row">
+      <div class="anim-name">View 切換（各主畫面）</div>
+      <div class="anim-spec">opacity: 0 → 1 / transition: .4s / pointer-events 同步切換</div>
+      <div class="anim-desc">Onboarding → Auth → Loading → Record → Diary 各層以 opacity 淡入淡出；pointer-events:none 防止隱藏層被點擊</div>
+    </div>
+
+    <div class="anim-row">
+      <div class="anim-name">Reflection 浮現（錄音中）</div>
+      <div class="anim-spec">opacity: 0 → 1 / transition: .8s ease / animation-delay: 1400ms</div>
+      <div class="anim-desc">偵測到低落情緒後，過去日記片段靜靜浮現。延遲 1.4 秒避免打擾使用者說話節奏</div>
+    </div>
+
+    <div class="anim-row">
+      <div class="anim-name">Onboarding Wave（說明頁插圖）</div>
+      <div class="anim-spec">@keyframes waveEx { 0% opacity:.65 scale(.8) → 100% opacity:0 scale(1) }<br>duration: 2.4s ease-out infinite / delay: 0s / 0.55s / 1.1s / 1.65s（4 圈各自錯位）</div>
+      <div class="anim-desc">麥克風周圍的聲波圈，4 個 div 依次以相同 keyframe 播放，製造向外擴散感</div>
+    </div>
+
+    <div class="anim-row">
+      <div class="anim-name">情緒色切換（水彩 Canvas）</div>
+      <div class="anim-spec">Canvas blob color 以 1–2 秒漸變（不硬切）</div>
+      <div class="anim-desc">LLM 回傳新 { emotion, intensity } 時，新的水彩 blob 以新色系生成，舊 blob 自然淡出；視覺上不會突然切色</div>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /content-sections -->
+</div><!-- /content-layout -->
+
+<script>
+// Scroll spy: highlight active sidebar link as user scrolls
+const targets = [
+  { id:'colours',      selector:'[href="#colours"]' },
+  { id:'typography',   selector:'[href="#typography"]' },
+  { id:'mic-button',   selector:'[href="#mic-button"]' },
+  { id:'progress-ring',selector:'[href="#progress-ring"]' },
+  { id:'emotion-pill', selector:'[href="#emotion-pill"]' },
+  { id:'volume-viz',   selector:'[href="#volume-viz"]' },
+  { id:'side-button',  selector:'[href="#side-button"]' },
+  { id:'glass-card',   selector:'[href="#glass-card"]' },
+  { id:'bottom-sheet', selector:'[href="#bottom-sheet"]' },
+  { id:'modal',        selector:'[href="#modal"]' },
+  { id:'entry-card',   selector:'[href="#entry-card"]' },
+  { id:'auth-button',  selector:'[href="#auth-button"]' },
+  { id:'ob-dots',      selector:'[href="#ob-dots"]' },
+  { id:'cta-button',   selector:'[href="#cta-button"]' },
+  { id:'animations',   selector:'[href="#animations"]' },
+  { id:'components',   selector:'[href="#components"]' },
+];
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    const t = targets.find(t => t.id === entry.target.id);
+    if (!t) return;
+    const link = document.querySelector(t.selector);
+    if (!link) return;
+    if (entry.isIntersecting) {
+      document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
+      // scroll sidebar link into view if needed
+      link.scrollIntoView({ block:'nearest' });
+    }
+  });
+}, { rootMargin:'-10% 0px -80% 0px', threshold:0 });
+
+targets.forEach(t => {
+  const el = document.getElementById(t.id);
+  if (el) observer.observe(el);
+});
+</script>
+
+</body>
+</html>
